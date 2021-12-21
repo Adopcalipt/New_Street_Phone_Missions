@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XmlContacts xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ImpXCars>
+    <string>ASBO</string>
+    <string>JACKAL</string>
+    <string>NOVAK</string>
+  </ImpXCars>
+  <ImpXList>
+    <int>6</int>
+    <int>2</int>
+    <int>9</int>
+  </ImpXList>
+  <MyMk2Weaps />
+  <FuMiss>
+    <X>-1043.986</X>
+    <Y>-889.4573</Y>
+    <Z>4.246201</Z>
+  </FuMiss>
+</XmlContacts>

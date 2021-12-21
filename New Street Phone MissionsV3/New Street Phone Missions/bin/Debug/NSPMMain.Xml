@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XmlSetings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Truckin>false</Truckin>
+  <Getaway>false</Getaway>
+  <Packages>false</Packages>
+  <Convicts>false</Convicts>
+  <FUber>false</FUber>
+  <Pilot>false</Pilot>
+  <Amulance>false</Amulance>
+  <Follow>false</Follow>
+  <LSFD>false</LSFD>
+  <Johnny>false</Johnny>
+  <Raceist>false</Raceist>
+  <BBBomb>false</BBBomb>
+  <Assassination>false</Assassination>
+  <Gruppe6>false</Gruppe6>
+  <Sailor>false</Sailor>
+  <ImportantEx>true</ImportantEx>
+  <DebtCollect>false</DebtCollect>
+  <MCBusiness>false</MCBusiness>
+  <BayLift>false</BayLift>
+  <Sharks>false</Sharks>
+  <HappyShopper>false</HappyShopper>
+  <MoresMute>false</MoresMute>
+  <TempJob>false</TempJob>
+  <ParaDisplay>false</ParaDisplay>
+  <RockShow>false</RockShow>
+  <ShowRoute>true</ShowRoute>
+  <EnemyStrength>true</EnemyStrength>
+  <FastTraveltoStart>false</FastTraveltoStart>
+  <Subtitles>true</Subtitles>
+  <PhoneCone>true</PhoneCone>
+  <PhoneAudio>true</PhoneAudio>
+  <BulderOnly>false</BulderOnly>
+  <YachtPrice>6000000</YachtPrice>
+  <PhoneAnim>true</PhoneAnim>
+  <PreLoadOnline>true</PreLoadOnline>
+  <LangSupport>2</LangSupport>
+  <AssZone01>0</AssZone01>
+  <AssZone02>0</AssZone02>
+  <AssZone03>0</AssZone03>
+  <AssZone04>0</AssZone04>
+  <AssZone05>0</AssZone05>
+  <AssZone06>0</AssZone06>
+  <AssZone07>0</AssZone07>
+  <ModVersion>30000</ModVersion>
+  <SPDelayTime>5000</SPDelayTime>
+  <ImpXCars />
+  <ImpXList />
+  <PhoneBlock />
+  <MySavedWeaps />
+</XmlSetings>
