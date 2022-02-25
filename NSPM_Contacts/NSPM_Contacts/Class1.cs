@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
@@ -20,6 +20,7 @@ namespace NSPM_Contacts
         private bool bLoads = true;
         private bool bTrainM = true;
         private bool bBankTransfer = true;
+        private bool bStopDriving = false;
         private bool bMenuOpen = false;
         private bool bImports = false;
         private bool bWeapSwap = false;
@@ -45,6 +46,7 @@ namespace NSPM_Contacts
         private int iFaster_03 = 0;
         private int iFubard = 0;
         private int iJustBribed = 0;
+        private int iFindingTime = 0;
         private int iFuClock = 0;
         private int iFuFees = 0;
         private int iNSPMBank = 0;
@@ -107,15 +109,17 @@ namespace NSPM_Contacts
 
         private List<MyMk2Weaps> Mk2WeapsMain = new List<MyMk2Weaps>();
 
+        private PositionDirect FindMe = null;
+        private List<FindVeh> MakeCarz = new List<FindVeh>();
+
         private TimerBarPool VTBTimerPool = new TimerBarPool();
         private TextTimerBar FuBar = new TextTimerBar("", "");
 
         private MenuPool YtmenuPool = new MenuPool();
 
-
         public Main()
         {
-            Tick += onTick;
+            Tick += OnTick;
             Interval = 1;
         }
         private void ShutThatPhone(int iFunct)
@@ -128,36 +132,27 @@ namespace NSPM_Contacts
 
             ReadNSMPDat();
 
+            if (bIFrutiyAdd || FubarCarX != null)
+                Fubar_Clean();
+
             if (iFunct == 1)
             {
+                bIFrutiyAdd = true;
                 NSPMCoinAccount();
             }
             else if (iFunct == 2)
             {
-                if (bFubarRide)
-                    Fubar_Clean();
-                else if (!Game.Player.Character.IsInVehicle())
-                    FindAndReplaceVeh("Dilettante", Game.Player.Character.Position, true, 1, 198, false);
+                if (!Game.Player.Character.IsInVehicle())
+                {
+                    SearchVeh(0.10f, 95.00f, "Dilettante", true, 1, 198, false, false);
+                }
                 else
                     UI.Notify(sContactLang[0]);
             }
             else if (iFunct == 3)
             {
                 if (!Game.Player.Character.IsInVehicle())
-                {
-                    if (bImports)
-                    {
-                        FubarCarX.CurrentBlip.Remove();
-                        FubarCarX.MarkAsNoLongerNeeded();
-                        bIFrutiyAdd = false;
-                        bImports = false;
-                    }
-                    else
-                    {
-                        bIFrutiyAdd = true;
-                        ImportsMenu();
-                    }
-                }
+                    ImportsMenu();
                 else
                     UI.Notify(sContactLang[464]);
             }
@@ -165,52 +160,30 @@ namespace NSPM_Contacts
             {
                 if (!Game.Player.Character.IsInVehicle())
                 {
-                    if (bIFrutiyAdd)
-                        Fubar_Clean();
-                    else
+                    if (iNSPMBank > 500)
                     {
-                        if (iNSPMBank > 500)
-                        {
-                            YourCoinPopUp(-500, 1, sContactLang[42]);
-                            bIFrutiyAdd = true;
-                            iFubCarzz = 0;
-                            FindAndReplaceVeh("AMBULANCE", Game.Player.Character.Position, false, 2, 477, false);
-                        }
-                        else
-                            UI.Notify(sContactLang[41]);
+                        YourCoinPopUp(-500, 1, sContactLang[42]);
+                        SearchVeh(0.10f, 95.00f, "AMBULANCE", false, 2, 477, false, false);
                     }
+                    else
+                        UI.Notify(sContactLang[41]);
                 }
                 else
                     UI.Notify(sContactLang[3]);
             }
             else if (iFunct == 5)
             {
-                if (bWeaponMan)
-                    Fubar_Clean();
-                else
-                {
-                    var mainMenu = new UIMenu(sContactLang[43], sContactLang[44]);
-                    YtmenuPool.Add(mainMenu);
-                    MkWepsOpt(mainMenu);
-                    YtmenuPool.RefreshIndex();
-                    bMenuOpen = true;
-                    mainMenu.Visible = !mainMenu.Visible;
-                }
+                var mainMenu = new UIMenu(sContactLang[43], sContactLang[44]);
+                YtmenuPool.Add(mainMenu);
+                MkWepsOpt(mainMenu);
+                YtmenuPool.RefreshIndex();
+                bMenuOpen = true;
+                mainMenu.Visible = !mainMenu.Visible;
             }
             else if (iFunct == 6)
             {
                 if (!Game.Player.Character.IsInVehicle())
-                {
-                    if (bImports)
-                    {
-                        FubarCarX.CurrentBlip.Remove();
-                        FubarCarX.MarkAsNoLongerNeeded();
-                        bIFrutiyAdd = false;
-                        bImports = false;
-                    }
-                    else
-                        PeggsMenu();
-                }
+                    PeggsMenu();
                 else
                     UI.Notify(sContactLang[1]);
             }
@@ -724,11 +697,12 @@ namespace NSPM_Contacts
             }
             else
             {
-                XmlContacts XSets = new XmlContacts();
-                XSets.MyMk2Weaps = Mk2WeapsMain;
+                XmlContacts XSets = new XmlContacts
+                {
+                    MyMk2Weaps = Mk2WeapsMain
+                };
                 SaveXmlContacts(XSets, sNSPMCont);
             }
-
         }
         private void AddMissWeaps(List<MyMk2Weaps> DemWeaps, bool bOldTest)
         {
@@ -773,76 +747,78 @@ namespace NSPM_Contacts
         {
             LogThis("RandNPC, ");
 
-            List<string> sPeds = new List<string>();
-            sPeds.Add("a_m_o_ktown_01");    //"Korean Old Male" />
-            sPeds.Add("a_m_y_ktown_01");    //"Korean Young Male" />
-            sPeds.Add("a_m_m_polynesian_01");    //"Polynesian" />
-            sPeds.Add("a_m_y_polynesian_01");    //"Polynesian Young" />
-            sPeds.Add("a_f_m_eastsa_01");    //"East SA Female" />
-            sPeds.Add("a_f_m_eastsa_02");    //"East SA Female 2" />
-            sPeds.Add("a_f_y_eastsa_01");    //"East SA Young Female" />
-            sPeds.Add("a_f_y_eastsa_02");    //"East SA Young Female 2" />
-            sPeds.Add("a_f_y_eastsa_03");    //"East SA Young Female 3" />
-            sPeds.Add("a_m_m_eastsa_01");    //"East SA Male" />
-            sPeds.Add("a_m_m_eastsa_02");    //"East SA Male 2" />
-            sPeds.Add("a_m_y_eastsa_01");    //"East SA Young Male" />
-            sPeds.Add("a_m_y_eastsa_02");    //"East SA Young Male 2" />
-            sPeds.Add("u_m_y_baygor");    //"Kifflom Guy" />
-            sPeds.Add("a_f_m_fatbla_01");    //"Fat Black Female" />
-            sPeds.Add("a_f_m_fatcult_01");    //"Fat Cult Female" />
-            sPeds.Add("a_f_m_fatwhite_01");    //"Fat White Female" />
-            sPeds.Add("a_m_m_genfat_01");    //"General Fat Male" />
-            sPeds.Add("a_m_m_genfat_02");    //"General Fat Male 2" />
-            sPeds.Add("a_m_m_fatlatin_01");    //"Fat Latino Male" />
-            sPeds.Add("a_f_o_genstreet_01");    //"General Street Old Female" />
-            sPeds.Add("a_m_o_genstreet_01");    //"General Street Old Male" />
-            sPeds.Add("a_m_y_stbla_01");    //"Black Street Male" />
-            sPeds.Add("a_m_y_stbla_02");    //"Black Street Male 2" />
-            sPeds.Add("a_m_m_stlat_02");    //"Latino Street Male 2" />
-            sPeds.Add("a_m_y_stlat_01");    //"Latino Street Young Male" />
-            sPeds.Add("a_m_y_latino_01");    //"Latino Young Male" />
-            sPeds.Add("a_m_m_afriamer_01");    //"African American Male" />
-            sPeds.Add("a_m_y_stwhi_01");    //"White Street Male" />
-            sPeds.Add("a_m_y_stwhi_02");    //"White Street Male 2" />
-            sPeds.Add("a_m_y_ktown_01");    //"Korean Young Male" />
-            sPeds.Add("a_m_y_ktown_02");    //"Korean Young Male 2" />
-            sPeds.Add("a_m_m_polynesian_01");    //"Polynesian" />
-            sPeds.Add("a_m_y_polynesian_01");    //"Polynesian Young" />
-            sPeds.Add("a_m_m_eastsa_01");    //"East SA Male" />
-            sPeds.Add("a_m_m_eastsa_02");    //"East SA Male 2" />
-            sPeds.Add("a_f_m_ktown_01");    //"Korean Female" />
-            sPeds.Add("a_f_m_ktown_02");    //"Korean Female 2" />
-            sPeds.Add("a_f_o_ktown_01");    //"Korean Old Female" />
-            sPeds.Add("a_f_o_indian_01");    //"Indian Old Female" />
-            sPeds.Add("a_m_m_hillbilly_01");    //"Hillbilly Male" />
-            sPeds.Add("a_m_m_hillbilly_02");    //"Hillbilly Male 2" />
-            sPeds.Add("a_m_m_salton_01");    //"Salton Male" />
-            sPeds.Add("a_m_m_salton_02");    //"Salton Male 2" />
-            sPeds.Add("a_m_m_salton_03");    //"Salton Male 3" />
-            sPeds.Add("a_m_m_salton_04");    //"Salton Male 4" />
-            sPeds.Add("a_m_o_salton_01");    //"Salton Old Male" />
-            sPeds.Add("a_m_y_salton_01");    //"Salton Young Male" />
-            sPeds.Add("a_m_m_mexcntry_01");    //"Mexican Rural" />
-            sPeds.Add("a_f_m_soucent_01");    //"South Central Female" />
-            sPeds.Add("a_f_m_soucent_02");    //"South Central Female 2" />
-            sPeds.Add("a_f_m_soucentmc_01");    //"South Central MC Female" />
-            sPeds.Add("a_f_o_soucent_01");    //"South Central Old Female" />
-            sPeds.Add("a_f_o_soucent_02");    //"South Central Old Female 2" />
-            sPeds.Add("a_f_y_soucent_01");    //"South Central Young Female" />
-            sPeds.Add("a_f_y_soucent_02");    //"South Central Young Female 2" />
-            sPeds.Add("a_f_y_soucent_03");    //"South Central Young Female 3" />
-            sPeds.Add("a_m_m_socenlat_01");    //"South Central Latino Male" />
-            sPeds.Add("a_m_m_soucent_01");    //"South Central Male" />
-            sPeds.Add("a_m_m_soucent_02");    //"South Central Male 2" />
-            sPeds.Add("a_m_m_soucent_03");    //"South Central Male 3" />
-            sPeds.Add("a_m_m_soucent_04");    //"South Central Male 4" />
-            sPeds.Add("a_m_o_soucent_01");    //"South Central Old Male" />
-            sPeds.Add("a_m_o_soucent_02");    //"South Central Old Male 2" />
-            sPeds.Add("a_m_o_soucent_03");    //"South Central Old Male 3" />
-            sPeds.Add("a_m_y_soucent_01");    //"South Central Young Male" />
-            sPeds.Add("a_m_y_soucent_02");    //"South Central Young Male 2" />
-            sPeds.Add("a_m_y_soucent_03");    //"South Central Young Male 3" />
-            sPeds.Add("a_m_y_soucent_04");    //"South Central Young Male 4" />
+            List<string> sPeds = new List<string>
+            {
+                "a_m_o_ktown_01",    //"Korean Old Male" />
+                "a_m_y_ktown_01",    //"Korean Young Male" />
+                "a_m_m_polynesian_01",    //"Polynesian" />
+                "a_m_y_polynesian_01",    //"Polynesian Young" />
+                "a_f_m_eastsa_01",    //"East SA Female" />
+                "a_f_m_eastsa_02",    //"East SA Female 2" />
+                "a_f_y_eastsa_01",    //"East SA Young Female" />
+                "a_f_y_eastsa_02",    //"East SA Young Female 2" />
+                "a_f_y_eastsa_03",    //"East SA Young Female 3" />
+                "a_m_m_eastsa_01",    //"East SA Male" />
+                "a_m_m_eastsa_02",    //"East SA Male 2" />
+                "a_m_y_eastsa_01",    //"East SA Young Male" />
+                "a_m_y_eastsa_02",    //"East SA Young Male 2" />
+                "u_m_y_baygor",    //"Kifflom Guy" />
+                "a_f_m_fatbla_01",    //"Fat Black Female" />
+                "a_f_m_fatcult_01",    //"Fat Cult Female" />
+                "a_f_m_fatwhite_01",    //"Fat White Female" />
+                "a_m_m_genfat_01",    //"General Fat Male" />
+                "a_m_m_genfat_02",    //"General Fat Male 2" />
+                "a_m_m_fatlatin_01",    //"Fat Latino Male" />
+                "a_f_o_genstreet_01",    //"General Street Old Female" />
+                "a_m_o_genstreet_01",    //"General Street Old Male" />
+                "a_m_y_stbla_01",    //"Black Street Male" />
+                "a_m_y_stbla_02",    //"Black Street Male 2" />
+                "a_m_m_stlat_02",    //"Latino Street Male 2" />
+                "a_m_y_stlat_01",    //"Latino Street Young Male" />
+                "a_m_y_latino_01",    //"Latino Young Male" />
+                "a_m_m_afriamer_01",    //"African American Male" />
+                "a_m_y_stwhi_01",    //"White Street Male" />
+                "a_m_y_stwhi_02",    //"White Street Male 2" />
+                "a_m_y_ktown_01",    //"Korean Young Male" />
+                "a_m_y_ktown_02",    //"Korean Young Male 2" />
+                "a_m_m_polynesian_01",    //"Polynesian" />
+                "a_m_y_polynesian_01",    //"Polynesian Young" />
+                "a_m_m_eastsa_01",    //"East SA Male" />
+                "a_m_m_eastsa_02",    //"East SA Male 2" />
+                "a_f_m_ktown_01",    //"Korean Female" />
+                "a_f_m_ktown_02",    //"Korean Female 2" />
+                "a_f_o_ktown_01",    //"Korean Old Female" />
+                "a_f_o_indian_01",    //"Indian Old Female" />
+                "a_m_m_hillbilly_01",    //"Hillbilly Male" />
+                "a_m_m_hillbilly_02",    //"Hillbilly Male 2" />
+                "a_m_m_salton_01",    //"Salton Male" />
+                "a_m_m_salton_02",    //"Salton Male 2" />
+                "a_m_m_salton_03",    //"Salton Male 3" />
+                "a_m_m_salton_04",    //"Salton Male 4" />
+                "a_m_o_salton_01",    //"Salton Old Male" />
+                "a_m_y_salton_01",    //"Salton Young Male" />
+                "a_m_m_mexcntry_01",    //"Mexican Rural" />
+                "a_f_m_soucent_01",    //"South Central Female" />
+                "a_f_m_soucent_02",    //"South Central Female 2" />
+                "a_f_m_soucentmc_01",    //"South Central MC Female" />
+                "a_f_o_soucent_01",    //"South Central Old Female" />
+                "a_f_o_soucent_02",    //"South Central Old Female 2" />
+                "a_f_y_soucent_01",    //"South Central Young Female" />
+                "a_f_y_soucent_02",    //"South Central Young Female 2" />
+                "a_f_y_soucent_03",    //"South Central Young Female 3" />
+                "a_m_m_socenlat_01",    //"South Central Latino Male" />
+                "a_m_m_soucent_01",    //"South Central Male" />
+                "a_m_m_soucent_02",    //"South Central Male 2" />
+                "a_m_m_soucent_03",    //"South Central Male 3" />
+                "a_m_m_soucent_04",    //"South Central Male 4" />
+                "a_m_o_soucent_01",    //"South Central Old Male" />
+                "a_m_o_soucent_02",    //"South Central Old Male 2" />
+                "a_m_o_soucent_03",    //"South Central Old Male 3" />
+                "a_m_y_soucent_01",    //"South Central Young Male" />
+                "a_m_y_soucent_02",    //"South Central Young Male 2" />
+                "a_m_y_soucent_03",    //"South Central Young Male 3" />
+                "a_m_y_soucent_04"    //"South Central Young Male 4" />
+            };
 
             return sPeds[RandInt(0, sPeds.Count - 1)];
         }
@@ -850,7 +826,7 @@ namespace NSPM_Contacts
         {
             LogThis("AddNPC, sModel == " + sModel + ", iService == " + iService);
 
-            Ped Peddy = null;
+            FUbarDrv = null;
 
             var model = new Model(sModel);
             model.Request();    // Check if the model is valid
@@ -859,32 +835,42 @@ namespace NSPM_Contacts
                 while (!model.IsLoaded)
                     Wait(1);
 
-                Peddy = Function.Call<Ped>(Hash.CREATE_PED, 4, model, vPos.X, vPos.Y, vPos.Z, fHeads, false, false);
+                FUbarDrv = Function.Call<Ped>(Hash.CREATE_PED, 4, model, vPos.X, vPos.Y, vPos.Z, fHeads, false, false);
                 Function.Call(Hash.SET_MODEL_AS_NO_LONGER_NEEDED, model.Hash);
 
-                if (Peddy.Exists())
+                if (FUbarDrv.Exists())
                 {
-                    Peddy.Accuracy = 45;
-                    Peddy.MaxHealth = 250;
-                    Peddy.Health = 250;
-                    FUbarDrv = Peddy;
+                    FUbarDrv.Accuracy = 45;
+                    FUbarDrv.MaxHealth = 250;
+                    FUbarDrv.Health = 250;
                     if (vHick != null)
-                        WarptoAnyVeh(vHick, Peddy, 1);
+                        WarptoAnyVeh(vHick, FUbarDrv, 1);
 
-                    Peddy.Task.ClearAll();
-                    Peddy.BlockPermanentEvents = true;
+                    FUbarDrv.Task.ClearAll();
+                    FUbarDrv.BlockPermanentEvents = true;
                     vFuDest = World.GetNextPositionOnStreet(Game.Player.Character.Position);
-                    Peddy.Task.DriveTo(vHick, vFuDest, 3.00f, 35.00f, 536871355);
-                    Peddy.CanBeDraggedOutOfVehicle = false;
+                    FUbarDrv.Task.DriveTo(vHick, vFuDest, 3.00f, 35.00f, 536871355);
+                    FUbarDrv.CanBeDraggedOutOfVehicle = false;
 
                     if (iService == 1)
+                    {
                         bFubarRide = true;
+                        bMeeddicc = false;
+                        bWeaponMan = false;
+                    }
                     else if (iService == 2)
+                    {
                         bMeeddicc = true;
+                        bFubarRide = false;
+                        bWeaponMan = false;
+                    }
                     else if (iService == 3)
+                    {
                         bWeaponMan = true;
-
-                    bIFrutiyAdd = true;
+                        bFubarRide = false;
+                        bMeeddicc = false;
+                    }
+                    
                     iFubCarzz = 0;
                 }
             }
@@ -892,7 +878,9 @@ namespace NSPM_Contacts
         private void AddVeh(string VModel, Vector3 Vec3, float fHeads, bool bDriver, int iService, int iBlip, bool bModShop)
         {
             LogThis("AddVeh, VModel == " + VModel + ", bDriver == " + bDriver + ", iService == " + iService + ", bModShop == " + bModShop);
-            Vehicle BuildVehicle = null;
+
+            if (FubarCarX != null)
+                Fubar_Clean();
 
             int iVehHash = Function.Call<int>(Hash.GET_HASH_KEY, VModel);
             if (Function.Call<bool>(Hash.IS_MODEL_IN_CDIMAGE, iVehHash) && Function.Call<bool>(Hash.IS_MODEL_A_VEHICLE, iVehHash))
@@ -901,44 +889,41 @@ namespace NSPM_Contacts
                 while (!Function.Call<bool>(Hash.HAS_MODEL_LOADED, iVehHash))
                     Wait(1);
 
-                BuildVehicle = Function.Call<Vehicle>(Hash.CREATE_VEHICLE, iVehHash, Vec3.X, Vec3.Y, Vec3.Z, fHeads, true, true);
+                FubarCarX = Function.Call<Vehicle>(Hash.CREATE_VEHICLE, iVehHash, Vec3.X, Vec3.Y, Vec3.Z, fHeads, true, true);
                 Function.Call(Hash.SET_MODEL_AS_NO_LONGER_NEEDED, iVehHash);
 
-                FubarCarX = BuildVehicle;
-                VehicBlimp(BuildVehicle, iBlip, 46);
+                Function.Call(Hash.SET_VEHICLE_MOD_KIT, FubarCarX.Handle, 0);
+                VehicBlimp(FubarCarX, iBlip, 46);
 
                 if (iService == 1)
                 {
-                    BuildVehicle.PrimaryColor = VehicleColor.MetallicWhite;
-                    BuildVehicle.SmashWindow(VehicleWindow.FrontLeftWindow);
-                    BuildVehicle.DirtLevel = 99.75f;
-                    AddNPC(RandNPC(), BuildVehicle.Position, 0.00f, BuildVehicle, iService);
+                    FubarCarX.PrimaryColor = VehicleColor.MetallicWhite;
+                    FubarCarX.SmashWindow(VehicleWindow.FrontLeftWindow);
+                    FubarCarX.DirtLevel = 99.75f;
+                    AddNPC(RandNPC(), FubarCarX.Position, 0.00f, FubarCarX, iService);
+                    bStopDriving = true;
                 }//Fubar
                 else if (iService == 2)
                 {
-                    AddNPC("s_m_m_paramedic_01", BuildVehicle.Position, 0.00f, BuildVehicle, iService);
+                    AddNPC("s_m_m_paramedic_01", FubarCarX.Position, 0.00f, FubarCarX, iService);
                 }//Medic
                 else if (iService == 3)
                 {
-                    AddNPC("mp_m_weapexp_01", BuildVehicle.Position, 0.00f, BuildVehicle, iService);
+                    AddNPC("mp_m_weapexp_01", FubarCarX.Position, 0.00f, FubarCarX, iService);
                 }//Weppons
                 else if (iService == 4)
                 {
-                    bIFrutiyAdd = true;
                     bImports = true;
+                    MaxModsRandExtras(FubarCarX, false);
                 }//Non Boat
                 else if (iService == 5)
                 {
-                    bIFrutiyAdd = true;
-                    Function.Call(Hash.SET_BOAT_ANCHOR, BuildVehicle, true);
                     bImports = true;
+                    Function.Call(Hash.SET_BOAT_ANCHOR, FubarCarX.Handle, true);
                 }//Boats
-
-                if (bModShop)
-                    MaxModsRandExtras(BuildVehicle);
             }
         }
-        private void MaxModsRandExtras(Vehicle Vehic)
+        private void MaxModsRandExtras(Vehicle Vehic, bool bWheels)
         {
             LogThis("MaxModsRandExtras");
 
@@ -954,10 +939,21 @@ namespace NSPM_Contacts
                 {
 
                 }
+                else if (i == 23)
+                {
+                    if (bWheels)
+                    {
+                        if (iSpoilher != 0)
+                            Function.Call(Hash.SET_VEHICLE_MOD, Vehic.Handle, i, RandInt(0, iSpoilher - 1), true);
+                    }
+                }
                 else if (i == 24)
                 {
-                    if (bMotoBike)
-                        Function.Call(Hash.SET_VEHICLE_MOD, Vehic.Handle, i, Function.Call<int>(Hash.GET_VEHICLE_MOD, Vehic.Handle, 23), true);
+                    if (bWheels)
+                    {
+                        if (bMotoBike)
+                            Function.Call(Hash.SET_VEHICLE_MOD, Vehic.Handle, i, Function.Call<int>(Hash.GET_VEHICLE_MOD, Vehic.Handle, 23), true);
+                    }
                 }
                 else
                 {
@@ -1095,116 +1091,92 @@ namespace NSPM_Contacts
 
             Function.Call(Hash.SET_BLIP_COLOUR, MyBlip.Handle, iColour);
         }
-        private void FindAndReplaceVeh(string VModel, Vector3 Vec3, bool bDriver, int iService, int iBlip, bool bModShop)
+        public class FindVeh
         {
-            LogThis("FindAndReplaceVeh, VModel == " + VModel + ", bDriver == " + bDriver + ", iService == " + iService + ", bModShop == " + bModShop);
-
-            Vehicle ThisVehicle = null;
-            bool bNotFound = true;
-
-                int iTen = 10;
-            while (ThisVehicle == null || iTen > 0)
-            {
-                Script.Wait(1000);
-                ThisVehicle = FoundVehicle(Vec3);
-                if (ThisVehicle != null)
-                {
-                    bNotFound = false;
-                    iTen = -1;
-                }
-                iTen -= 1;
-            }
-
-            if (bNotFound)
-            {
-                if (iService == 1)
-                {
-                    UI.Notify(sContactLang[0]);
-                }
-                else if (iService == 2)
-                {
-                    UI.Notify(sContactLang[3]);
-                    YourCoinPopUp(500, 1, sContactLang[5]);
-                }
-                else if (iService == 3)
-                {
-                    UI.Notify(sContactLang[2]);
-                }
-                else if (iService == 4)
-                {
-                    UI.Notify(sContactLang[1]);
-                    YourCoinPopUp(200, 1, sContactLang[4]);
-                }
-                else if (iService == 5)
-                {
-                    UI.Notify(sContactLang[1]);
-                    YourCoinPopUp(200, 1, sContactLang[6]);
-                }
-                bFubarRide = false;
-                bIFrutiyAdd = false;
-                bWeaponMan = false;
-                bImports = false;
-                bMeeddicc = false;
-            }
-            else
-            {
-                Vector3 vPos = ThisVehicle.Position;
-                float fDir = ThisVehicle.Heading;
-
-                if (ThisVehicle.IsVisible)
-                    Game.FadeScreenOut(1000);
-
-                Script.Wait(1000);
-                ThisVehicle.Delete();
-                AddVeh(VModel, vPos, fDir, bDriver, iService, iBlip, bModShop);
-                Game.FadeScreenIn(1000);
-            }
+            public float MinRadi { get; set; }
+            public float MaxRadi { get; set; }
+            public string VModel { get; set; }
+            public bool Driver { get; set; }
+            public int Service { get; set; }
+            public int Blipz { get; set; }
+            public bool ModShop { get; set; }
+            public bool BeNear { get; set; }
+            public int ByPass { get; set; }
         }
-        public Vehicle FoundVehicle(Vector3 Vec3)
+        public class PositionDirect
         {
-            List<Vehicle> vListVeh = new List<Vehicle>();
-            List<float> fListVeh = new List<float>();
-            int iClosest = -1;
-            float fDist = 95.00f;
-            Vehicle vMe = null;
-            Vehicle[] CarSpot = World.GetNearbyVehicles(Vec3, 95.00f);
-
+            public Vector3 Pos { get; set; }
+            public float Dir { get; set; }
+        }
+        public PositionDirect GetVehPos(float fMinRadi, float fMaxRadi, bool bGrabNearest)
+        {
+            iFindingTime = Game.GameTime + 1000;
+            Vector3 vArea = Game.Player.Character.Position;
+            PositionDirect MyPosDir = null;
+            Vehicle[] CarSpot = World.GetNearbyVehicles(vArea, fMaxRadi);
+            Vehicle VeNear = null;
             for (int i = 0; i < CarSpot.Count(); i++)
             {
                 if (VehExists(CarSpot, i))
                 {
                     Vehicle Veh = CarSpot[i];
-                    if (!Veh.IsPersistent && Veh.ClassType != VehicleClass.Boats && Veh.ClassType != VehicleClass.Cycles && Veh.ClassType != VehicleClass.Helicopters && Veh.ClassType != VehicleClass.Planes && Veh.ClassType != VehicleClass.Trains && Veh != Game.Player.Character.CurrentVehicle)
+                    if (bGrabNearest)
                     {
-                        //if (bDriver)
-                        //{
-                        //    if (!Veh.IsSeatFree(VehicleSeat.Driver) || Veh.EngineRunning)
-                        //    {
-                        //        fListVeh.Add(Game.Player.Character.Position.DistanceTo(Veh.Position));
-                        //        vListVeh.Add(new Vehicle(Veh.Handle));
-                        //    }
-                        //}
-
-                        fListVeh.Add(Game.Player.Character.Position.DistanceTo(Veh.Position));
-                        vListVeh.Add(new Vehicle(Veh.Handle));
+                        if (Veh.IsPersistent == false && Veh.ClassType != VehicleClass.Boats && Veh.ClassType != VehicleClass.Cycles && Veh.ClassType != VehicleClass.Helicopters && Veh.ClassType != VehicleClass.Planes && Veh.ClassType != VehicleClass.Trains)
+                        {
+                            if (VeNear == null)
+                                VeNear = Veh;
+                            else if (VeNear.Position.DistanceTo(Game.Player.Character.Position) > Veh.Position.DistanceTo(Game.Player.Character.Position))
+                                VeNear = Veh;
+                        }
+                    }
+                    else
+                    {
+                        if (Veh.IsPersistent == false && Veh.Position.DistanceTo(Game.Player.Character.Position) > fMinRadi && Veh.ClassType != VehicleClass.Boats && Veh.ClassType != VehicleClass.Cycles && Veh.ClassType != VehicleClass.Helicopters && Veh.ClassType != VehicleClass.Planes && Veh.ClassType != VehicleClass.Trains && Veh != Game.Player.Character.CurrentVehicle && !Veh.IsOnScreen && Veh.EngineRunning)
+                        {
+                            MyPosDir = new PositionDirect
+                            {
+                                Pos = Veh.Position,
+                                Dir = Veh.Heading
+                            };
+                            Veh.Delete();
+                            break;
+                        }
                     }
                 }
             }
-            for (int i = 0; i < vListVeh.Count; i++)
+            if (bGrabNearest && VeNear != null)
             {
-                if (fListVeh[i] < fDist)
+                MyPosDir = new PositionDirect
                 {
-                    fDist = fListVeh[i];
-                    iClosest = i;
-                }
-            }
-            if (iClosest != -1)
-            {
-                if (vListVeh[iClosest].Exists())
-                    vMe = vListVeh[iClosest];
+                    Pos = VeNear.Position,
+                    Dir = VeNear.Heading
+                };
+                VeNear.Delete();
             }
 
-            return vMe;
+            return MyPosDir;
+        }
+        private void VehRelpace(PositionDirect MyPos, FindVeh MyVeh)
+        {
+            AddVeh(MyVeh.VModel, MyPos.Pos, MyPos.Dir, MyVeh.Driver, MyVeh.Service, MyVeh.Blipz, MyVeh.ModShop);
+        }
+        private void SearchVeh(float fMin, float fMax, string sVehModel, bool bDriver, int iService, int iBlipzz, bool bModed, bool bNear)
+        {
+            FindVeh MyFinda = new FindVeh
+            {
+                MinRadi = fMin,
+                MaxRadi = fMax,
+                VModel = sVehModel,
+                Driver = bDriver,
+                Service = iService,
+                Blipz = iBlipzz,
+                ModShop = bModed,
+                BeNear = bNear,
+                ByPass = 0
+            };
+            bIFrutiyAdd = true;
+            MakeCarz.Add(MyFinda);
         }
         public bool VehExists(Vehicle[] Vlist, int iPos)
         {
@@ -1306,6 +1278,7 @@ namespace NSPM_Contacts
             }
 
             OneNote = UI.Notify(sTing);
+            WriteNSPMDat(9, iNSPMBank);
         }
         public string ShowComs(int iNumber, bool bMoney, bool bHalfSecs)
         {
@@ -1668,8 +1641,7 @@ namespace NSPM_Contacts
                     Game.Player.Character.Task.LeaveVehicle();
                     Fubar_Math(false);
                     iFuFees *= -1;
-                    YourCoinPopUp(iFuFees, 1, sContactLang[14]);
-                    WriteNSPMDat(9, iNSPMBank);
+                    YourCoinPopUp(iFuFees, 1, sContactLang[14]);                   
                     iFuFees = 0;
                     Game.FadeScreenIn(1000);
                     vFuMiss = Vector3.Zero;
@@ -1698,7 +1670,6 @@ namespace NSPM_Contacts
                 Fubar_Math(false);
                 iFuFees *= -1;
                 YourCoinPopUp(iFuFees, 1, sContactLang[14]);
-                WriteNSPMDat(9, iNSPMBank);
                 iFuFees = 0;
                 Game.FadeScreenIn(1000);
                 Fubar_Clean();
@@ -1718,15 +1689,15 @@ namespace NSPM_Contacts
             if (FUbarDrv != null)
                 FUbarDrv.MarkAsNoLongerNeeded();
             VTBTimerPool.Remove(FuBar);
+            MakeCarz.Clear();
             iFubCarzz = 0;
-            Game.Player.Character.Task.ClearAll();
             bWepMenuX = false;
             bFubarRide = false;
             bIFrutiyAdd = false;
             bFuToMishTarg = false;
-            bIFrutiyAdd = false;
             bWeaponMan = false;
             bMeeddicc = false;
+            bImports = false;
             FubarCarX = null;
             FUbarDrv = null;
         }
@@ -1874,7 +1845,6 @@ namespace NSPM_Contacts
                 else if (item == item_02)
                 {
                     bBankTransfer = true;
-                    bIFrutiyAdd = true;
                     iCoinBats = 1;
                     YtmenuPool.CloseAllMenus();
                 }
@@ -1906,7 +1876,6 @@ namespace NSPM_Contacts
                 else if (item == item_02)
                 {
                     bBankTransfer = true;
-                    bIFrutiyAdd = true;
                     iCoinBats = 2;
                     YtmenuPool.CloseAllMenus();
                 }
@@ -1938,7 +1907,6 @@ namespace NSPM_Contacts
                 else if (item == item_02)
                 {
                     bBankTransfer = true;
-                    bIFrutiyAdd = true;
                     iCoinBats = 3;
                     YtmenuPool.CloseAllMenus();
                 }
@@ -2081,8 +2049,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_01[index], Game.Player.Character.Position, false, 4, OhMyBlip(sub_01[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_01[index], false, 4, OhMyBlip(sub_01[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2093,8 +2060,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_02[index], Game.Player.Character.Position, false, 0, OhMyBlip(sub_02[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_02[index], false, 4, OhMyBlip(sub_02[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2105,8 +2071,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_03[index], Game.Player.Character.Position, false, 0, OhMyBlip(sub_03[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_03[index], false, 4, OhMyBlip(sub_03[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2117,8 +2082,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_04[index], Game.Player.Character.Position, false, 0, OhMyBlip(sub_04[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_04[index], false, 4, OhMyBlip(sub_04[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2129,8 +2093,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_05[index], Game.Player.Character.Position, false, 0, OhMyBlip(sub_05[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_05[index], false, 4, OhMyBlip(sub_05[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2141,8 +2104,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_06[index], Game.Player.Character.Position, false, 0, OhMyBlip(sub_06[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_06[index], false, 4, OhMyBlip(sub_06[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2153,8 +2115,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_07[index], Game.Player.Character.Position, false, 0, OhMyBlip(sub_07[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_07[index], false, 4, OhMyBlip(sub_07[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2165,8 +2126,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_08[index], Game.Player.Character.Position, false, 0, OhMyBlip(sub_08[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_08[index], false, 4, OhMyBlip(sub_08[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2177,8 +2137,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_09[index], Game.Player.Character.Position, false, 0, OhMyBlip(sub_09[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_09[index], false, 4, OhMyBlip(sub_09[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2189,8 +2148,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sub_10[index], Game.Player.Character.Position, false, 0, OhMyBlip(sub_10[index], 225), true);
+                    SearchVeh(0.10f, 95.00f, sub_10[index], false, 4, OhMyBlip(sub_10[index], 225), true, true);
                     YourCoinPopUp(-200, 1, sContactLang[19]);
                 }
                 else
@@ -2650,9 +2608,8 @@ namespace NSPM_Contacts
             {
                 if (item == Rand_01)
                 {
-                    bIFrutiyAdd = true;
                     iFubCarzz = 0;
-                    FindAndReplaceVeh("BOXVILLE5", Game.Player.Character.Position, false, 3, 529, false);
+                    SearchVeh(0.10f, 95.00f, "BOXVILLE5", false, 3, 529, false, false);
                     YtmenuPool.CloseAllMenus();
                 }
                 else if (item == Rand_02)
@@ -3400,10 +3357,12 @@ namespace NSPM_Contacts
 
                 if (!bGotthis)
                 {
-                    MyMk2Weaps ThisWeap = new MyMk2Weaps();
-                    ThisWeap.Mk2Weap = sWeapon;
-                    ThisWeap.MyPlayer = iPlayer;
-                    ThisWeap.MyAmmos = iAmmo;
+                    MyMk2Weaps ThisWeap = new MyMk2Weaps
+                    {
+                        Mk2Weap = sWeapon,
+                        MyPlayer = iPlayer,
+                        MyAmmos = iAmmo
+                    };
                     Mk2WeapsMain.Add(ThisWeap);
                 }
             }
@@ -3522,16 +3481,18 @@ namespace NSPM_Contacts
         {
             var SafeHelimenu = YtmenuPool.AddSubMenu(XMen, sContactLang[50]);
 
-            List<string> sPegggisis = new List<string>();
-            sPegggisis.Add("Buzzard");
-            sPegggisis.Add("Jetsam Cargobob");
-            sPegggisis.Add("Frogger");
-            sPegggisis.Add("Maverick");
-            sPegggisis.Add("Super Volito");
-            sPegggisis.Add("Super Volito Carbon");
-            sPegggisis.Add("Swift");
-            sPegggisis.Add("Swift Deluxe");
-            sPegggisis.Add("Volatus");
+            List<string> sPegggisis = new List<string>
+            {
+                "Buzzard",
+                "Jetsam Cargobob",
+                "Frogger",
+                "Maverick",
+                "Super Volito",
+                "Super Volito Carbon",
+                "Swift",
+                "Swift Deluxe",
+                "Volatus"
+            };
 
             for (int i = 0; i < sPegggisis.Count; i++)
             {
@@ -3543,7 +3504,6 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
                     PeggDrop(1, index);
                     YourCoinPopUp(-200, 1, sContactLang[48]);
                 }
@@ -3556,16 +3516,18 @@ namespace NSPM_Contacts
         {
             var ArmHelimenu = YtmenuPool.AddSubMenu(XMen, sContactLang[51]);
 
-            List<string> sPegggisis = new List<string>();
-            sPegggisis.Add("Akula");
-            sPegggisis.Add("Annihilator");
-            sPegggisis.Add("Buzzard Attack Chopper");
-            sPegggisis.Add("Military Cargobob");
-            sPegggisis.Add("FH-1 Hunter");
-            sPegggisis.Add("Havok");
-            sPegggisis.Add("Savage");
-            sPegggisis.Add("Sea Sparrow");
-            sPegggisis.Add("Valkyrie");
+            List<string> sPegggisis = new List<string>
+            {
+                "Akula",
+                "Annihilator",
+                "Buzzard Attack Chopper",
+                "Military Cargobob",
+                "FH-1 Hunter",
+                "Havok",
+                "Savage",
+                "Sea Sparrow",
+                "Valkyrie"
+            };
 
             for (int i = 0; i < sPegggisis.Count; i++)
             {
@@ -3577,7 +3539,6 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
                     PeggDrop(2, index);
                     YourCoinPopUp(-200, 1, sContactLang[48]);
                 }
@@ -3590,27 +3551,29 @@ namespace NSPM_Contacts
         {
             var SafePlanemenu = YtmenuPool.AddSubMenu(XMen, sContactLang[52]);
 
-            List<string> sPegggisis = new List<string>();
-            sPegggisis.Add("Atomic Blimp");
-            sPegggisis.Add("Xero Blimp");
-            sPegggisis.Add("Nightclub Blimp");
-            sPegggisis.Add("Besra");
-            sPegggisis.Add("Alpha-Z1");
-            sPegggisis.Add("Cuban 800");
-            sPegggisis.Add("Dodo");
-            sPegggisis.Add("Duster");
-            sPegggisis.Add("Howard NX-25");
-            sPegggisis.Add("Luxor");
-            sPegggisis.Add("Luxor Deluxe");
-            sPegggisis.Add("Mallard");
-            sPegggisis.Add("Mammatus");
-            sPegggisis.Add("Miljet");
-            sPegggisis.Add("Nimbus");
-            sPegggisis.Add("Shamal");
-            sPegggisis.Add("Velum");
-            sPegggisis.Add("Velum 5-Seater");
-            sPegggisis.Add("Vestra");
-            sPegggisis.Add("Titan");
+            List<string> sPegggisis = new List<string>
+            {
+                "Atomic Blimp",
+                "Xero Blimp",
+                "Nightclub Blimp",
+                "Besra",
+                "Alpha-Z1",
+                "Cuban 800",
+                "Dodo",
+                "Duster",
+                "Howard NX-25",
+                "Luxor",
+                "Luxor Deluxe",
+                "Mallard",
+                "Mammatus",
+                "Miljet",
+                "Nimbus",
+                "Shamal",
+                "Velum",
+                "Velum 5-Seater",
+                "Vestra",
+                "Titan"
+            };
 
 
             for (int i = 0; i < sPegggisis.Count; i++)
@@ -3623,7 +3586,6 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
                     PeggDrop(3, index);
                     YourCoinPopUp(-200, 1, sContactLang[48]);
                 }
@@ -3636,21 +3598,23 @@ namespace NSPM_Contacts
         {
             var ArmPlanemenu = YtmenuPool.AddSubMenu(XMen, sContactLang[53]);
 
-            List<string> sPegggisis = new List<string>();
-            sPegggisis.Add("B-11 Strikeforce");
-            sPegggisis.Add("Hydra");
-            sPegggisis.Add("LF-22 Starling");
-            sPegggisis.Add("Mogul");
-            sPegggisis.Add("P-45 Nokota");
-            sPegggisis.Add("P-996 LAZER");
-            sPegggisis.Add("Pyro");
-            sPegggisis.Add("Rogue");
-            sPegggisis.Add("Seabreeze");
-            sPegggisis.Add("Tula");
-            sPegggisis.Add("Ultralight");
-            sPegggisis.Add("V-65 Molotok");
-            sPegggisis.Add("RM-10 Bombushka");
-            sPegggisis.Add("Volatol");
+            List<string> sPegggisis = new List<string>
+            {
+                "B-11 Strikeforce",
+                "Hydra",
+                "LF-22 Starling",
+                "Mogul",
+                "P-45 Nokota",
+                "P-996 LAZER",
+                "Pyro",
+                "Rogue",
+                "Seabreeze",
+                "Tula",
+                "Ultralight",
+                "V-65 Molotok",
+                "RM-10 Bombushka",
+                "Volatol"
+            };
 
 
             for (int i = 0; i < sPegggisis.Count; i++)
@@ -3663,7 +3627,6 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
                     PeggDrop(4, index);
                     YourCoinPopUp(-200, 1, sContactLang[48]);
                 }
@@ -3676,24 +3639,26 @@ namespace NSPM_Contacts
         {
             var Boatsmenu = YtmenuPool.AddSubMenu(XMen, sContactLang[54]);
 
-            List<string> sPegggisis = new List<string>();
-            sPegggisis.Add("SeaShark");    //
-            sPegggisis.Add("Dinghy");    //
-            sPegggisis.Add("Dinghy 2-seater");    //<!-- Dinghy 2-seater variant -->
-            sPegggisis.Add("Jetmax");    //
-            sPegggisis.Add("Speeder");    //
-            sPegggisis.Add("Squalo");    //
-            sPegggisis.Add("Suntrap");    //
-            sPegggisis.Add("Toro");    //
-            sPegggisis.Add("Tropic");    //
-            sPegggisis.Add("Marquis");    //
-            sPegggisis.Add("Tug");    //
-            sPegggisis.Add("Submersible");    //
-            sPegggisis.Add("Kraken");    //<!-- Kraken -->
-            sPegggisis.Add("Kraken Avisa"); //Kraken Avisa -Boats
-            sPegggisis.Add("Weaponized Dinghy"); //Nagasaki Weaponized Dinghy -Boats
-            sPegggisis.Add("Longfin"); //Shitzu Longfin -Boats
-            sPegggisis.Add("Kurtz 31"); //Kurtz 31 Patrol Boat -Boats
+            List<string> sPegggisis = new List<string>
+            {
+                "SeaShark",    //
+                "Dinghy",    //
+                "Dinghy 2-seater",    //<!-- Dinghy 2-seater variant -->
+                "Jetmax",    //
+                "Speeder",    //
+                "Squalo",    //
+                "Suntrap",    //
+                "Toro",    //
+                "Tropic",    //
+                "Marquis",    //
+                "Tug",    //
+                "Submersible",    //
+                "Kraken",    //<!-- Kraken -->
+                "Kraken Avisa", //Kraken Avisa -Boats
+                "Weaponized Dinghy", //Nagasaki Weaponized Dinghy -Boats
+                "Longfin", //Shitzu Longfin -Boats
+                "Kurtz 31" //Kurtz 31 Patrol Boat -Boats
+            };
 
             for (int i = 0; i < sPegggisis.Count; i++)
             {
@@ -3705,7 +3670,6 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
                     PeggDrop(5, index);
                     YourCoinPopUp(-200, 1, sContactLang[48]);
                 }
@@ -3718,15 +3682,17 @@ namespace NSPM_Contacts
         {
             var ImpExmenu = YtmenuPool.AddSubMenu(XMen, sContactLang[55]);
 
-            List<string> sPegggisis = new List<string>();
-            sPegggisis.Add("BF Ramp Buggy");    //
-            sPegggisis.Add("Brute Armored Boxville");    //
-            sPegggisis.Add("Coil Rocket Voltic");    //
-            sPegggisis.Add("Imponte Ruiner 2000");    //
-            sPegggisis.Add("Jobuilt Phantom Wedge");    //
-            sPegggisis.Add("Karin Technical Aqua");    //
-            sPegggisis.Add("MTL Wastelander");    //
-            sPegggisis.Add("Nagasaki Blazer Aqua");    //
+            List<string> sPegggisis = new List<string>
+            {
+                "BF Ramp Buggy",    //
+                "Brute Armored Boxville",    //
+                "Coil Rocket Voltic",    //
+                "Imponte Ruiner 2000",    //
+                "Jobuilt Phantom Wedge",    //
+                "Karin Technical Aqua",    //
+                "MTL Wastelander",    //
+                "Nagasaki Blazer Aqua"    //
+            };
 
             for (int i = 0; i < sPegggisis.Count; i++)
             {
@@ -3738,7 +3704,6 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
                     PeggDrop(6, index);
                     YourCoinPopUp(-200, 1, sContactLang[48]);
                 }
@@ -3777,7 +3742,6 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
                     if (Game.Player.Character.IsInWater)
                     {
                         Vector3 vAirstrip = Game.Player.Character.Position + (Game.Player.Character.ForwardVector) * 5;
@@ -3799,7 +3763,6 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
                     PeggAirports(sCustomPlanez[index]);
                     YourCoinPopUp(-200, 1, sContactLang[48]);
                 }
@@ -3812,8 +3775,7 @@ namespace NSPM_Contacts
             {
                 if (iNSPMBank > 200)
                 {
-                    bIFrutiyAdd = true;
-                    FindAndReplaceVeh(sCustomChopperz[index], Game.Player.Character.Position, false, 4, 64, false);
+                    SearchVeh(0.10f, 95.00f, sCustomChopperz[index], false, 4, 64, false, true);
                     YourCoinPopUp(-200, 1, sContactLang[48]);
                 }
                 else
@@ -3838,7 +3800,7 @@ namespace NSPM_Contacts
                 sVehicles.Add("SWIFT"); //
                 sVehicles.Add("SWIFT2"); //<!-- Swift Deluxe -->
                 sVehicles.Add("VOLATUS"); //
-                FindAndReplaceVeh(sVehicles[iDrop], Game.Player.Character.Position, false, 4, 64, false);
+                SearchVeh(0.10f, 95.00f, sVehicles[iDrop], false, 4, 64, false, true);
             }
             else if (iList == 2)
             {
@@ -3851,7 +3813,7 @@ namespace NSPM_Contacts
                 sVehicles.Add("SAVAGE"); //                
                 sVehicles.Add("SEASPARROW"); //
                 sVehicles.Add("VALKYRIE"); //
-                FindAndReplaceVeh(sVehicles[iDrop], Game.Player.Character.Position, false, 4, 64, false);
+                SearchVeh(0.10f, 95.00f, sVehicles[iDrop], false, 4, 64, false, true);
             }
             else if (iList == 3)
             {
@@ -3919,6 +3881,7 @@ namespace NSPM_Contacts
 
                 if (Game.Player.Character.IsInWater)
                 {
+                    bIFrutiyAdd = true;
                     Vector3 vAirstrip = Game.Player.Character.Position + (Game.Player.Character.ForwardVector) * 5;
                     float fPlaneHead = Game.Player.Character.Heading;
                     AddVeh(sVehicles[iDrop], vAirstrip, fPlaneHead, false, 5, 455, false);
@@ -3938,8 +3901,9 @@ namespace NSPM_Contacts
                 sVehicles.Add("TECHNICAL2");    //
                 sVehicles.Add("WASTLNDR");    //
                 sVehicles.Add("BLAZER5");    //
-                FindAndReplaceVeh(sVehicles[iDrop], Game.Player.Character.Position, false, 4, OhMyBlip(sVehicles[iDrop], 225), false);
-            }
+
+                SearchVeh(0.10f, 95.00f, sVehicles[iDrop], false, 4, OhMyBlip(sVehicles[iDrop], 225), false, true);
+            }          
         }
         private void PeggAirports(string sAircraft)
         {
@@ -3997,7 +3961,7 @@ namespace NSPM_Contacts
                 if (fAirDist[i] < fMin)
                 { fMin = fAirDist[i]; iAir = i; }
             }
-
+            bIFrutiyAdd = true;
             AddVeh(sAircraft, vAirStips[iAir], fAir[iAir], false, 4, OhMyBlip(sAircraft, 307), false);
         }
         private void BribesAnswered(iFruitContact contact)
@@ -4083,7 +4047,7 @@ namespace NSPM_Contacts
             ShutThatPhone(0);
             AddMissWeaps(Mk2WeapsMain, bWeapSwap);
         }
-        private void onTick(object sender, EventArgs e)
+        private void OnTick(object sender, EventArgs e)
         {
             if (bLoads)
             {
@@ -4106,12 +4070,12 @@ namespace NSPM_Contacts
                     YtmenuPool.ProcessMenus();
                 else
                 {
-                    bMenuOpen = false;
                     if (bWepMenuX)
+                    {
                         Fubar_Clean();
-                    WriteContacts();
-                    WriteNSPMDat(9, iNSPMBank);
-                    AddMissingCont();
+                        WriteContacts();
+                    }
+                    bMenuOpen = false;
                 }
             }
             else if (bIFrutiyAdd)
@@ -4120,17 +4084,12 @@ namespace NSPM_Contacts
 
                 if (Function.Call<bool>(Hash.IS_PLAYER_DEAD) || Function.Call<bool>(Hash.IS_PLAYER_BEING_ARRESTED))
                 {
-                    if (bFubarRide || bWeaponMan || bMeeddicc)
+                    if (bFubarRide || bWeaponMan || bMeeddicc || bImports)
                     {
                         bFubarRide = false;
+                        if (MakeCarz.Count > 0)
+                            MakeCarz.Clear();
                         Fubar_Clean();
-                    }
-                    else if (bImports)
-                    {
-                        FubarCarX.CurrentBlip.Remove();
-                        FubarCarX.MarkAsNoLongerNeeded();
-                        bIFrutiyAdd = false;
-                        bImports = false;
                     }
                     else if (bBankTransfer)
                     {
@@ -4139,32 +4098,68 @@ namespace NSPM_Contacts
                         iCoinBats = 0;
                     }
                 }
+                else if (MakeCarz.Count > 0)
+                {
+                    if (FindMe == null)
+                    {
+                        if (iFindingTime < Game.GameTime)
+                        {
+                            if (MakeCarz[0].ByPass > 5)
+                                FindMe = GetVehPos(MakeCarz[0].MinRadi, MakeCarz[0].MaxRadi, true);
+                            else
+                            {
+                                FindMe = GetVehPos(MakeCarz[0].MinRadi, MakeCarz[0].MaxRadi, MakeCarz[0].BeNear);
+                                MakeCarz[0].ByPass += 1;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        VehRelpace(FindMe, MakeCarz[0]);
+                        MakeCarz.RemoveAt(0);
+                        FindMe = null;
+                    }
+                }
                 else if (bFubarRide)
                 {
                     if (iFubCarzz == 0)
                     {
-                        if (Game.Player.Character.IsInVehicle())
+                        if (FUbarDrv.IsDead || Game.Player.Character.IsInVehicle() || Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 155.00f)
+                        {
+                            bFubarRide = false;
                             Fubar_Clean();
-                        else if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 95.00f)
-                            Fubar_Clean();
+                        }
                         else
                         {
-                            if (Game.Player.Character.Position.DistanceTo(vFuDest) > 25.00f)
+                            if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) < 5.00f)
+                            {
+                                if (bStopDriving)
+                                {
+                                    bStopDriving = false;
+                                    FUbarDrv.Task.DriveTo(FubarCarX, FubarCarX.Position, 3.00f, 1.00f, 536871355);
+                                    FubarCarX.SoundHorn(2000);
+                                }
+                                ReadContacts();
+                                ControlerUI(sContactLang[64], 5000);
+                                iFubCarzz = 1;
+                            }
+                            else if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) < 15.00f)
+                            {
+                                if (bStopDriving)
+                                {
+                                    bStopDriving = false;
+                                    FUbarDrv.Task.DriveTo(FubarCarX, FubarCarX.Position, 3.00f, 1.00f, 536871355);
+                                    FubarCarX.SoundHorn(2000);
+                                }
+                            }
+                            else if (Game.Player.Character.Position.DistanceTo(vFuDest) > 25.00f)
                             {
                                 FUbarDrv.Task.ClearAll();
                                 vFuDest = Game.Player.Character.Position;
                                 if (FUbarDrv.IsInVehicle())
                                     FUbarDrv.Task.DriveTo(FubarCarX, vFuDest, 3.00f, 35.00f, 536871355);
-                                else if (FUbarDrv.IsDead)
-                                    Fubar_Clean();
                                 else
                                     FUbarDrv.Task.EnterVehicle(FubarCarX, VehicleSeat.Driver, -1, 8.00f);
-                            }
-                            else if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) < 5.00f)
-                            {
-                                ReadContacts();
-                                ControlerUI(sContactLang[64], 5000);
-                                iFubCarzz = 1;
                             }
                         }
                     }
@@ -4176,6 +4171,8 @@ namespace NSPM_Contacts
                                 Game.Player.Character.Task.EnterVehicle(FubarCarX, VehicleSeat.Passenger, -1, 8.00f);
                             else if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 150.00f || Game.Player.Character.IsInVehicle() || FUbarDrv.IsDead)
                             {
+                                if (!Game.Player.Character.IsInVehicle())
+                                    Game.Player.Character.Task.ClearAll();
                                 bFubarRide = false;
                                 Fubar_Clean();
                             }
@@ -4270,59 +4267,30 @@ namespace NSPM_Contacts
                         }
                     }
                 }
-                else if (bImports)
-                {
-                    if (!FubarCarX.Exists())
-                    {
-                        FubarCarX = null;
-                        bTrainM = false;
-                        bIFrutiyAdd = false;
-                        bImports = false;
-                        UI.Notify(sContactLang[63]);
-                    }
-                    else if (Game.Player.Character.IsInVehicle())
-                    {
-                        FubarCarX.CurrentBlip.Remove();
-                        FubarCarX.MarkAsNoLongerNeeded();
-                        FubarCarX = null;
-                        bIFrutiyAdd = false;
-                        bImports = false;
-                    }
-                }
                 else if (bWeaponMan)
                 {
                     if (iFubCarzz == 0)
                     {
-                        if (Game.Player.Character.IsInVehicle())
+                        if (Game.Player.Character.IsInVehicle() || FUbarDrv.IsDead || Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 155.00f)
                         {
-                            bFubarRide = false;
-                            Fubar_Clean();
-                        }
-                        else if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 155.00f)
-                        {
-                            bFubarRide = false;
+                            bWeaponMan = false;
                             Fubar_Clean();
                         }
                         else
                         {
-                            if (World.GetNextPositionOnStreet(Game.Player.Character.Position).DistanceTo(vFuDest) > 25.00f)
-                            {
-                                FUbarDrv.Task.ClearAll();
-                                vFuDest = World.GetNextPositionOnStreet(Game.Player.Character.Position);
-                                if (FUbarDrv.IsInVehicle())
-                                    FUbarDrv.Task.DriveTo(FubarCarX, vFuDest, 3.00f, 20.00f, 536871355);
-                                else if (FUbarDrv.IsDead)
-                                {
-                                    bFubarRide = false;
-                                    Fubar_Clean();
-                                }
-                            }
-                            else if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) < 15.00f)
+                            if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) < 15.00f)
                             {
                                 FUbarDrv.Task.ClearAll();
                                 FUbarDrv.Task.LeaveVehicle();
                                 iFubCarzz = 1;
                                 iWait4Sec = Game.GameTime + 1000;
+                            }
+                            else if (World.GetNextPositionOnStreet(Game.Player.Character.Position).DistanceTo(vFuDest) > 25.00f)
+                            {
+                                FUbarDrv.Task.ClearAll();
+                                vFuDest = World.GetNextPositionOnStreet(Game.Player.Character.Position);
+                                if (FUbarDrv.IsInVehicle())
+                                    FUbarDrv.Task.DriveTo(FubarCarX, vFuDest, 3.00f, 20.00f, 536871355);
                             }
                         }
                     }
@@ -4330,7 +4298,7 @@ namespace NSPM_Contacts
                     {
                         if (FUbarDrv.IsDead || FubarCarX.IsDead)
                         {
-                            bFubarRide = false;
+                            bWeaponMan = false;
                             Fubar_Clean();
                         }
                         else if (FUbarDrv.IsInVehicle())
@@ -4355,7 +4323,7 @@ namespace NSPM_Contacts
                         Vector3 Vpos = FubarCarX.Position - (FubarCarX.ForwardVector * 4.75f);
                         if (FUbarDrv.IsDead || FubarCarX.IsDead || Game.Player.Character.Position.DistanceTo(Vpos) > 150.00f)
                         {
-                            bFubarRide = false;
+                            bWeaponMan = false;
                             Fubar_Clean();
                         }
                         else if (FUbarDrv.Position.DistanceTo(Vpos) < 2.50f && !FubarCarX.IsDoorOpen(VehicleDoor.BackLeftDoor))
@@ -4376,6 +4344,82 @@ namespace NSPM_Contacts
                                 WeaponsMenu();
                             }
                         }
+                    }
+                }
+                else if (bMeeddicc)
+                {
+                    if (iFubCarzz == 0)
+                    {
+                        if (FUbarDrv.IsDead || Game.Player.Character.IsInVehicle() || Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 95.00f)
+                        {
+                            bMeeddicc = false;
+                            Fubar_Clean();
+                        }
+                        else
+                        {
+                            if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) < 15.00f)
+                            {
+                                FUbarDrv.Task.ClearAll();
+                                FUbarDrv.Task.LeaveVehicle();
+                                iFubCarzz = 1;
+                                iWait4Sec = Game.GameTime + 1000;
+                            }
+                            else if(World.GetNextPositionOnStreet(Game.Player.Character.Position).DistanceTo(vFuDest) > 25.00f)
+                            {
+                                FUbarDrv.Task.ClearAll();
+                                vFuDest = World.GetNextPositionOnStreet(Game.Player.Character.Position);
+                                if (FUbarDrv.IsInVehicle())
+                                    FUbarDrv.Task.DriveTo(FubarCarX, vFuDest, 3.00f, 20.00f, 536871355);
+                            }
+                        }
+                    }
+                    else if (iFubCarzz == 1)
+                    {
+                        if (FUbarDrv.IsDead || Game.Player.Character.Position.DistanceTo(FUbarDrv.Position) > 150.00f)
+                        {
+                            bMeeddicc = false;
+                            Fubar_Clean();
+                        }
+                        else if (FUbarDrv.IsInVehicle())
+                        {
+                            if (iWait4Sec < Game.GameTime)
+                            {
+                                FUbarDrv.Task.ClearAll();
+                                FUbarDrv.Task.LeaveVehicle(LeaveVehicleFlags.LeaveDoorOpen);
+                                iWait4Sec = Game.GameTime + 4000;
+                            }
+                        }
+                        else
+                        {
+                            FUbarDrv.Task.ClearAll();
+                            FUbarDrv.Task.GoTo(Game.Player.Character.Position);
+                            iFubCarzz = 2;
+                        }
+                    }
+                    else if (iFubCarzz == 2)
+                    {
+                        Vector3 Vpos = FubarCarX.Position - (FubarCarX.ForwardVector * 3.75f);
+                        if (FUbarDrv.IsDead || Game.Player.Character.Position.DistanceTo(Vpos) > 150.00f)
+                        {
+                            bMeeddicc = false;
+                            Fubar_Clean();
+                        }
+                        else if (FUbarDrv.Position.DistanceTo(Game.Player.Character.Position) < 1.50f)
+                        {
+                            FUbarDrv.Task.PlayAnimation("amb@medic@standing@timeofdeath@idle_a", "idle_a", 8.00f, 4000, false, 1.00f);
+                            Game.Player.Character.Health = Game.Player.Character.MaxHealth;
+                            Script.Wait(1000);
+                            bMeeddicc = false;
+                            Fubar_Clean();
+                        }
+                    }
+                }
+                else if (bImports)
+                {
+                    if (Game.Player.Character.IsInVehicle() || Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 150.00f)
+                    {
+                        Fubar_Clean();
+                        bIFrutiyAdd = false;
                     }
                 }
                 else if (bBankTransfer)
@@ -4414,85 +4458,6 @@ namespace NSPM_Contacts
                         iFaster_01 = Game.GameTime + 4000;
                         iFaster_02 = Game.GameTime + 15000;
                         iFaster_03 = Game.GameTime + 25000;
-                    }
-                }
-                else if (bMeeddicc)
-                {
-                    if (iFubCarzz == 0)
-                    {
-                        if (Game.Player.Character.IsInVehicle())
-                        {
-                            bFubarRide = false;
-                            Fubar_Clean();
-                        }
-                        else if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 95.00f)
-                        {
-                            bFubarRide = false;
-                            Fubar_Clean();
-                        }
-                        else
-                        {
-                            if (World.GetNextPositionOnStreet(Game.Player.Character.Position).DistanceTo(vFuDest) > 25.00f)
-                            {
-                                FUbarDrv.Task.ClearAll();
-                                vFuDest = World.GetNextPositionOnStreet(Game.Player.Character.Position);
-                                if (FUbarDrv.IsInVehicle())
-                                    FUbarDrv.Task.DriveTo(FubarCarX, vFuDest, 3.00f, 20.00f, 536871355);
-                                else if (FUbarDrv.IsDead)
-                                {
-                                    bFubarRide = false;
-                                    Fubar_Clean();
-                                }
-                            }
-                            else if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) < 15.00f)
-                            {
-                                FUbarDrv.Task.ClearAll();
-                                FUbarDrv.Task.LeaveVehicle();
-                                iFubCarzz = 1;
-                                iWait4Sec = Game.GameTime + 1000;
-                            }
-                        }
-                    }
-                    else if (iFubCarzz == 1)
-                    {
-                        if (FUbarDrv.IsDead)
-                        {
-                            bFubarRide = false;
-                            Fubar_Clean();
-                        }
-                        else if (FUbarDrv.IsInVehicle())
-                        {
-                            if (iWait4Sec < Game.GameTime)
-                            {
-                                FUbarDrv.Task.ClearAll();
-                                FUbarDrv.Task.LeaveVehicle();
-                                iWait4Sec = Game.GameTime + 1000;
-                            }
-                        }
-                        else
-                        {
-                            Vector3 Vpos = FubarCarX.Position - (FubarCarX.ForwardVector * 3.75f);
-                            FUbarDrv.Task.ClearAll();
-                            FUbarDrv.Task.GoTo(Game.Player.Character);
-                            iFubCarzz = 2;
-                        }
-                    }
-                    else if (iFubCarzz == 2)
-                    {
-                        Vector3 Vpos = FubarCarX.Position - (FubarCarX.ForwardVector * 3.75f);
-                        if (FUbarDrv.IsDead || Game.Player.Character.Position.DistanceTo(Vpos) > 150.00f)
-                        {
-                            bFubarRide = false;
-                            Fubar_Clean();
-                        }
-                        else if (Game.Player.Character.Position.DistanceTo(Game.Player.Character.Position) < 1.50f)
-                        {
-                            FUbarDrv.Task.PlayAnimation("amb@medic@standing@timeofdeath@idle_a", "idle_a", 8.00f, 4000, false, 1.00f);
-                            Game.Player.Character.Health = Game.Player.Character.MaxHealth;
-                            Script.Wait(1000);
-                            bFubarRide = false;
-                            Fubar_Clean();
-                        }
                     }
                 }
             }
