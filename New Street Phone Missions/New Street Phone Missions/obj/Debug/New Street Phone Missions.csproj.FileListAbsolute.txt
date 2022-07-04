@@ -1,0 +1,11 @@
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\New Street Phone Missions.dll
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\New Street Phone Missions.pdb
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.dll
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.csproj.CoreCompileInputs.cache
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.csproj.CopyComplete
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.dll
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.pdb
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.xml
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\NativeUI.xml
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.pdb
+C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.csproj.AssemblyReference.cache
