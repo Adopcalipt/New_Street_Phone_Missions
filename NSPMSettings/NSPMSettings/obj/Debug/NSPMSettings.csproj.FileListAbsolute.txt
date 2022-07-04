@@ -1,0 +1,16 @@
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\bin\Debug\NSPMSettings.exe.config
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\bin\Debug\NSPMSettings.exe
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\bin\Debug\NSPMSettings.pdb
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.Form1.resources
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.Properties.Resources.resources
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.csproj.GenerateResource.cache
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.csproj.CoreCompileInputs.cache
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.exe
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.pdb
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\bin\Debug\ScriptHookVDotNet2.dll
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\bin\Debug\ScriptHookVDotNet2.pdb
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\bin\Debug\ScriptHookVDotNet2.xml
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.csproj.CopyComplete
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.Form2.resources
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.csproj.AssemblyReference.cache
+C:\Users\Ado\source\repos\NSPMSettings\NSPMSettings\obj\Debug\NSPMSettings.csproj.SuggestedBindingRedirects.cache

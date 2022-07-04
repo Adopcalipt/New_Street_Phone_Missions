@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XmlSetings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Truckin>true</Truckin>
+  <Getaway>true</Getaway>
+  <Packages>true</Packages>
+  <Convicts>true</Convicts>
+  <FUber>true</FUber>
+  <Pilot>true</Pilot>
+  <Amulance>true</Amulance>
+  <Follow>true</Follow>
+  <LSFD>true</LSFD>
+  <Johnny>true</Johnny>
+  <Raceist>true</Raceist>
+  <BBBomb>true</BBBomb>
+  <Assassination>true</Assassination>
+  <Gruppe6>true</Gruppe6>
+  <Sailor>true</Sailor>
+  <ImportantEx>true</ImportantEx>
+  <DebtCollect>true</DebtCollect>
+  <MCBusiness>true</MCBusiness>
+  <BayLift>true</BayLift>
+  <Sharks>true</Sharks>
+  <HappyShopper>true</HappyShopper>
+  <MoresMute>true</MoresMute>
+  <TempJob>true</TempJob>
+  <ParaDisplay>true</ParaDisplay>
+  <Deliverwho>true</Deliverwho>
+  <ShowRoute>true</ShowRoute>
+  <EnemyStrength>true</EnemyStrength>
+  <FastTraveltoStart>false</FastTraveltoStart>
+  <Subtitles>true</Subtitles>
+  <PhoneCone>true</PhoneCone>
+  <PhoneAudio>true</PhoneAudio>
+  <BulderOnly>false</BulderOnly>
+  <YachtPrice>6000000</YachtPrice>
+  <PhoneAnim>true</PhoneAnim>
+  <PreLoadOnline>true</PreLoadOnline>
+  <MenyooAppFixer>false</MenyooAppFixer>
+  <LangSupport>0</LangSupport>
+  <AssZone01>0</AssZone01>
+  <AssZone02>0</AssZone02>
+  <AssZone03>0</AssZone03>
+  <AssZone04>0</AssZone04>
+  <AssZone05>0</AssZone05>
+  <AssZone06>0</AssZone06>
+  <AssZone07>0</AssZone07>
+  <ModVersion>0</ModVersion>
+  <SPDelayTime>4000</SPDelayTime>
+  <WhyNotSubscribe>0</WhyNotSubscribe>
+  <PhoneBlock />
+</XmlSetings>
