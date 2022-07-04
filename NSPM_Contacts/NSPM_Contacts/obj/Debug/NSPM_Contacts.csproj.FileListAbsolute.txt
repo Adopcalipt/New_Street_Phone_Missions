@@ -1,0 +1,14 @@
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\obj\Debug\NSPM_Contacts.csproj.CoreCompileInputs.cache
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\bin\Debug\NSPM_Contacts.dll
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\bin\Debug\NSPM_Contacts.pdb
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\bin\Debug\iFruitAddon2.dll
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\bin\Debug\NativeUI.dll
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\bin\Debug\ScriptHookVDotNet2.dll
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\bin\Debug\NativeUI.xml
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\bin\Debug\ScriptHookVDotNet2.pdb
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\bin\Debug\ScriptHookVDotNet2.xml
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\obj\Debug\NSPM_Contacts.csproj.CopyComplete
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\obj\Debug\NSPM_Contacts.dll
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\obj\Debug\NSPM_Contacts.pdb
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\obj\Debug\NSPM_Contacts.csproj.AssemblyReference.cache
+C:\Users\Ado\source\repos\NSPM_Contacts\NSPM_Contacts\bin\Debug\New Street Phone Missions.dll
