@@ -1,17 +1,14 @@
-﻿using System;
+using GTA;
+using GTA.Math;
+using GTA.Native;
+using NativeUI;
+using New_Street_Phone_Missions;
+using New_Street_Phone_Missions.Classes;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Drawing;
 using System.IO;
-using System.Xml;
-using System.Windows.Forms;
-using New_Street_Phone_Missions.Classes;
-using New_Street_Phone_Missions;
-using System.Xml.Serialization;
-using NativeUI;
-using GTA;
-using GTA.Native;
-using GTA.Math;
+using System.Linq;
 
 namespace NSPM_Yacht
 {
@@ -47,10 +44,8 @@ namespace NSPM_Yacht
 
         private readonly int iProcessForYacht = System.Environment.ProcessorCount * 15;
 
-        private readonly string sBeeLogs = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/ShipsLog.txt";
         private readonly string sDefaulted = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe/DefaultOut.Xml";
         private readonly string sOutDir = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe";
-        private readonly string sNSPMDatafile = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMData.NSPM";
 
         private Vector3 vYachtBlip = new Vector3(-2062.635f, -1025.35f, 14.90f);
 
@@ -65,7 +60,6 @@ namespace NSPM_Yacht
         private List<bool> bOnList = new List<bool>();
 
         private List<float> fList_01 = new List<float>();
-        private List<float> fYachtDoorList = new List<float>();
 
         private List<string> DrString = new List<string>();
         private List<string> DancinFool = new List<string>();
@@ -79,7 +73,7 @@ namespace NSPM_Yacht
         private List<Prop> YachtSlCam = new List<Prop>();
 
         private List<Vector3> vYachtTrigList = new List<Vector3>();
-        private List<Vector3> vYachtDoorList = new List<Vector3>();
+        private List<Vector4> vYachtDoorList = new List<Vector4>();
         private List<Vector3> vRandomDestList = new List<Vector3>();
         private List<Vector3> VectorList_01 = new List<Vector3>();
 
@@ -91,76 +85,102 @@ namespace NSPM_Yacht
 
         public Yacht()
         {
-            if (File.Exists(sBeeLogs))
-                File.Delete(sBeeLogs);
-
             while (!DataStore.bHasLoaded)
                 Script.Wait(10);
 
             LogThis("Yacht Loaded == " + DataStore.bHasLoaded);
 
+            vYachtTrigList = YaTrig();
+            vYachtDoorList = YaDoors();
+            sDestList = Desto();
+            DrString = DocLoad();
+
             Tick += OnTick;
             Interval = 1;
             //KeyDown += OnKeyDown;
-
-            vYachtTrigList.Add(new Vector3(-2030.604f, -1041.843f, 2.566333f));     //0
-            vYachtTrigList.Add(new Vector3(-2027.406f, -1031.263f, 2.566305f));     //1
-            vYachtTrigList.Add(new Vector3(-2026.023f, -1044.079f, 3.5016f));       //2
-            vYachtTrigList.Add(new Vector3(-2021.994f, -1031.659f, 3.5016f));       //3
-            vYachtTrigList.Add(new Vector3(-2073.849f, -1021.678f, 5.884126f));     //4
-            vYachtTrigList.Add(new Vector3(-2089.88f, -1013.522f, 5.884132f));      //5
-            vYachtTrigList.Add(new Vector3(-2097.821f, -1013.057f, 5.88435f));      //6
-            vYachtTrigList.Add(new Vector3(-2022.674f, -1038.524f, 5.580638f));     //7
-            vYachtTrigList.Add(new Vector3(-2093.406f, -1013.812f, 5.884346f));     //8
-            vYachtTrigList.Add(new Vector3(-2092.738f, -1012.015f, 5.884349f));     //9
-            vYachtTrigList.Add(new Vector3(-2086.886f, -1013.086f, 5.884132f));     //10
-            vYachtTrigList.Add(new Vector3(-2050.074f, -1028.000f, 8.971491f));     //11
-            vYachtTrigList.Add(new Vector3(-2024.45f, -1035.888f, 5.57f));       //12-stand
-            vYachtTrigList.Add(new Vector3(-2025.457f, -1039.567f, 5.57f));     //13-stand
-            vYachtTrigList.Add(new Vector3(-2024.319f, -1040.304f, 5.57f));     //14-out
-            vYachtTrigList.Add(new Vector3(-2022.741f, -1039.947f, 5.57f));     //15-in
-            vYachtTrigList.Add(new Vector3(-2021.812f, -1037.576f, 5.57f));     //16-in
-            vYachtTrigList.Add(new Vector3(-2022.5f, -1036.011f, 5.57f));        //17-out
-            vYachtTrigList.Add(new Vector3(-2095.131f, -1016.018f, 9.0805f));       //18-BarMaid
-            vYachtTrigList.Add(new Vector3(-2094.076f, -1017.452f, 9.0805f));       //19-BarDrink
-            vYachtTrigList.Add(new Vector3(-2085.821f, -1017.94f, 12.7819f));       //20-capitan
-
-            vYachtDoorList.Add(new Vector3(-2056.808f, -1031.276f, 8.97149f)); fYachtDoorList.Add(251.6967f);
-            vYachtDoorList.Add(new Vector3(-2071.112f, -1028.82f, 5.882073f)); fYachtDoorList.Add(166.458f);
-            vYachtDoorList.Add(new Vector3(-2076.274f, -1024.964f, 5.884129f)); fYachtDoorList.Add(62.59665f);
-            vYachtDoorList.Add(new Vector3(-2070.088f, -1018.865f, 5.884129f)); fYachtDoorList.Add(79.79578f);
-            vYachtDoorList.Add(new Vector3(-2078.324f, -1013.596f, 5.882021f)); fYachtDoorList.Add(255.3005f);
-            vYachtDoorList.Add(new Vector3(-2067.564f, -1017.044f, 5.882022f)); fYachtDoorList.Add(338.0218f);
-            vYachtDoorList.Add(new Vector3(-2036.542f, -1033.837f, 5.882352f)); fYachtDoorList.Add(235.3591f);
-            vYachtDoorList.Add(new Vector3(-2071.008f, -1018.602f, 3.051447f)); fYachtDoorList.Add(241.4973f);
-
-            sDestList.Add("Paleto Bay");
-            sDestList.Add("North Chumash");
-            sDestList.Add("Lago Zancuda");
-            sDestList.Add("Chumash");
-            sDestList.Add("Pacific Bluffs");
-            sDestList.Add("Elysian Island");
-            sDestList.Add("Terminal");
-            sDestList.Add("Palomino");
-            sDestList.Add("Palmer-Taylor");
-            sDestList.Add("San Chianski");
-            sDestList.Add("El Gordo");
-            sDestList.Add("Procopio Beach");
-
-            DrString.Add("fidget_01");
-            DrString.Add("fidget_02");
-            DrString.Add("fidget_03");
-            DrString.Add("fidget_04");
-            DrString.Add("fidget_05");
-            DrString.Add("fidget_06");
-            DrString.Add("fidget_07");
-            DrString.Add("fidget_08");
-            DrString.Add("fidget_09");
-            DrString.Add("fidget_10");
-
             DipDar.Load();
         }
+        private List<Vector3> YaTrig()
+        {
+            List<Vector3> Yt = new List<Vector3>
+            {
+                new Vector3(-2030.60f, -1041.843f, 2.566333f),     //0
+                new Vector3(-2027.40f, -1031.263f, 2.566305f),     //1
+                new Vector3(-2026.02f, -1044.079f, 3.5016f),       //2
+                new Vector3(-2021.99f, -1031.659f, 3.5016f),       //3
+                new Vector3(-2073.85f, -1021.678f, 5.884126f),     //4
+                new Vector3(-2089.88f, -1013.522f, 5.884132f),     //5
+                new Vector3(-2097.82f, -1013.057f, 5.88435f),      //6
+                new Vector3(-2022.67f, -1038.524f, 5.580638f),     //7
+                new Vector3(-2093.40f, -1013.812f, 5.884346f),     //8
+                new Vector3(-2092.74f, -1012.015f, 5.884349f),     //9
+                new Vector3(-2086.88f, -1013.086f, 5.884132f),     //10
+                new Vector3(-2050.07f, -1028.000f, 8.971491f),     //11
+                new Vector3(-2024.45f, -1035.888f, 5.57f),         //12-stand
+                new Vector3(-2025.45f, -1039.567f, 5.57f),         //13-stand
+                new Vector3(-2024.32f, -1040.304f, 5.57f),         //14-out
+                new Vector3(-2022.74f, -1039.947f, 5.57f),         //15-in
+                new Vector3(-2021.81f, -1037.576f, 5.57f),         //16-in
+                new Vector3(-2022.50f, -1036.011f, 5.57f),         //17-out
+                new Vector3(-2095.13f, -1016.018f, 9.0805f),       //18-BarMaid
+                new Vector3(-2094.07f, -1017.452f, 9.0805f),       //19-BarDrink
+                new Vector3(-2085.82f, -1017.94f, 12.7819f)        //20-capitan
+            };
+            return Yt;
+        }
+        private List<Vector4> YaDoors()
+        {
+            List<Vector4> Yd = new List<Vector4>
+            {
+                new Vector4(-2056.808f, -1031.276f, 8.97149f, 251.6967f),
+                new Vector4(-2071.112f, -1028.82f, 5.882073f, 166.458f),
+                new Vector4(-2076.274f, -1024.964f, 5.884129f, 62.59665f),
+                new Vector4(-2070.088f, -1018.865f, 5.884129f, 79.79578f),
+                new Vector4(-2078.324f, -1013.596f, 5.882021f, 255.3005f),
+                new Vector4(-2067.564f, -1017.044f, 5.882022f, 338.0218f),
+                new Vector4(-2036.542f, -1033.837f, 5.882352f, 235.3591f),
+                new Vector4(-2071.008f, -1018.602f, 3.051447f, 241.4973f)
+            };
+            return Yd;
+        }
+        private List<string> Desto()
+        {
+            List<string> Ls = new List<string>
+            {
+                "Paleto Bay",
+                "North Chumash",
+                "Lago Zancuda",
+                "Chumash",
+                "Pacific Bluffs",
+                "Elysian Island",
+                "Terminal",
+                "Palomino",
+                "Palmer-Taylor",
+                "San Chianski",
+                "El Gordo",
+                "Procopio Beach"
+            };
 
+            return Ls;
+        }
+        private List<string> DocLoad()
+        {
+            List<string> Ls = new List<string>
+            {
+                "fidget_01",
+                "fidget_02",
+                "fidget_03",
+                "fidget_04",
+                "fidget_05",
+                "fidget_06",
+                "fidget_07",
+                "fidget_08",
+                "fidget_09",
+                "fidget_10"
+            };
+
+            return Ls;
+        }
         private void AddHeistYacht()
         {
             LogThis("AddHeistYacht");
@@ -179,54 +199,23 @@ namespace NSPM_Yacht
         {
             if (bLogFiles)
             {
-                using (StreamWriter tEx = File.AppendText(sBeeLogs))
-                    tEx.WriteLine($"{DateTime.Now.ToLongTimeString()} {DateTime.Now.ToLongDateString()} {"--" + sLog}");
+                LoggerLight.LogThis("YachtLog_" + sLog);
             }
-        }
-        public List<int> GetHashed(List<Ped> Peds, List<Prop> Props, List<Vehicle> Vehicks)
-        {
-            List<int> SomeHash = new List<int>();
-
-            if (Peds != null)
-            {
-                for (int i = 0; i < Peds.Count; i++)
-                    SomeHash.Add(Peds[i].Handle);
-            }
-            else if (Props != null)
-            {
-                for (int i = 0; i < Props.Count; i++)
-                    SomeHash.Add(Props[i].Handle);
-            }
-            else if (Vehicks != null)
-            {
-                for (int i = 0; i < Vehicks.Count; i++)
-                    SomeHash.Add(Vehicks[i].Handle);
-            }
-
-            return SomeHash;
         }
         private void CleanUp()
         {
-            ObjectHand.CleanUpPeds(GetHashed(MissionData.PedList_01, null, null), true, false);
+            ObjectHand.CleanUpPeds(ObjectHand.ConvertToHandle(null, MissionData.PedList_01, null, null), true, false);
             MissionData.PedList_01.Clear();
 
-            ObjectHand.CleanUpProps(GetHashed(null, MissionData.PropList_01, null), true, false);
+            ObjectHand.CleanUpProps(ObjectHand.ConvertToHandle(null, null, MissionData.PropList_01, null), true, false);
             MissionData.PropList_01.Clear();
 
-            ObjectHand.CleanUpVehicles(GetHashed(null, null, MissionData.VehicleList_01), true, false);
+            ObjectHand.CleanUpVehicles(ObjectHand.ConvertToHandle(null, null, null, MissionData.VehicleList_01), true, false);
             MissionData.VehicleList_01.Clear();
 
             DancingPed.Clear();
             SHowBoat = null;
             Choppers = null;
-        }
-        public int RandInt(int minNumber, int maxNumber)
-        {
-            return Function.Call<int>(Hash.GET_RANDOM_INT_IN_RANGE, minNumber, maxNumber);
-        }
-        public int RandFloat(float minNumber, float maxNumber)
-        {
-            return Function.Call<int>(Hash.GET_RANDOM_FLOAT_IN_RANGE, minNumber, maxNumber);
         }
         public bool BeOnOff(int iBon)
         {
@@ -259,125 +248,6 @@ namespace NSPM_Yacht
             //FontWingDings = 3,
             //FontChaletComprimeCologne = 4,
             //FontPricedown = 7
-        }
-        private void ControlerUI(string sText, int iDuration)
-        {
-            Function.Call(Hash._SET_TEXT_COMPONENT_FORMAT, "STRING");
-            Function.Call(Hash._ADD_TEXT_COMPONENT_STRING, sText);
-            Function.Call(Hash._0x238FFE5C7B0498A6, false, false, false, iDuration);
-        }
-        private void ForceAnim(Ped peddy, string sAnimDict, string sAnimName, Vector3 AnPos, Vector3 AnRot)
-        {
-            LogThis("ForceAnim, sAnimName == " + sAnimName);
-
-            Function.Call(Hash.REQUEST_ANIM_DICT, sAnimDict);
-            while (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, sAnimDict))
-                Script.Wait(100);
-            Function.Call(Hash.TASK_PLAY_ANIM_ADVANCED, peddy.Handle, sAnimDict, sAnimName, AnPos.X, AnPos.Y, AnPos.Z, AnRot.X, AnRot.Y, AnRot.Z, 8.0f, 0.00f, -1, 1, 0.01f, 0, 0);
-            Function.Call(Hash.REMOVE_ANIM_DICT, sAnimDict);
-        }
-        private void ForceAnimOnce(Ped peddy, string sAnimDict, string sAnimName, Vector3 AnPos, Vector3 AnRot)
-        {
-            LogThis("ForceAnimOnce, sAnimName == " + sAnimName);
-
-            Function.Call(Hash.REQUEST_ANIM_DICT, sAnimDict);
-            while (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, sAnimDict))
-                Script.Wait(100);
-            Function.Call(Hash.TASK_PLAY_ANIM_ADVANCED, peddy.Handle, sAnimDict, sAnimName, AnPos.X, AnPos.Y, AnPos.Z, AnRot.X, AnRot.Y, AnRot.Z, 8.0f, 0.00f, -1, 0, 0.01f, 0, 0);
-            Function.Call(Hash.REMOVE_ANIM_DICT, sAnimDict);
-        }
-        private void PedScenario(Ped Peddy, string sCenario, Vector3 Vpos, float fHead, bool bSeated)
-        {
-            LogThis("PedScenario, sCenario == " + sCenario);
-
-            Function.Call(Hash.TASK_START_SCENARIO_AT_POSITION, Peddy.Handle, sCenario, Vpos.X, Vpos.Y, Vpos.Z, fHead, 0, bSeated, true);
-        }
-        private void PedSitHere(Ped Peddy, Prop Chair, int iChair)
-        {
-            LogThis("PedSitHere, iChair == " + iChair);
-
-            Vector3 vCharPos = new Vector3(Chair.Position.X, Chair.Position.Y, Chair.Position.Z + 0.55f);
-
-            Peddy.Position = vCharPos;
-            Peddy.Heading = Chair.Heading - 180.00f;
-
-            if (iChair == 1)
-            {
-                List<string> SitVArs = new List<string>
-                {
-                    "PROP_HUMAN_SEAT_CHAIR",
-                    "PROP_HUMAN_SEAT_CHAIR_UPRIGHT"
-                };
-
-                PedScenario(Peddy, SitVArs[RandInt(0, SitVArs.Count - 1)], vCharPos, Chair.Heading - 180.00f, true);
-            }
-            else if (iChair == 2)
-            {
-                vCharPos += (Chair.ForwardVector * 0.30f);
-                vCharPos.Z -= 0.10f;
-                PedScenario(Peddy, "PROP_HUMAN_SEAT_SUNLOUNGER", vCharPos, Chair.Heading - 180.00f, true);
-            }
-            else if (iChair == 3)
-                PedScenario(Peddy, "PROP_HUMAN_SEAT_ARMCHAIR", vCharPos, Chair.Heading - 180.00f, true);
-            else if (iChair == 4)
-                PedScenario(Peddy, "PROP_HUMAN_SEAT_BAR", vCharPos, Chair.Heading - 180.00f, true);
-            else if (iChair == 5)
-                PedScenario(Peddy, "PROP_HUMAN_SEAT_COMPUTER", vCharPos, Chair.Heading - 180.00f, true);
-            else if (iChair == 6)
-            {
-                List<string> SitVArs = new List<string>
-                {
-                    "PROP_HUMAN_SEAT_DECKCHAIR",
-                    "PROP_HUMAN_SEAT_DECKCHAIR_DRINK"
-                };
-
-                PedScenario(Peddy, SitVArs[RandInt(0, SitVArs.Count - 1)], vCharPos, Chair.Heading - 180.00f, true);
-            }
-            else if (iChair == 7)
-            {
-                List<string> SitVArs = new List<string>
-                {
-                    "PROP_HUMAN_SEAT_BENCH",
-                    "PROP_HUMAN_SEAT_BENCH_DRINK",
-                    "PROP_HUMAN_SEAT_BENCH_DRINK_BEER",
-                    "PROP_HUMAN_SEAT_BENCH_FOOD"
-                };
-
-                PedScenario(Peddy, SitVArs[RandInt(0, SitVArs.Count - 1)], vCharPos, Chair.Heading - 180.00f, true);
-            }
-            else if (iChair == 8)
-            {
-                vCharPos = new Vector3(Chair.Position.X, Chair.Position.Y, Chair.Position.Z + 0.70f);
-
-                List<string> SitVArs = new List<string>
-                {
-                    "PROP_HUMAN_SEAT_CHAIR",
-                    "PROP_HUMAN_SEAT_CHAIR_UPRIGHT"
-                };
-
-                PedScenario(Peddy, SitVArs[RandInt(0, SitVArs.Count - 1)], vCharPos, Chair.Heading - 180.00f, true);
-            }
-            else if (iChair == 9)
-            {
-                vCharPos = new Vector3(Chair.Position.X, Chair.Position.Y, Chair.Position.Z + 0.50f);
-
-                PedScenario(Peddy, "PROP_HUMAN_SEAT_CHAIR_UPRIGHT", vCharPos, Chair.Heading - 180.00f, true);
-            }
-
-            Peddy.AlwaysKeepTask = false;
-        }
-        private void SlowFastTravel(Vector3 VDest, float fHedd)
-        {
-            LogThis("SlowFastTravel");
-
-            if (fHedd == 0.00f)
-                fHedd = (int)RandInt(0, 360);
-            Game.FadeScreenOut(1000);
-            Script.Wait(1000);
-            Game.Player.Character.Position = VDest;
-            Game.Player.Character.Heading = fHedd;
-            Script.Wait(2000);
-            Game.FadeScreenIn(1000);
         }
         private void DrunkMoves()
         {
@@ -438,27 +308,18 @@ namespace NSPM_Yacht
                 cCams = null;
             }
         }
-        public int DoesThisExist(string sPed, string sTitle)
+        public int DoesThisExist(string sTitle)
         {
             LogThis("DoesThisExist");
-
-            string sOutDir = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe";
-
             int iFind = -1;
-            if (File.Exists(sOutDir + "/" + sPed + ".Xml"))
+            for (int i = 0; i < MyWardrobe.Outfits.Count(); i++)
             {
-                ClothBankXML MyWardrobe = ReadWriteXML.LoadXmlCloth(sOutDir + "/" + sPed + ".Xml");
-
-                for (int i = 0; i < MyWardrobe.Outfits.Count(); i++)
+                if (MyWardrobe.Outfits[i].Title == sTitle)
                 {
-                    if (MyWardrobe.Outfits[i].Title == sTitle)
-                    {
-                        iFind = i;
-                        break;
-                    }
+                    iFind = i;
+                    break;
                 }
-            }
-
+            } 
             return iFind;
         }
         private void WriteMyWard(ClothBank ThisWard, bool bDefault, string sPed)
@@ -472,7 +333,7 @@ namespace NSPM_Yacht
                 ThisWard.Title = Game.GetUserInput(255);
                 if (ThisWard.Title != "")
                 {
-                    int iBeAt = DoesThisExist(sPed, ThisWard.Title);
+                    int iBeAt = DoesThisExist(ThisWard.Title);
 
                     if (iBeAt == -1)
                         MyWardrobe.Outfits.Add(ThisWard);
@@ -482,17 +343,6 @@ namespace NSPM_Yacht
                     ReadWriteXML.SaveXmlCloth(MyWardrobe, sOutDir + "/" + sPed + ".Xml");
                 }
             }
-        }
-        private void PedDresser(Ped Peddy, ClothBank ThisWard)
-        {
-            LogThis("XmlPedDresser");
-
-            Function.Call(Hash.CLEAR_ALL_PED_PROPS, Peddy);
-            for (int i = 0; i < ThisWard.ClothA.Count; i++)
-                Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy, i, ThisWard.ClothA[i], ThisWard.ClothB[i], 2);
-
-            for (int i = 0; i < ThisWard.ExtraA.Count; i++)
-                Function.Call(Hash.SET_PED_PROP_INDEX, Peddy, i, ThisWard.ExtraA[i], ThisWard.ExtraB[i], false);
         }
         private void WardrobeScan(int iOutfit,string sPed)
         {
@@ -570,16 +420,25 @@ namespace NSPM_Yacht
             LogThis("LauchWardrobe");
 
             string sPed = MyChar();
-            MyWardrobe = new ClothBankXML();
+            MyWardrobe = GetWarded();
 
-            LogThis("Gets to here");
+            WardrobeScan(11, sPed);
+            WardMenuMain(sPed);
+        }
+        public ClothBankXML GetWarded()
+        {
+            LogThis("GetWarded");
+
+            string sPed = MyChar();
+            ClothBankXML CB = new ClothBankXML();
+
             if (Directory.Exists(sOutDir))
             {
                 if (File.Exists(sOutDir + "/" + sPed + ".Xml"))
-                    MyWardrobe = ReadWriteXML.LoadXmlCloth(sOutDir + "/" + sPed + ".Xml");
+                    CB = ReadWriteXML.LoadXmlCloth(sOutDir + "/" + sPed + ".Xml");
             }
-            WardrobeScan(11, sPed);
-            WardMenuMain(sPed);
+
+            return CB;
         }
         private void WardMenuMain(string sPed)
         {
@@ -613,14 +472,14 @@ namespace NSPM_Yacht
 
             var playermodelmenu = YtmenuPool.AddSubMenu(XMen, "Set Outfits");
 
-            if (sPed == "Franklin" && sPed == "Michael" && sPed == "Trevor")
+            if (sPed == "Franklin" || sPed == "Michael" || sPed == "Trevor")
             {
                 Componets(playermodelmenu, 3, "Torso");
                 Componets(playermodelmenu, 4, "Legs");
                 Componets(playermodelmenu, 5, "Hands");
                 Componets(playermodelmenu, 6, "Shoes");
             }
-            else if (sPed != "FreemodeFemale" && sPed != "FreemodeMale")
+            else if (sPed == "FreemodeFemale" || sPed == "FreemodeMale")
             {
                 Componets(playermodelmenu, 1, "Beard");
                 Componets(playermodelmenu, 3, "Torso");
@@ -755,9 +614,9 @@ namespace NSPM_Yacht
         private void QuickChanges(int iNdex)
         {
             if (iNdex == 0)
-                PedDresser(Game.Player.Character, ReadWriteXML.LoadXmlClothDefault(sDefaulted));
+                DressinRoom.PedDresser(Game.Player.Character, ReadWriteXML.LoadXmlClothDefault(sDefaulted));
             else if (iNdex <= MyWardrobe.Outfits.Count)
-                PedDresser(Game.Player.Character, MyWardrobe.Outfits[iNdex - 1]);
+                DressinRoom.PedDresser(Game.Player.Character, MyWardrobe.Outfits[iNdex - 1]);
         }
         private void WardMenu(UIMenu XMen,string sPed)
         {
@@ -788,48 +647,6 @@ namespace NSPM_Yacht
 
             return BuildPop;
         }
-        public bool PropExists(Prop[] Proplist, int iPos)
-        {
-            bool bExist = false;
-
-            if (iPos < Proplist.Count())
-            {
-                unsafe
-                {
-                    if (Proplist[iPos].Exists())
-                        bExist = true;
-                }
-            }
-
-            return bExist;
-        }
-        public string RandomNPC()
-        {
-            string sPed = "";
-
-            List<string> sPeds = new List<string>
-            {
-                "a_f_m_beach_01",    //"Beach Female" />
-                "A_F_Y_Beach_02",
-                "a_f_y_beach_01",    //"Beach Young Female" />
-                "a_m_m_beach_01",    //"Beach Male" />
-                "a_m_m_beach_02",    //"Beach Male 2" />
-                "a_m_y_beach_01",    //"Beach Young Male" />
-                "a_m_y_beach_02",    //"Beach Young Male 2" />
-                "a_m_y_beach_03",    //"Beach Young Male 3" />
-                "a_m_m_malibu_01",    //"Malibu Male" />
-                "a_m_y_sunbathe_01",    //"Sunbather Male" />
-                "a_m_y_hippy_01",    //"Hippie Male" />
-                "a_f_y_hippie_01",    //"Hippie Female" />
-                "a_m_y_beachvesp_01",    //"Vespucci Beach Male" />
-                "a_m_y_beachvesp_02",    //"Vespucci Beach Male 2" />
-                "u_m_y_party_01"    //"Partygoer" />
-            };
-
-            sPed = sPeds[RandInt(0, sPeds.Count - 1)];
-
-            return sPed;
-        }
         public Ped NPCSpawn(string sPed, Vector3 vLocal, float fAce, int iTask)
         {
             Script.Wait(100);
@@ -850,15 +667,15 @@ namespace NSPM_Yacht
                 BuildPed.CanBeTargette﻿d﻿ = false;
                 BuildPed.AlwaysKeepTask = true;
                 BuildPed.IsInvincible = true;
-                ForceAnim(BuildPed, "anim@amb@yacht@captain@", "idle", new Vector3(-2085.821f, -1017.94f, 12.7819f), new Vector3(0.00f, 0.00f, 73.96f));
+                ObjectBuild.ForceAnim(BuildPed, "anim@amb@yacht@captain@", "idle", new Vector3(-2085.821f, -1017.94f, 12.7819f), new Vector3(0.00f, 0.00f, 73.96f));
             }
             else if (iTask == 3)
             {
-                PedScenario(BuildPed, "WORLD_HUMAN_PARTYING", BuildPed.Position, BuildPed.Heading, false);
+                ObjectBuild.PedScenario(BuildPed, "WORLD_HUMAN_PARTYING", BuildPed.Position, BuildPed.Heading, false);
             }
             else if (iTask == 4)
             {
-                WarptoAnyVeh(SHowBoat, BuildPed, 1, false);
+                ObjectBuild.WarptoAnyVeh(SHowBoat, BuildPed, 1);
                 ShowBoating(BuildPed, VectorList_01[1], SHowBoat, 25.00f, 4194304);
                 YachtStuff_BoatToShore();
             }
@@ -888,36 +705,6 @@ namespace NSPM_Yacht
             PedX.Task.ClearAll();
             Function.Call(Hash.TASK_BOAT_MISSION, PedX, Vhick, 0, 0, vEctor.X, vEctor.Y, vEctor.Z, 4, fSpeeds, iDrivinStyle, -1.0f, 7);
             Function.Call(Hash.SET_BLOCKING_OF_NON_TEMPORARY_EVENTS, PedX.Handle, true);
-        }
-        private void WarptoAnyVeh(Vehicle Vhic, Ped Peddy, int iSeat, bool bFightPlayer)
-        {
-            LogThis("WarptoAnyVeh, iSeat == " + iSeat + ", bFightPlayer == " + bFightPlayer);
-
-            bool bFader = false;
-            if (Peddy == Game.Player.Character)
-            {
-                Game.FadeScreenOut(1000);
-                Script.Wait(1000);
-                bFader = true;
-            }
-
-            while (!Peddy.IsInVehicle(Vhic))
-            {
-                if (Peddy.IsInVehicle())
-                    Peddy.Task.EnterVehicle();
-                VehicleWarp(Vhic, Peddy, iSeat);
-                Script.Wait(100);
-            }
-
-            if (bFader)
-            {
-                Script.Wait(500);
-                Game.FadeScreenIn(1000);
-            }
-        }
-        private void VehicleWarp(Vehicle Vhic, Ped Peddy, int iSeat)
-        {
-            Function.Call(Hash.SET_PED_INTO_VEHICLE, Peddy, Vhic, iSeat - 2);
         }
         private void YachtStuff_StartOnYacht()
         {
@@ -988,10 +775,10 @@ namespace NSPM_Yacht
 
             if (bASleap)
             {
-                ControlerUI(DataStore.MyLang.YachtLang[5], 1);
+                UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[5], 1);
                 if (ReturnStuff.WhileButtonDown(47))
                 {
-                    ForceAnimOnce(Peddy, "savebighouse@", "f_getout_l_bighouse", Peddy.Position + (Peddy.RightVector * 0.60f), Peddy.Rotation);
+                    ObjectBuild.ForceAnimOnce(Peddy, "savebighouse@", "f_getout_l_bighouse", Peddy.Position + (Peddy.RightVector * 0.60f), Peddy.Rotation);
                     Script.Wait(1000);
                     Peddy.Detach();
                     if (iMyBed == 0)
@@ -1037,7 +824,7 @@ namespace NSPM_Yacht
             }
             else if (bPianoSt)
             {
-                ControlerUI(DataStore.MyLang.YachtLang[5], 1);
+                UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[5], 1);
                 if (ReturnStuff.WhileButtonDown(47))
                 {
                     bPianoSt = false;
@@ -1050,16 +837,16 @@ namespace NSPM_Yacht
                 {
                     if (bScubaGOn)
                     {
-                        ControlerUI(DataStore.MyLang.YachtLang[6], 1);
+                        UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[6], 1);
                         if (ReturnStuff.WhileButtonDown(47))
                         {
-                            PedDresser(Peddy, ReadWriteXML.LoadXmlClothDefault(sDefaulted));
+                            DressinRoom.PedDresser(Peddy, ReadWriteXML.LoadXmlClothDefault(sDefaulted));
                             bScubaGOn = false;
                         }
                     }
                     else
                     {
-                        ControlerUI(DataStore.MyLang.YachtLang[7], 1);
+                        UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[7], 1);
                         if (ReturnStuff.WhileButtonDown(47))
                         {
                             WardrobeScan(1, MyChar());
@@ -1125,7 +912,7 @@ namespace NSPM_Yacht
                 {
                     if (!bASleap)
                     {
-                        ControlerUI(DataStore.MyLang.YachtLang[8], 1);
+                        UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[8], 1);
                         if (ReturnStuff.WhileButtonDown(47))
                         {
                             iMyBed = 0;
@@ -1137,7 +924,7 @@ namespace NSPM_Yacht
                 {
                     if (!bASleap)
                     {
-                        ControlerUI(DataStore.MyLang.YachtLang[8], 1);
+                        UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[8], 1);
                         if (ReturnStuff.WhileButtonDown(47))
                         {
                             iMyBed = 1;
@@ -1149,7 +936,7 @@ namespace NSPM_Yacht
                 {
                     if (!bASleap)
                     {
-                        ControlerUI(DataStore.MyLang.YachtLang[8], 1);
+                        UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[8], 1);
                         if (ReturnStuff.WhileButtonDown(47))
                         {
                             iMyBed = 2;
@@ -1177,7 +964,7 @@ namespace NSPM_Yacht
                     {
                         if (iJacuzSit == 1)
                         {
-                            ControlerUI(DataStore.MyLang.YachtLang[5], 1);
+                            UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[5], 1);
                             if (ReturnStuff.WhileButtonDown(47))
                             {
                                 if (Peddy.Gender == Gender.Female)
@@ -1193,36 +980,36 @@ namespace NSPM_Yacht
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
                                         }
                                         else
-                                            ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "base", PlayPos, Peddy.Rotation);
                                         bBacktoBase = !bBacktoBase;
                                     }
                                     else
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
                                         }
                                         else
-                                            ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnim(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "base", PlayPos, Peddy.Rotation);
                                         bBacktoBase = !bBacktoBase;
                                     }
                                 }
@@ -1230,7 +1017,7 @@ namespace NSPM_Yacht
                         }
                         else if (iJacuzSit == 2)
                         {
-                            ControlerUI(DataStore.MyLang.YachtLang[9], 1);
+                            UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[9], 1);
                             if (ReturnStuff.WhileButtonDown(47))
                             {
                                 if (Peddy.Gender == Gender.Female)
@@ -1246,44 +1033,44 @@ namespace NSPM_Yacht
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_d", PlayPos, Peddy.Rotation);
                                             bBacktoBase = !bBacktoBase;
                                         }
                                         else
-                                            ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", PlayPos, Peddy.Rotation);
                                     }
                                     else
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_d", PlayPos, Peddy.Rotation);
                                             bBacktoBase = !bBacktoBase;
                                         }
                                         else
-                                            ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "base", PlayPos, Peddy.Rotation);
                                     }
                                 }
                             }
                         }
                         else if (iJacuzSit == 22)
                         {
-                            ControlerUI(DataStore.MyLang.YachtLang[9], 1);
+                            UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[9], 1);
                             if (ReturnStuff.WhileButtonDown(47))
                             {
                                 if (Peddy.Gender == Gender.Female)
@@ -1299,44 +1086,44 @@ namespace NSPM_Yacht
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "idle_d", PlayPos, Peddy.Rotation);
                                             bBacktoBase = !bBacktoBase;
                                         }
                                         else
-                                            ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", PlayPos, Peddy.Rotation);
                                     }
                                     else
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "idle_d", PlayPos, Peddy.Rotation);
                                             bBacktoBase = !bBacktoBase;
                                         }
                                         else
-                                            ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "base", PlayPos, Peddy.Rotation);
                                     }
                                 }
                             }
                         }
                         else if (iJacuzSit == 3)
                         {
-                            ControlerUI(DataStore.MyLang.YachtLang[9], 1);
+                            UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[9], 1);
                             if (ReturnStuff.WhileButtonDown(47))
                             {
                                 if (Peddy.Gender == Gender.Female)
@@ -1352,44 +1139,44 @@ namespace NSPM_Yacht
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
                                             bBacktoBase = !bBacktoBase;
                                         }
                                         else
-                                            ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", PlayPos, Peddy.Rotation);
                                     }
                                     else
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
                                             bBacktoBase = !bBacktoBase;
                                         }
                                         else
-                                            ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "base", PlayPos, Peddy.Rotation);
                                     }
                                 }
                             }
                         }
                         else if (iJacuzSit == 33)
                         {
-                            ControlerUI(DataStore.MyLang.YachtLang[9], 1);
+                            UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[9], 1);
                             if (ReturnStuff.WhileButtonDown(47))
                             {
                                 if (Peddy.Gender == Gender.Female)
@@ -1405,37 +1192,37 @@ namespace NSPM_Yacht
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
                                             bBacktoBase = !bBacktoBase;
                                         }
                                         else
-                                            ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", PlayPos, Peddy.Rotation);
                                     }
                                     else
                                     {
                                         if (!bBacktoBase)
                                         {
-                                            int iDell = RandInt(0, 4);
+                                            int iDell = ReturnStuff.RandInt(0, 4);
                                             if (iDell == 0)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_a", PlayPos, Peddy.Rotation);
                                             else if (iDell == 1)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_b", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_c", PlayPos, Peddy.Rotation);
                                             else if (iDell == 2)
-                                                ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
+                                                ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "idle_d", PlayPos, Peddy.Rotation);
                                             bBacktoBase = !bBacktoBase;
                                         }
                                         else
-                                            ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "base", PlayPos, Peddy.Rotation);
+                                            ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "base", PlayPos, Peddy.Rotation);
                                     }
                                 }
                             }
@@ -1444,7 +1231,7 @@ namespace NSPM_Yacht
                         {
                             if (iJacuzSit == 0)
                             {
-                                ControlerUI(DataStore.MyLang.YachtLang[10], 1);
+                                UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[10], 1);
                                 if (ReturnStuff.WhileButtonDown(47))
                                 {
                                     iJacuzSit = 1;
@@ -1457,7 +1244,7 @@ namespace NSPM_Yacht
                         {
                             if (iJacuzSit == 0)
                             {
-                                ControlerUI(DataStore.MyLang.YachtLang[10], 1);
+                                UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[10], 1);
                                 if (ReturnStuff.WhileButtonDown(47))
                                 {
                                     iJacuzSit = 1;
@@ -1470,7 +1257,7 @@ namespace NSPM_Yacht
                         {
                             if (iJacuzSit == 0)
                             {
-                                ControlerUI(DataStore.MyLang.YachtLang[11], 1);
+                                UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[11], 1);
                                 if (ReturnStuff.WhileButtonDown(47))
                                 {
                                     iJacuzSit = 2;
@@ -1484,7 +1271,7 @@ namespace NSPM_Yacht
                         {
                             if (iJacuzSit == 0)
                             {
-                                ControlerUI(DataStore.MyLang.YachtLang[11], 1);
+                                UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[11], 1);
                                 if (ReturnStuff.WhileButtonDown(47))
                                 {
                                     iJacuzSit = 3;
@@ -1498,7 +1285,7 @@ namespace NSPM_Yacht
                         {
                             if (iJacuzSit == 0)
                             {
-                                ControlerUI(DataStore.MyLang.YachtLang[11], 1);
+                                UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[11], 1);
                                 if (ReturnStuff.WhileButtonDown(47))
                                 {
                                     iJacuzSit = 33;
@@ -1512,7 +1299,7 @@ namespace NSPM_Yacht
                         {
                             if (iJacuzSit == 0)
                             {
-                                ControlerUI(DataStore.MyLang.YachtLang[11], 1);
+                                UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[11], 1);
                                 if (ReturnStuff.WhileButtonDown(47))
                                 {
                                     iJacuzSit = 22;
@@ -1529,7 +1316,7 @@ namespace NSPM_Yacht
                 {
                     if (!bMenuOpen)
                     {
-                        ControlerUI(DataStore.MyLang.YachtLang[12], 1);
+                        UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[12], 1);
                         if (ReturnStuff.WhileButtonDown(47))
                         {
                             Function.Call(Hash.DISPLAY_RADAR, false);
@@ -1543,7 +1330,7 @@ namespace NSPM_Yacht
                 {
                     if (!bPianoSt)
                     {
-                        ControlerUI(DataStore.MyLang.YachtLang[13], 1);
+                        UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[13], 1);
                         if (ReturnStuff.WhileButtonDown(47))
                         {
                             bPianoSt = true;
@@ -1558,7 +1345,7 @@ namespace NSPM_Yacht
                     {
                         if (!bDrinks)
                         {
-                            ControlerUI(DataStore.MyLang.YachtLang[14], 1);
+                            UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[14], 1);
                             if (ReturnStuff.WhileButtonDown(47))
                             {
                                 Peddy.FreezePosition = true;
@@ -1573,7 +1360,7 @@ namespace NSPM_Yacht
                 }           //BarDrink
                 else if (PlayPos.DistanceTo(vYachtTrigList[20]) < 1.50f)
                 {
-                    ControlerUI(DataStore.MyLang.YachtLang[15], 1);
+                    UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[15], 1);
                     StickySubTitle(DataStore.MyLang.YachtLang[16] + "~y~" + sDestList[iYachtFast] + "~w~.");
                     if (ReturnStuff.WhileButtonDown(21))
                         YachtStuff_FastTravel(iYachtFast);
@@ -1596,7 +1383,7 @@ namespace NSPM_Yacht
                 {
                     if (bSwimSuit)
                     {
-                        PedDresser(Peddy, ReadWriteXML.LoadXmlClothDefault(sDefaulted));
+                        DressinRoom.PedDresser(Peddy, ReadWriteXML.LoadXmlClothDefault(sDefaulted));
                         bSwimSuit = false;
                         bWetness = false;
 
@@ -1610,30 +1397,30 @@ namespace NSPM_Yacht
                     {
                         for (int i = 0; i < vYachtDoorList.Count; i++)
                         {
-                            Vector3 ThisDoor = vYachtDoorList[i];
+                            Vector3 ThisDoor = new Vector3(vYachtDoorList[i].X, vYachtDoorList[i].Y, vYachtDoorList[i].Z);
                             ThisDoor.Z = ThisDoor.Z - 1.00f;
-                            //World.DrawMarker(MarkerType.VerticalCylinder, ThisDoor, Vector3.Zero, Vector3.Zero, new Vector3(0.10f, 0.10f, 0.50f), Color.WhiteSmoke);
                             if (PlayPos.DistanceTo(ThisDoor) < 1.50f)
                             {
-                                ControlerUI(DataStore.MyLang.YachtLang[5], 1);
+                                UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[5], 1);
                                 if (ReturnStuff.WhileButtonDown(47))
                                 {
                                     Game.FadeScreenOut(1000);
                                     iDoors = iDoors + 1;
-                                    if (iDoors > RandInt(25, 50))
+                                    if (iDoors > ReturnStuff.RandInt(25, 50))
                                     {
-                                        SlowFastTravel(vRandomDestList[RandInt(0, vRandomDestList.Count - 1)], 0.00f);
+                                        ObjectHand.SlowFastTravel(vRandomDestList[ReturnStuff.RandInt(0, vRandomDestList.Count - 1)], 0.00f);
                                         iDoors = 0;
                                     }
                                     else
                                     {
-                                        int iDoor = RandInt(0, vYachtDoorList.Count - 1);
+                                        int iDoor = ReturnStuff.RandInt(0, vYachtDoorList.Count - 1);
                                         while (iDoor == i)
                                         {
-                                            iDoor = RandInt(0, vYachtDoorList.Count - 1);
+                                            iDoor = ReturnStuff.RandInt(0, vYachtDoorList.Count - 1);
                                             Script.Wait(100);
                                         }
-                                        SlowFastTravel(vYachtDoorList[iDoor], fYachtDoorList[iDoor]);
+                                        Vector3 MyDoor = new Vector3(vYachtDoorList[iDoor].X, vYachtDoorList[iDoor].Y, vYachtDoorList[iDoor].Z);
+                                        ObjectHand.SlowFastTravel(MyDoor, vYachtDoorList[iDoor].R);
                                     }
                                 }
                             }
@@ -1872,7 +1659,7 @@ namespace NSPM_Yacht
         {
             LogThis("YachtStuff_BoatToShore");
 
-            WarptoAnyVeh(SHowBoat, Game.Player.Character, 2, false);
+            ObjectBuild.WarptoAnyVeh(SHowBoat, Game.Player.Character, 2);
 
             while (Game.Player.Character.IsInVehicle(SHowBoat))
                 Script.Wait(500);
@@ -1976,8 +1763,8 @@ namespace NSPM_Yacht
             LogThis("YachtStuff_YachtSwim, iped == " + sPed);
 
             Ped Peddy = Game.Player.Character;
-            //int iExist = DoesThisExist(sPed, "Swim");
-            int iExist = -1;
+            MyWardrobe = GetWarded();
+            int iExist = DoesThisExist("Swim");
 
             if (sPed == "Franklin")
             {
@@ -1993,7 +1780,7 @@ namespace NSPM_Yacht
                     Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy, 11, 0, 0, 2);    //11 Top2
                 }
                 else
-                    PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
+                    DressinRoom.PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
             }      //Franklin
             else if (sPed == "Michael")
             {
@@ -2009,7 +1796,7 @@ namespace NSPM_Yacht
                     Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy, 11, 0, 0, 2);    //11 Top2
                 }
                 else
-                    PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
+                    DressinRoom.PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
             }       //Michael
             else if (sPed == "Trevor")
             {
@@ -2025,7 +1812,7 @@ namespace NSPM_Yacht
                     Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy, 11, 0, 0, 2);    //11 Top2
                 }
                 else
-                    PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
+                    DressinRoom.PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
             }       //Trevor
             else if (sPed == "FreemodeFemale")
             {
@@ -2042,7 +1829,7 @@ namespace NSPM_Yacht
                     Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy, 11, 18, 11, 2);    //11 Top2
                 }
                 else
-                    PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
+                    DressinRoom.PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
             }      //MpFemale
             else if (sPed == "FreemodeMale")
             {
@@ -2059,7 +1846,7 @@ namespace NSPM_Yacht
                     Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy, 11, -1, 0, 2);    //11 Top2
                 }
                 else
-                    PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
+                    DressinRoom.PedDresser(Peddy, MyWardrobe.Outfits[iExist]);
             }       //MpMale
 
             Peddy.ClearBloodDamage();
@@ -2107,15 +1894,15 @@ namespace NSPM_Yacht
                 cCams = World.CreateCamera(Campo, Camro, 50.00f);
                 Function.Call(Hash.RENDER_SCRIPT_CAMS, 1, 1, cCams.Handle, 0, 0);
 
-                ForceAnimOnce(Npc_01, "anim@mini@yacht@bar@drink@one", "one_bartender", VMaidP, VMaidR);
-                ForceAnimOnce(Game.Player.Character, "anim@mini@yacht@bar@drink@one", "one_player", VPEddP, VPEddR);
+                ObjectBuild.ForceAnimOnce(Npc_01, "anim@mini@yacht@bar@drink@one", "one_bartender", VMaidP, VMaidR);
+                ObjectBuild.ForceAnimOnce(Game.Player.Character, "anim@mini@yacht@bar@drink@one", "one_player", VPEddP, VPEddR);
 
                 Script.Wait(1000);
                 while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Npc_01, 134))
                     Script.Wait(100);
 
                 Game.Player.Character.Task.ClearAllImmediately();
-                ForceAnim(Npc_01, "anim@mini@yacht@bar@drink@idle_a", "idle_a", Npc_01.Position, Npc_01.Rotation);
+                ObjectBuild.ForceAnim(Npc_01, "anim@mini@yacht@bar@drink@idle_a", "idle_a", Npc_01.Position, Npc_01.Rotation);
                 Glass.HasCollision = true;
                 Bottle.HasCollision = true;
                 Glass.Detach();
@@ -2142,15 +1929,15 @@ namespace NSPM_Yacht
                 cCams = World.CreateCamera(Campo, Camro, 50.00f);
                 Function.Call(Hash.RENDER_SCRIPT_CAMS, 1, 1, cCams.Handle, 0, 0);
 
-                ForceAnimOnce(Npc_01, "anim@mini@yacht@bar@drink@two", "two_bartender", VMaidP, VMaidR);
-                ForceAnimOnce(Game.Player.Character, "anim@mini@yacht@bar@drink@two", "two_player", VPEddP, VPEddR);
+                ObjectBuild.ForceAnimOnce(Npc_01, "anim@mini@yacht@bar@drink@two", "two_bartender", VMaidP, VMaidR);
+                ObjectBuild.ForceAnimOnce(Game.Player.Character, "anim@mini@yacht@bar@drink@two", "two_player", VPEddP, VPEddR);
 
                 Script.Wait(1000);
                 while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Npc_01, 134))
                     Script.Wait(100);
 
                 Game.Player.Character.Task.ClearAllImmediately();
-                ForceAnim(Npc_01, "anim@mini@yacht@bar@drink@idle_a", "idle_a", Npc_01.Position, Npc_01.Rotation);
+                ObjectBuild.ForceAnim(Npc_01, "anim@mini@yacht@bar@drink@idle_a", "idle_a", Npc_01.Position, Npc_01.Rotation);
                 Glass.HasCollision = true;
                 Bottle.HasCollision = true;
                 Glass.Detach();
@@ -2176,8 +1963,8 @@ namespace NSPM_Yacht
                 cCams = World.CreateCamera(Campo, Camro, 50.00f);
                 Function.Call(Hash.RENDER_SCRIPT_CAMS, 1, 1, cCams.Handle, 0, 0);
 
-                ForceAnimOnce(Npc_01, "anim@mini@yacht@bar@drink@three", "three_bartender", VMaidP, VMaidR);
-                ForceAnimOnce(Game.Player.Character, "anim@mini@yacht@bar@drink@three", "three_player", VPEddP, VPEddR);
+                ObjectBuild.ForceAnimOnce(Npc_01, "anim@mini@yacht@bar@drink@three", "three_bartender", VMaidP, VMaidR);
+                ObjectBuild.ForceAnimOnce(Game.Player.Character, "anim@mini@yacht@bar@drink@three", "three_player", VPEddP, VPEddR);
 
                 Script.Wait(1000);
                 while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Npc_01, 134))
@@ -2186,7 +1973,7 @@ namespace NSPM_Yacht
                 Script.Wait(1000);
 
                 Game.Player.Character.Task.ClearAllImmediately();
-                ForceAnim(Npc_01, "anim@mini@yacht@bar@drink@idle_a", "idle_a", Npc_01.Position, Npc_01.Rotation);
+                ObjectBuild.ForceAnim(Npc_01, "anim@mini@yacht@bar@drink@idle_a", "idle_a", Npc_01.Position, Npc_01.Rotation);
                 Glass.HasCollision = true;
                 Bottle.HasCollision = true;
                 Glass.Detach();
@@ -2221,13 +2008,13 @@ namespace NSPM_Yacht
                     Vector3 VRota = new Vector3(0.00f, 0.00f, fList_01[iPosy]);
                     Game.Player.Character.Position = Vspot;
                     Function.Call(Hash.POPULATE_NOW);
-                    ForceAnim(Game.Player.Character, "switch@trevor@puking_into_fountain", "trev_fountain_puke_loop", Vspot, VRota);
+                    ObjectBuild.ForceAnim(Game.Player.Character, "switch@trevor@puking_into_fountain", "trev_fountain_puke_loop", Vspot, VRota);
                     Script.Wait(1000);
                     Game.FadeScreenIn(2000);
                     while (Game.IsScreenFadingIn)
                         Script.Wait(100);
                     Script.Wait(2000);
-                    ForceAnimOnce(Game.Player.Character, "switch@trevor@puking_into_fountain", "trev_fountain_puke_exit", Vspot, VRota);
+                    ObjectBuild.ForceAnimOnce(Game.Player.Character, "switch@trevor@puking_into_fountain", "trev_fountain_puke_exit", Vspot, VRota);
                 }
                 else
                 {
@@ -2243,12 +2030,12 @@ namespace NSPM_Yacht
                     Vector3 VRota = new Vector3(0.00f, 0.00f, fList_01[iPosy]);
                     Game.Player.Character.Position = Vspot;
                     Function.Call(Hash.POPULATE_NOW);
-                    ForceAnimOnce(Game.Player.Character, "missfam5_blackout", "pass_out", Vspot, VRota);
+                    ObjectBuild.ForceAnimOnce(Game.Player.Character, "missfam5_blackout", "pass_out", Vspot, VRota);
                     Game.FadeScreenIn(1000);
                     Script.Wait(1000);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Game.Player.Character, 134))
                         Script.Wait(1);
-                    ForceAnimOnce(Game.Player.Character, "missfam5_blackout", "vomit", Game.Player.Character.Position, Game.Player.Character.Rotation);
+                    ObjectBuild.ForceAnimOnce(Game.Player.Character, "missfam5_blackout", "vomit", Game.Player.Character.Position, Game.Player.Character.Rotation);
                     Script.Wait(1000);
                 }
 
@@ -2273,7 +2060,7 @@ namespace NSPM_Yacht
                 Vector3 Vrot = new Vector3(0.00f, 0.00f, -47.0688f);
                 Game.Player.Character.Position = Vpos;
                 Game.Player.Character.Rotation = Vrot;
-                ForceAnim(Game.Player.Character, "mp_safehousevagos@boss", "vagos_boss_keyboard_base", Vpos, Vrot);
+                ObjectBuild.ForceAnim(Game.Player.Character, "mp_safehousevagos@boss", "vagos_boss_keyboard_base", Vpos, Vrot);
                 Script.Wait(500);
                 DipDar.PlayLooping();
             }
@@ -2297,7 +2084,7 @@ namespace NSPM_Yacht
             {
                 if (bMale)
                 {
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "exit", Peddy.Position, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "exit", Peddy.Position, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
@@ -2306,7 +2093,7 @@ namespace NSPM_Yacht
                 }
                 else
                 {
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "exit", Peddy.Position, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "exit", Peddy.Position, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
@@ -2318,7 +2105,7 @@ namespace NSPM_Yacht
             {
                 if (bMale)
                 {
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "exit", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "exit", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
@@ -2327,7 +2114,7 @@ namespace NSPM_Yacht
                 }
                 else
                 {
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "exit", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "exit", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
@@ -2339,7 +2126,7 @@ namespace NSPM_Yacht
             {
                 if (bMale)
                 {
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "exit", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "exit", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
@@ -2348,7 +2135,7 @@ namespace NSPM_Yacht
                 }
                 else
                 {
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "exit", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "exit", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
@@ -2374,33 +2161,33 @@ namespace NSPM_Yacht
             {
                 if (iPose == 1)
                 {
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "enter", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "enter", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "base", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@male@variation_01@", "base", Vpos, Vrot);
                     Script.Wait(100);
                 }       //Stand
                 else if (iPose == 2 || iPose == 22)
                 {
                     if (pChair != null)
                         Game.Player.Character.AttachTo(pChair, 0, new Vector3(0.00f, 0.00f, 0.50f), new Vector3(0.00f, 0.00f, -180.00f));
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "enter", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "enter", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "base", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_03@", "base", Vpos, Vrot);
                     Script.Wait(100);
                 }       //Sitouter
                 else if (iPose == 3 || iPose == 33)
                 {
                     if (pChair != null)
                         Game.Player.Character.AttachTo(pChair, 0, new Vector3(0.00f, 0.00f, 0.50f), new Vector3(0.00f, 0.00f, -180.00f));
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "enter", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "enter", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "base", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@male@variation_01@", "base", Vpos, Vrot);
                     Script.Wait(100);
                 }       //SiInner
             }
@@ -2408,33 +2195,33 @@ namespace NSPM_Yacht
             {
                 if (iPose == 1)
                 {
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "enter", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "enter", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "base", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@standing@female@variation_01@", "base", Vpos, Vrot);
                     Script.Wait(100);
                 }       //Stand
                 else if (iPose == 2 || iPose == 22)
                 {
                     if (pChair != null)
                         Game.Player.Character.AttachTo(pChair, 0, new Vector3(0.00f, 0.00f, 0.50f), new Vector3(0.00f, 0.00f, -180.00f));
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "enter", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "enter", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_03@", "base", Vpos, Vrot);
                     Script.Wait(100);
                 }       //Sitouter
                 else if (iPose == 3 || iPose == 33)
                 {
                     if (pChair != null)
                         Game.Player.Character.AttachTo(pChair, 0, new Vector3(0.00f, 0.00f, 0.50f), new Vector3(0.00f, 0.00f, -180.00f));
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "enter", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "enter", Vpos, Vrot);
                     Script.Wait(100);
                     while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy, 134))
                         Script.Wait(100);
-                    ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "base", Vpos, Vrot);
+                    ObjectBuild.ForceAnimOnce(Peddy, "anim@amb@yacht@jacuzzi@seated@female@variation_01@", "base", Vpos, Vrot);
                     Script.Wait(100);
                 }       //SiInner
             }
@@ -2461,7 +2248,7 @@ namespace NSPM_Yacht
             cCams = World.CreateCamera(Campo, Camro, 50.00f);
             Function.Call(Hash.RENDER_SCRIPT_CAMS, 1, 1, cCams.Handle, 0, 0);
 
-            ForceAnim(Game.Player.Character, "anim@mp_bedmid@right_var_04", "f_sleep_r_loop_bighouse", Game.Player.Character.Position, Game.Player.Character.Rotation);
+            ObjectBuild.ForceAnim(Game.Player.Character, "anim@mp_bedmid@right_var_04", "f_sleep_r_loop_bighouse", Game.Player.Character.Position, Game.Player.Character.Rotation);
             Game.FadeScreenIn(1000);
             Script.Wait(1000);
             if (bDrinkig)
@@ -2478,38 +2265,42 @@ namespace NSPM_Yacht
             LogThis("YachtStuff_YachtParty");
 
             Prop[] Pops = World.GetNearbyProps(vYachtBlip, 75.00f);
+            List<Prop> ThisPop = new List<Prop>();
 
             DancingPed.Clear();
             PartayPed.Clear();
 
             for (int i = 0; i < Pops.Count(); i++)
-            {
-                if (PropExists(Pops, i))
-                {
-                    Ped Psit = null;
+                ThisPop.Add(new Prop(Pops[i].Handle));
 
-                    if (Pops[i].Model == Function.Call<int>(Hash.GET_HASH_KEY, "hei_prop_yah_seat_02") || Pops[i].Model == Function.Call<int>(Hash.GET_HASH_KEY, "hei_prop_yah_seat_03"))
+            for (int i = 0; i < ThisPop.Count; i++)
+            {
+                Prop ThisProp = ThisPop[i];
+
+                if (ThisProp.Exists())
+                {
+                    if (ThisProp.Model == Function.Call<int>(Hash.GET_HASH_KEY, "hei_prop_yah_seat_02") || ThisProp.Model == Function.Call<int>(Hash.GET_HASH_KEY, "hei_prop_yah_seat_03"))
                     {
-                        if (RandInt(0, 20) < 10)
+                        if (ReturnStuff.RandInt(0, 20) < 10)
                         {
-                            Psit = NPCSpawn(RandomNPC(), Pops[i].Position, Pops[i].Heading - 180f, 0);
-                            PedSitHere(Psit, Pops[i], 1);
+                            Ped Psit = NPCSpawn(ReturnStuff.RandNPC(12), ThisProp.Position, ThisProp.Heading - 180f, 0);
+                            ObjectHand.PedSitHere(Psit, ThisProp, 1);
                         }
                     }
-                    else if (Pops[i].Model == Function.Call<int>(Hash.GET_HASH_KEY, "hei_prop_yah_lounger"))
+                    else if (ThisProp.Model == Function.Call<int>(Hash.GET_HASH_KEY, "hei_prop_yah_lounger"))
                     {
-                        if (RandInt(0, 20) < 10)
+                        if (ReturnStuff.RandInt(0, 20) < 10)
                         {
-                            Psit = NPCSpawn(RandomNPC(), Pops[i].Position, Pops[i].Heading - 180f, 0);
-                            PedSitHere(Psit, Pops[i], 2);
+                            Ped Psit = NPCSpawn(ReturnStuff.RandNPC(12), ThisProp.Position, ThisProp.Heading - 180f, 0);
+                            ObjectHand.PedSitHere(Psit, Pops[i], 2);
                         }
                     }
-                    else if (Pops[i].Model == Function.Call<int>(Hash.GET_HASH_KEY, "hei_prop_yah_seat_01"))
+                    else if (ThisProp.Model == Function.Call<int>(Hash.GET_HASH_KEY, "hei_prop_yah_seat_01"))
                     {
-                        if (RandInt(0, 20) < 10)
+                        if (ReturnStuff.RandInt(0, 20) < 10)
                         {
-                            Psit = NPCSpawn(RandomNPC(), Pops[i].Position, Pops[i].Heading - 180f, 0);
-                            PedSitHere(Psit, Pops[i], 8);
+                            Ped Psit = NPCSpawn(ReturnStuff.RandNPC(12), ThisProp.Position, ThisProp.Heading - 180f, 0);
+                            ObjectHand.PedSitHere(Psit, ThisProp, 8);
                         }
                     }
                 }
@@ -2534,12 +2325,12 @@ namespace NSPM_Yacht
             {
                 if (i < 6)
                 {
-                    int iRanPeds = RandInt(2, 3);
+                    int iRanPeds = ReturnStuff.RandInt(2, 3);
                     for (int ii = 0; ii < iRanPeds; ii++)
                     {
                         Vector3 VPedPos = Pos_01[i].Around(2.50f);
                         VPedPos.Z = Pos_01[i].Z;
-                        Ped Psit = NPCSpawn(RandomNPC(), VPedPos, RandInt(0, 360), 3);
+                        Ped Psit = NPCSpawn(ReturnStuff.RandNPC(12), VPedPos, ReturnStuff.RandInt(0, 360), 3);
                         PartayPed.Add(new Ped(Psit.Handle));
                     }
                 }
@@ -2552,7 +2343,7 @@ namespace NSPM_Yacht
                             Vector3 VPedPos = Pos_01[i].Around(3.55f);
                             VPedPos.Z = Pos_01[i].Z;
 
-                            Ped DancinF = NPCSpawn(RandomNPC(), VPedPos, RandInt(0, 360), 0);
+                            Ped DancinF = NPCSpawn(ReturnStuff.RandNPC(12), VPedPos, ReturnStuff.RandInt(0, 360), 0);
                             DancingPed.Add(new Ped(DancinF.Handle));
                             PartayPed.Add(new Ped(DancinF.Handle));
                         }
@@ -2561,13 +2352,13 @@ namespace NSPM_Yacht
                     }
                     else
                     {
-                        int iRanPeds = RandInt(4, 9);
+                        int iRanPeds = ReturnStuff.RandInt(4, 9);
                         for (int ii = 0; ii < iRanPeds; ii++)
                         {
                             Vector3 VPedPos = Pos_01[i].Around(3.75f);
                             VPedPos.Z = Pos_01[i].Z;
 
-                            Ped DancinF = NPCSpawn(RandomNPC(), VPedPos, RandInt(0, 360), 0);
+                            Ped DancinF = NPCSpawn(ReturnStuff.RandNPC(12), VPedPos, ReturnStuff.RandInt(0, 360), 0);
                             DancingPed.Add(new Ped(DancinF.Handle));
                             PartayPed.Add(new Ped(DancinF.Handle));
                         }
@@ -2609,7 +2400,7 @@ namespace NSPM_Yacht
                 for (int i = 0; i < DancingPed.Count; i++)
                 {
                     bool bMale = false;
-                    int iRan = RandInt(1, 3);
+                    int iRan = ReturnStuff.RandInt(1, 3);
 
                     if (!Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, DancingPed[i], 134))
                     {
@@ -2623,7 +2414,7 @@ namespace NSPM_Yacht
 
                         DancinFool = ReturnStuff.DanceList(bMale, iRan);
 
-                        ForceAnim(DancingPed[i], DancinFool[0], DancinFool[1], DancingPed[i].Position, DancingPed[i].Rotation);
+                        ObjectBuild.ForceAnim(DancingPed[i], DancinFool[0], DancinFool[1], DancingPed[i].Position, DancingPed[i].Rotation);
                     }
                 }
                 iKeepDance = Game.GameTime + 1000;
@@ -2647,7 +2438,7 @@ namespace NSPM_Yacht
         }
         private void PlayerDance()
         {
-            ControlerUI(DataStore.MyLang.YachtLang[17], 1);
+            UiDisplay.ControlerUI(DataStore.MyLang.YachtLang[17], 1);
 
             if (ReturnStuff.WhileButtonDown(47))
             {
@@ -2656,7 +2447,7 @@ namespace NSPM_Yacht
                     DancinFool.Clear();
                     DancinFool.Add("move_m@drunk@verydrunk_idles@");
                     DancinFool.Add(DrString[ReturnStuff.FindRandom(110, 0, DrString.Count - 1)]);
-                    ForceAnim(Game.Player.Character, DancinFool[0], DancinFool[1], Game.Player.Character.Position, Game.Player.Character.Rotation);
+                    ObjectBuild.ForceAnim(Game.Player.Character, DancinFool[0], DancinFool[1], Game.Player.Character.Position, Game.Player.Character.Rotation);
                 }
                 else
                 {
@@ -2670,7 +2461,7 @@ namespace NSPM_Yacht
 
                     DancinFool = ReturnStuff.DanceList(bMale, iDancing);
 
-                    ForceAnim(Game.Player.Character, DancinFool[0], DancinFool[1], Game.Player.Character.Position, Game.Player.Character.Rotation);
+                    ObjectBuild.ForceAnim(Game.Player.Character, DancinFool[0], DancinFool[1], Game.Player.Character.Position, Game.Player.Character.Rotation);
                 }
             }
             else if (ReturnStuff.WhileButtonDown(51))
@@ -2802,9 +2593,11 @@ namespace NSPM_Yacht
                     YachtStuff_TheBlip(false);
             }
         }
-        //private void OnKeyDown(object sender, KeyEventArgs e)
-        //{
-           // if (e.KeyCode == Keys.K)
-        //}
+        /*
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.K)
+        }
+        */
     }
 }
