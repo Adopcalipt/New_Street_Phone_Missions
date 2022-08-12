@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -40,16 +40,9 @@ namespace NSPM_Contacts
         private int iWait4Sec = 0;
         private int iService = 0;
 
-        private readonly string sBeeLogs = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/ContactLog.txt";
         private readonly string sNSPMCont = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMContact.Xml";
-        private readonly string sNSPMDatafile = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMData.NSPM";
-        private readonly string sNSPMLanguage = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Language";
         private string sLastVeh = "";
 
-        private Vector3 vTarget_01 = Vector3.Zero;
-        private Vector3 vTarget_02 = Vector3.Zero;
-        private Vector3 vTarget_03 = Vector3.Zero;
-        private Vector3 vTarget_04 = Vector3.Zero;
         private Vector3 vFuDest = Vector3.Zero;
         private Vector3 vFuFees = Vector3.Zero;
 
@@ -77,16 +70,17 @@ namespace NSPM_Contacts
 
         public Contacts()
         {
-            if (File.Exists(sBeeLogs))
-                File.Delete(sBeeLogs);
-
             while (!DataStore.bHasLoaded)
                 Script.Wait(10);
 
             LogThis("Contacts Loaded == " + DataStore.bHasLoaded);
 
+            sTrainerOnly = BlockBulder();
             BeeEnabled = BeenEnabled();
-
+            sCustomCarz = DataStore.MyCusVeh.MyCarz;
+            sCustomPlanez = DataStore.MyCusVeh.MyPlanez;
+            sCustomBoatsz = DataStore.MyCusVeh.MyBoatz;
+            sCustomChopperz = DataStore.MyCusVeh.MyChopperz;
             OnLoadUp();
 
             Tick += OnTick;
@@ -225,33 +219,42 @@ namespace NSPM_Contacts
                 if (!BeeEnabled[0])
                 {
                     if (DataStore.MyAssets.Fubard)
+                    {
                         Fruits(1);
-
-                    BeeEnabled[0] = true;
+                        BeeEnabled[0] = true;
+                    }
                 }
                 if (!BeeEnabled[1])
                 {
-                    if (DataStore.MyAssets.PegsimortasTest)
+                    if (sImpExpVeh.Count > 0)
+                    {
                         Fruits(2);
-                    BeeEnabled[1] = true;
+                        BeeEnabled[1] = true;
+                    }
                 }
                 if (!BeeEnabled[2])
                 {
                     if (DataStore.MyAssets.GotPegsus)
+                    {
                         Fruits(4);
-                    BeeEnabled[2] = true;
+                        BeeEnabled[2] = true;
+                    }
                 }
                 if (!BeeEnabled[3])
                 {
                     if (DataStore.MyAssets.WantedBribe)
+                    {
                         Fruits(5);
-                    BeeEnabled[3] = true;
+                        BeeEnabled[3] = true;
+                    }
                 }
                 if (!BeeEnabled[4])
                 {
                     if (DataStore.MyAssets.MeddicTest)
+                    {
                         Fruits(6);
-                    BeeEnabled[4] = true;
+                        BeeEnabled[4] = true;
+                    }
                 }
             }
         }
@@ -259,31 +262,7 @@ namespace NSPM_Contacts
         {
             if (bLogFiles)
             {
-                using (StreamWriter tEx = File.AppendText(sBeeLogs))
-                    tEx.WriteLine($"{DateTime.Now.ToLongTimeString()} {DateTime.Now.ToLongDateString()} {"--" + sLog}");
-            }
-        }
-        public void SaveXmlContacts(XmlContacts config, string fileName)
-        {
-            XmlSerializer xml = new XmlSerializer(typeof(XmlContacts));
-            using (StreamWriter sw = new StreamWriter(fileName))
-            {
-                xml.Serialize(sw, config);
-            }
-        }
-        public XmlContacts LoadXmlContacts(string fileName)
-        {
-            try
-            {
-                XmlSerializer xml = new XmlSerializer(typeof(XmlContacts));
-                using (StreamReader sr = new StreamReader(fileName))
-                {
-                    return (XmlContacts)xml.Deserialize(sr);
-                }
-            }
-            catch (Exception ex)
-            {
-                return NewCont();
+                LoggerLight.LogThis("ContactLog_" + sLog);
             }
         }
         public XmlContacts NewCont()
@@ -303,7 +282,7 @@ namespace NSPM_Contacts
 
             if (File.Exists(sNSPMCont))
             {
-                XmlContacts XSets = LoadXmlContacts(sNSPMCont);
+                XmlContacts XSets = ReadWriteXML.LoadXmlContacts(sNSPMCont);
                 Mk2WeapsMain = XSets.MyMk2Weaps;
 
                 sImpExpVeh = XSets.ImpXCars;
@@ -336,7 +315,7 @@ namespace NSPM_Contacts
                 XSets.ImpXCars = sImpExpVeh;
                 XSets.ImpXList = iImpExpList;
                 XSets.FuMiss = Vector3.Zero;
-                SaveXmlContacts(XSets, sNSPMCont);
+                ReadWriteXML.SaveXmlContacts(XSets, sNSPMCont);
             }
         }
         private void WriteContacts()
@@ -345,9 +324,9 @@ namespace NSPM_Contacts
 
             if (File.Exists(sNSPMCont))
             {
-                XmlContacts XSets = LoadXmlContacts(sNSPMCont);
+                XmlContacts XSets = ReadWriteXML.LoadXmlContacts(sNSPMCont);
                 XSets.MyMk2Weaps = Mk2WeapsMain;
-                SaveXmlContacts(XSets, sNSPMCont);
+                ReadWriteXML.SaveXmlContacts(XSets, sNSPMCont);
             }
             else
             {
@@ -355,7 +334,7 @@ namespace NSPM_Contacts
                 {
                     MyMk2Weaps = Mk2WeapsMain
                 };
-                SaveXmlContacts(XSets, sNSPMCont);
+                ReadWriteXML.SaveXmlContacts(XSets, sNSPMCont);
             }
         }
         private void AddMissWeaps(List<MyMk2Weaps> DemWeaps, bool bOldTest)
@@ -385,11 +364,11 @@ namespace NSPM_Contacts
                                 for (int ii = 0; ii < Mk2WeapsMain[i].Mk2Addon.Count; ii++)
                                     Function.Call(Hash.GIVE_WEAPON_COMPONENT_TO_PED, Game.Player.Character, Function.Call<int>(Hash.GET_HASH_KEY, Mk2WeapsMain[i].Mk2Weap), Function.Call<int>(Hash.GET_HASH_KEY, Mk2WeapsMain[i].Mk2Addon[ii]));
 
-                                Mk2WeapsMain[i].MyAmmos = MaxAmmo(Mk2WeapsMain[i].Mk2Weap, Game.Player.Character);
+                                Mk2WeapsMain[i].MyAmmos = ReturnStuff.MaxAmmo(Mk2WeapsMain[i].Mk2Weap, Game.Player.Character);
 
                                 FillMyAmmo(Mk2WeapsMain[i].Mk2Weap, Mk2WeapsMain[i].MyAmmos);
 
-                                if (Function.Call<int>(Hash.GET_AMMO_IN_PED_WEAPON, Game.Player.Character.Handle, Function.Call<int>(Hash.GET_HASH_KEY, Mk2WeapsMain[i].Mk2Weap)) < MaxAmmo(Mk2WeapsMain[i].Mk2Weap, Game.Player.Character))
+                                if (Function.Call<int>(Hash.GET_AMMO_IN_PED_WEAPON, Game.Player.Character.Handle, Function.Call<int>(Hash.GET_HASH_KEY, Mk2WeapsMain[i].Mk2Weap)) < ReturnStuff.MaxAmmo(Mk2WeapsMain[i].Mk2Weap, Game.Player.Character))
                                 {
                                     Script.Wait(500);
                                     FillMyAmmo(Mk2WeapsMain[i].Mk2Weap, Mk2WeapsMain[i].MyAmmos);
@@ -399,7 +378,7 @@ namespace NSPM_Contacts
                     }
                 }
             }
-            catch (Exception ex)
+            catch 
             {
                 // An unexpected error occured.
             }
@@ -418,7 +397,7 @@ namespace NSPM_Contacts
                 FUbarDrv.MaxHealth = 250;
                 FUbarDrv.Health = 250;
                 if (vHick != null)
-                    WarptoAnyVeh(vHick, FUbarDrv, 1);
+                    ObjectBuild.WarptoAnyVeh(vHick, FUbarDrv, 1);
 
                 FUbarDrv.Task.ClearAll();
                 FUbarDrv.BlockPermanentEvents = true;
@@ -462,53 +441,6 @@ namespace NSPM_Contacts
             }
 
             return bExist;
-        }
-        public bool IsItARealVehicle(string sVehName)
-        {
-            bool bIsReal = false;
-
-            int iVehHash = Function.Call<int>(Hash.GET_HASH_KEY, sVehName);
-            if (Function.Call<bool>(Hash.IS_MODEL_A_VEHICLE, iVehHash))
-                bIsReal = true;
-
-            return bIsReal;
-        }
-        private void WarptoAnyVeh(Vehicle Vhic, Ped Peddy, int iSeat)
-        {
-            LogThis("WarptoAnyVeh, iSeat == " + iSeat);
-
-            bool bFader = false;
-            if (Peddy == Game.Player.Character)
-            {
-                Game.FadeScreenOut(1000);
-                Script.Wait(1000);
-                bFader = true;
-            }
-
-            while (!Peddy.IsInVehicle(Vhic))
-            {
-                if (Peddy.IsInVehicle())
-                    Peddy.Task.LeaveVehicle();
-
-                VehicleWarp(Vhic, Peddy, iSeat);
-                Script.Wait(100);
-            }
-
-            if (bFader)
-            {
-                Script.Wait(500);
-                Game.FadeScreenIn(1000);
-            }
-        }
-        private void VehicleWarp(Vehicle Vhic, Ped Peddy, int iSeat)
-        {
-            Function.Call(Hash.SET_PED_INTO_VEHICLE, Peddy, Vhic, iSeat - 2);
-        }
-        private void ControlerUI(string sText, int iDuration)
-        {
-            Function.Call(Hash._SET_TEXT_COMPONENT_FORMAT, "STRING");
-            Function.Call(Hash._ADD_TEXT_COMPONENT_STRING, sText);
-            Function.Call(Hash._0x238FFE5C7B0498A6, false, false, false, iDuration);
         }
         public bool ButtonDown(int CButt)
         {
@@ -583,6 +515,8 @@ namespace NSPM_Contacts
 
                 ObjectHand.ReadWriteBlips(false, false, -1, -1, -1, -1, FubarCarX.Handle, -1);
                 MissionData.VehicleList_01.Remove(FubarCarX);
+                FubarCarX.MarkAsNoLongerNeeded();
+                FubarCarX = null;
             }
             else if (DataStore.SharedVeh != null)
             {
@@ -591,12 +525,15 @@ namespace NSPM_Contacts
 
                 ObjectHand.ReadWriteBlips(false, false, -1, -1, -1, -1, DataStore.SharedVeh.Handle, -1);
                 MissionData.VehicleList_01.Remove(DataStore.SharedVeh);
+                DataStore.SharedVeh.MarkAsNoLongerNeeded();
+                DataStore.SharedVeh = null;
             }
             if (FUbarDrv != null)
             {
                 ObjectHand.ReadWriteBlips(false, false, -1, -1, FUbarDrv.Handle, -1, -1, -1);
                 MissionData.PedList_01.Remove(FUbarDrv);
                 FUbarDrv.MarkAsNoLongerNeeded();
+                FUbarDrv = null;
             }
             VTBTimerPool.Remove(FuBar);
             iFubCarzz = 0;
@@ -863,7 +800,6 @@ namespace NSPM_Contacts
             var Submenu_09 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[37]);
             var Submenu_06 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[38]);
             var Submenu_07 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[39]);
-            var Submenu_10 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[40]);
 
             List<string> sub_01 = new List<string>();
             List<string> sub_02 = new List<string>();
@@ -874,7 +810,6 @@ namespace NSPM_Contacts
             List<string> sub_07 = new List<string>();
             List<string> sub_08 = new List<string>();
             List<string> sub_09 = new List<string>();
-            List<string> sub_10 = new List<string>();
 
             if (!bTrainM)
             {
@@ -892,71 +827,62 @@ namespace NSPM_Contacts
             {
                 if (iImpExpList[i] == 1)
                 {
-                    var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
+                    var item_ = new UIMenuItem(ReturnStuff.GetEntName(sImpExpVeh[i]), "");
                     Submenu_01.AddItem(item_);
                     sub_01.Add(sImpExpVeh[i]);
                 }                     //Super
                 else if (iImpExpList[i] == 2)
                 {
-                    var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
+                    var item_ = new UIMenuItem(ReturnStuff.GetEntName(sImpExpVeh[i]), "");
                     Submenu_02.AddItem(item_);
                     sub_02.Add(sImpExpVeh[i]);
                 }                //Coupe
                 else if (iImpExpList[i] == 3)
                 {
-                    var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
+                    var item_ = new UIMenuItem(ReturnStuff.GetEntName(sImpExpVeh[i]), "");
                     Submenu_03.AddItem(item_);
                     sub_03.Add(sImpExpVeh[i]);
                 }                //Sports
                 else if (iImpExpList[i] == 4)
                 {
-                    var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
+                    var item_ = new UIMenuItem(ReturnStuff.GetEntName(sImpExpVeh[i]), "");
                     Submenu_04.AddItem(item_);
                     sub_04.Add(sImpExpVeh[i]);
                 }                //Mussle
                 else if (iImpExpList[i] == 5)
                 {
-                    var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
+                    var item_ = new UIMenuItem(ReturnStuff.GetEntName(sImpExpVeh[i]), "");
                     Submenu_05.AddItem(item_);
                     sub_05.Add(sImpExpVeh[i]);
                 }                //SportsClassic
                 else if (iImpExpList[i] == 6)
                 {
-                    var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
+                    var item_ = new UIMenuItem(ReturnStuff.GetEntName(sImpExpVeh[i]), "");
                     Submenu_06.AddItem(item_);
                     sub_06.Add(sImpExpVeh[i]);
                 }                //Compact
                 else if (iImpExpList[i] == 7)
                 {
-                    var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
+                    var item_ = new UIMenuItem(ReturnStuff.GetEntName(sImpExpVeh[i]), "");
                     Submenu_07.AddItem(item_);
                     sub_07.Add(sImpExpVeh[i]);
                 }                //Sedan
                 else if (iImpExpList[i] == 8)
                 {
-                    var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
+                    var item_ = new UIMenuItem(ReturnStuff.GetEntName(sImpExpVeh[i]), "");
                     Submenu_08.AddItem(item_);
                     sub_08.Add(sImpExpVeh[i]);
                 }                //Offroad/
                 else if (iImpExpList[i] == 9)
                 {
-                    var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
+                    var item_ = new UIMenuItem(ReturnStuff.GetEntName(sImpExpVeh[i]), "");
                     Submenu_09.AddItem(item_);
                     sub_09.Add(sImpExpVeh[i]);
                 }                //SUV
                 else
                 {
-                    if (IsItARealVehicle(sImpExpVeh[i]))
-                    {
-                        var item_ = new UIMenuItem(GetEntName(sImpExpVeh[i]), "");
-                        Submenu_10.AddItem(item_);
-                        sub_10.Add(sImpExpVeh[i]);
-                    }
-                    else
-                    {
-                        sImpExpVeh.RemoveAt(i);
-                        iImpExpList.RemoveAt(i);
-                    }
+                    sImpExpVeh.RemoveAt(i);
+                    iImpExpList.RemoveAt(i);
                 }
             }
 
@@ -1086,20 +1012,6 @@ namespace NSPM_Contacts
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
                 YtmenuPool.CloseAllMenus();
             };
-            Submenu_10.OnItemSelect += (sender, item, index) =>
-            {
-                if (DataStore.MyDatSet.iNSPMBank > 200)
-                {
-                    iService = 4;
-                    sLastVeh = sub_10[index];
-                    SearchFor.SearchVeh(0.01f, 120.00f, sLastVeh, false, false, false, false, 0, 0, 5, "Import", 10, true, false);
-                    //SearchVeh(0.10f, 95.00f, sub_10[index], false, 4, OhMyBlip(sub_10[index], 225), true, true);
-                    UiDisplay.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
-                }
-                else
-                    UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
-            };
         }
         public string ImportsExpo_CarList(int iVechList)
         {
@@ -1160,7 +1072,7 @@ namespace NSPM_Contacts
                     sVehicles.Add("TIGON");
                 }
 
-                int iCar = RandInt(0, sVehicles.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sVehicles.Count - 1);
                 sThisVehicle = sVehicles[iCar];
             }            //Super
             else if (iVechList == 2)
@@ -1180,7 +1092,7 @@ namespace NSPM_Contacts
                 sVehicles.Add("ZION"); //
                 sVehicles.Add("ZION2"); //<!-- Zion Cabrio -->
 
-                int iCar = RandInt(0, sVehicles.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sVehicles.Count - 1);
                 sThisVehicle = sVehicles[iCar];
             }       //Coupe
             else if (iVechList == 3)
@@ -1262,7 +1174,7 @@ namespace NSPM_Contacts
                     sVehicles.Add("ITALIRSX"); //><!-- Grotti Itali RSX -->Spports
                 }
 
-                int iCar = RandInt(0, sVehicles.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sVehicles.Count - 1);
                 sThisVehicle = sVehicles[iCar];
             }       //Sport
             else if (iVechList == 4)
@@ -1329,7 +1241,7 @@ namespace NSPM_Contacts
                     sVehicles.Add("YOSEMITE3"); //
                 }
 
-                int iCar = RandInt(0, sVehicles.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sVehicles.Count - 1);
                 sThisVehicle = sVehicles[iCar];
             }       //Mussle
             else if (iVechList == 5)
@@ -1381,7 +1293,7 @@ namespace NSPM_Contacts
                     sVehicles.Add("TOREADOR"); //><!-- Pegassi Toreador -->sportsClassic
                 }
 
-                int iCar = RandInt(0, sVehicles.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sVehicles.Count - 1);
                 sThisVehicle = sVehicles[iCar];
             }       //SportsClassic
             else if (iVechList == 6)
@@ -1403,7 +1315,7 @@ namespace NSPM_Contacts
                     sVehicles.Add("WEEVIL"); //><!-- BF Weevil -->
                 }
 
-                int iCar = RandInt(0, sVehicles.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sVehicles.Count - 1);
                 sThisVehicle = sVehicles[iCar];
             }       //Compact
             else if (iVechList == 7)
@@ -1438,7 +1350,7 @@ namespace NSPM_Contacts
                 sVehicles.Add("WARRENER"); //
                 sVehicles.Add("WASHINGTON"); //
 
-                int iCar = RandInt(0, sVehicles.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sVehicles.Count - 1);
                 sThisVehicle = sVehicles[iCar];
             }       //Sedan
             else if (iVechList == 8)
@@ -1475,7 +1387,7 @@ namespace NSPM_Contacts
                     sVehicles.Add("WINKY"); //><!-- Vapid Winky -->	
                 }
 
-                int iCar = RandInt(0, sVehicles.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sVehicles.Count - 1);
                 sThisVehicle = sVehicles[iCar];
             }       //Offroad
             else if (iVechList == 9)
@@ -1516,12 +1428,12 @@ namespace NSPM_Contacts
                     sVehicles.Add("SEMINOLE2"); //
                 }
 
-                int iCar = RandInt(0, sVehicles.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sVehicles.Count - 1);
                 sThisVehicle = sVehicles[iCar];
             }       //SUV
             else
             {
-                int iCar = RandInt(0, sCustomCarz.Count - 1);
+                int iCar = ReturnStuff.RandInt(0, sCustomCarz.Count - 1);
                 sThisVehicle = sCustomCarz[iCar];
             }
 
@@ -2266,7 +2178,7 @@ namespace NSPM_Contacts
 
             var Ammosmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[47]);
 
-            int iAmmo = MaxAmmo(sWeap, Game.Player.Character);
+            int iAmmo = ReturnStuff.MaxAmmo(sWeap, Game.Player.Character);
 
             var item_ = new UIMenuItem(WeapName + DataStore.MyLang.ContactLang[47], DataStore.MyLang.ContactLang[15] + iAmmo);
             Ammosmenu.AddItem(item_);
@@ -2363,27 +2275,6 @@ namespace NSPM_Contacts
             else if (Game.Player.Character.Model == PedHash.Trevor)
                 iAm = 3;
             return iAm;
-        }
-        public int MaxAmmo(string sWeap, Ped Peddy)
-        {
-            int iAmmo = 0;
-            int iWeap = Function.Call<int>(Hash.GET_HASH_KEY, sWeap);
-
-            unsafe
-            {
-                Function.Call<bool>(Hash.GET_MAX_AMMO, Peddy.Handle, iWeap, &iAmmo);
-            }
-            return iAmmo;
-        }
-        public string GetEntName(string MyEnt)
-        {
-            string VehName = Function.Call<string>(Hash.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL, Function.Call<int>(Hash.GET_HASH_KEY, MyEnt));
-            if (Function.Call<bool>(Hash.DOES_TEXT_LABEL_EXIST, VehName))
-                VehName = Function.Call<string>(Hash._GET_LABEL_TEXT, VehName);
-            else
-                VehName = "";
-
-            return VehName;
         }
         private void PeggsAnswered(iFruitContact contact)
         {
@@ -2656,6 +2547,14 @@ namespace NSPM_Contacts
         }
         private void PeggsCustomList(UIMenu XMen)
         {
+            var CusCars = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[40]);
+
+            for (int i = 0; i < sCustomCarz.Count; i++)
+            {
+                var item_ = new UIMenuItem(sCustomCarz[i], DataStore.MyLang.ContactLang[15] + "200");
+                CusCars.AddItem(item_);
+            }
+
             var CusBoats = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[56]);
 
             for (int i = 0; i < sCustomBoatsz.Count; i++)
@@ -2680,6 +2579,20 @@ namespace NSPM_Contacts
                 CusHeli.AddItem(item_);
             }
 
+            CusCars.OnItemSelect += (sender, item, index) =>
+            {
+                if (DataStore.MyDatSet.iNSPMBank > 200)
+                {
+                    iService = 4;
+                    sLastVeh = sCustomCarz[index];
+                    SearchFor.SearchVeh(0.01f, 120.00f, sLastVeh, false, false, false, false, 0, 0, 5, "Pegisus", 10, true, false);
+                    UiDisplay.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                }
+                else
+                    UI.Notify(DataStore.MyLang.ContactLang[41]);
+                YtmenuPool.CloseAllMenus();
+            };
+
             CusBoats.OnItemSelect += (sender, item, index) =>
             {
                 if (DataStore.MyDatSet.iNSPMBank > 200)
@@ -2692,7 +2605,6 @@ namespace NSPM_Contacts
                         iService = 5;
                         sLastVeh = sCustomBoatsz[index];
                         ObjectBuild.VehicleSpawn(sLastVeh, vAirstrip, fPlaneHead, false, false, false, false, 0, 0, 5, "Pegisus", 10, false);
-                        //AddVeh(sCustomBoatsz[index], vAirstrip, fPlaneHead, false, 5, 455, false);
                         UiDisplay.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[48]);
                     }
                     else
@@ -2724,7 +2636,6 @@ namespace NSPM_Contacts
                     iService = 4;
                     sLastVeh = sCustomChopperz[index];
                     SearchFor.SearchVeh(0.01f, 120.00f, sLastVeh, false, false, false, false, 0, 0, 5, "Pegisus", 10, true, false);
-                    //SearchVeh(0.10f, 95.00f, sCustomChopperz[index], false, 4, 64, false, true);
                     UiDisplay.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[48]);
                 }
                 else
@@ -2922,8 +2833,8 @@ namespace NSPM_Contacts
             bIFrutiyAdd = true;
             iService = 4;
             sLastVeh = sAircraft;
-            ObjectBuild.VehicleSpawn(sAircraft, vAirStips[iAir], fAir[iAir], false, false, false, false, 0, 0, 0, "", 10, false);
-            //AddVeh(sAircraft, vAirStips[iAir], fAir[iAir], false, 4, OhMyBlip(sAircraft, 307), false);
+            Vehicle MeEnter = ObjectBuild.VehicleSpawn(sAircraft, vAirStips[iAir], fAir[iAir], false, false, false, false, 0, 0, 5, "Pegisus", 10, false);
+            ObjectBuild.WarptoAnyVeh(MeEnter, Game.Player.Character, 1);
         }
         private void BribesAnswered(iFruitContact contact)
         {
@@ -2931,74 +2842,72 @@ namespace NSPM_Contacts
             bFunctionTime = true;
             iFunctionTime = 7;
         }
-        public int RandInt(int minNumber, int maxNumber)
+        public List<string> BlockBulder()
         {
-            return Function.Call<int>(Hash.GET_RANDOM_INT_IN_RANGE, minNumber, maxNumber);
-        }
-        private void ListBulder()
-        {
-            sTrainerOnly.Add("DEVESTE"); //
-            sTrainerOnly.Add("EMERUS"); //
-            sTrainerOnly.Add("FURIA"); //
-            sTrainerOnly.Add("KRIEGER"); //
-            sTrainerOnly.Add("THRAX"); //
-            sTrainerOnly.Add("ZORRUSSO"); //
-            sTrainerOnly.Add("TIGON");
-            sTrainerOnly.Add("DRAFTER"); //<!-- 8F Drafter -->
-            sTrainerOnly.Add("IMORGON"); //
-            sTrainerOnly.Add("ISSI7"); //<!-- Issi Sport -->
-            sTrainerOnly.Add("ITALIGTO"); //
-            sTrainerOnly.Add("JUGULAR"); //
-            sTrainerOnly.Add("KOMODA"); //
-            sTrainerOnly.Add("LOCUST"); //
-            sTrainerOnly.Add("NEO"); //
-            sTrainerOnly.Add("PARAGON"); //
-            sTrainerOnly.Add("PARAGON2"); //<!-- Paragon R (Armored) -->
-            sTrainerOnly.Add("SCHLAGEN"); //
-            sTrainerOnly.Add("SUGOI"); //
-            sTrainerOnly.Add("SULTAN2"); //<!-- Sultan Classic -->
-            sTrainerOnly.Add("VSTR"); //<!-- V-STR -->
-            sTrainerOnly.Add("COQUETTE4"); //<!-- Coquette D10  -->
-            sTrainerOnly.Add("PENUMBRA2"); //<!-- Penumbra FF   -->
-            sTrainerOnly.Add("CLIQUE"); //
-            sTrainerOnly.Add("DEVIANT"); //
-            sTrainerOnly.Add("GAUNTLET3"); //<!-- Gauntlet Classic -->
-            sTrainerOnly.Add("GAUNTLET4"); //<!-- Gauntlet Hellfire -->
-            sTrainerOnly.Add("PEYOTE2"); //<!-- Peyote Gasser -->
-            sTrainerOnly.Add("IMPALER"); //
-            sTrainerOnly.Add("TULIP"); //
-            sTrainerOnly.Add("VAMOS"); //
-            sTrainerOnly.Add("DUKES3"); //
-            sTrainerOnly.Add("GAUNTLET5"); //
-            sTrainerOnly.Add("MANANA2"); //
-            sTrainerOnly.Add("PEYOTE3"); //
-            sTrainerOnly.Add("GLENDALE2"); //
-            sTrainerOnly.Add("YOSEMITE3"); //
-            sTrainerOnly.Add("DYNASTY"); //
-            sTrainerOnly.Add("JB7002"); //<!-- JB 700W -->
-            sTrainerOnly.Add("NEBULA"); //
-            sTrainerOnly.Add("RETINUE2"); //<!-- Retinue MkII -->
-            sTrainerOnly.Add("ZION3"); //<!-- Zion Classic -->
-            sTrainerOnly.Add("COQUETTE4"); //<!-- Coquette D10  -->
-            sTrainerOnly.Add("ASBO"); //
-            sTrainerOnly.Add("KANJO"); //<!-- Blista Kanjo -->
-            sTrainerOnly.Add("CLUB");
-            sTrainerOnly.Add("CARACARA2"); //<!-- Caracara 4x4 -->
-            sTrainerOnly.Add("EVERON"); //
-            sTrainerOnly.Add("OUTLAW"); //
-            sTrainerOnly.Add("VAGRANT"); //
-            sTrainerOnly.Add("ZHABA"); //
-            sTrainerOnly.Add("NOVAK"); //
-            sTrainerOnly.Add("REBLA"); //
-            sTrainerOnly.Add("TOROS"); //
-            sTrainerOnly.Add("LANDSTALKER2"); //
-            sTrainerOnly.Add("SEMINOLE2"); //
+            List<string> bLocks = new List<string>();
+            bLocks.Add("DEVESTE"); //
+            bLocks.Add("EMERUS"); //
+            bLocks.Add("FURIA"); //
+            bLocks.Add("KRIEGER"); //
+            bLocks.Add("THRAX"); //
+            bLocks.Add("ZORRUSSO"); //
+            bLocks.Add("TIGON");
+            bLocks.Add("DRAFTER"); //<!-- 8F Drafter -->
+            bLocks.Add("IMORGON"); //
+            bLocks.Add("ISSI7"); //<!-- Issi Sport -->
+            bLocks.Add("ITALIGTO"); //
+            bLocks.Add("JUGULAR"); //
+            bLocks.Add("KOMODA"); //
+            bLocks.Add("LOCUST"); //
+            bLocks.Add("NEO"); //
+            bLocks.Add("PARAGON"); //
+            bLocks.Add("PARAGON2"); //<!-- Paragon R (Armored) -->
+            bLocks.Add("SCHLAGEN"); //
+            bLocks.Add("SUGOI"); //
+            bLocks.Add("SULTAN2"); //<!-- Sultan Classic -->
+            bLocks.Add("VSTR"); //<!-- V-STR -->
+            bLocks.Add("COQUETTE4"); //<!-- Coquette D10  -->
+            bLocks.Add("PENUMBRA2"); //<!-- Penumbra FF   -->
+            bLocks.Add("CLIQUE"); //
+            bLocks.Add("DEVIANT"); //
+            bLocks.Add("GAUNTLET3"); //<!-- Gauntlet Classic -->
+            bLocks.Add("GAUNTLET4"); //<!-- Gauntlet Hellfire -->
+            bLocks.Add("PEYOTE2"); //<!-- Peyote Gasser -->
+            bLocks.Add("IMPALER"); //
+            bLocks.Add("TULIP"); //
+            bLocks.Add("VAMOS"); //
+            bLocks.Add("DUKES3"); //
+            bLocks.Add("GAUNTLET5"); //
+            bLocks.Add("MANANA2"); //
+            bLocks.Add("PEYOTE3"); //
+            bLocks.Add("GLENDALE2"); //
+            bLocks.Add("YOSEMITE3"); //
+            bLocks.Add("DYNASTY"); //
+            bLocks.Add("JB7002"); //<!-- JB 700W -->
+            bLocks.Add("NEBULA"); //
+            bLocks.Add("RETINUE2"); //<!-- Retinue MkII -->
+            bLocks.Add("ZION3"); //<!-- Zion Classic -->
+            bLocks.Add("COQUETTE4"); //<!-- Coquette D10  -->
+            bLocks.Add("ASBO"); //
+            bLocks.Add("KANJO"); //<!-- Blista Kanjo -->
+            bLocks.Add("CLUB");
+            bLocks.Add("CARACARA2"); //<!-- Caracara 4x4 -->
+            bLocks.Add("EVERON"); //
+            bLocks.Add("OUTLAW"); //
+            bLocks.Add("VAGRANT"); //
+            bLocks.Add("ZHABA"); //
+            bLocks.Add("NOVAK"); //
+            bLocks.Add("REBLA"); //
+            bLocks.Add("TOROS"); //
+            bLocks.Add("LANDSTALKER2"); //
+            bLocks.Add("SEMINOLE2"); //
+
+            return bLocks;
         }
         private void OnLoadUp()
         {
             LogThis("OnLoadUp");
 
-            ListBulder();
             Fruits(0);
             Fruits(3);
             Fruits(7);
@@ -3111,7 +3020,7 @@ namespace NSPM_Contacts
                                     FubarCarX.SoundHorn(2000);
                                 }
                                 ReadContacts();
-                                ControlerUI(DataStore.MyLang.ContactLang[64], 5000);
+                                UiDisplay.ControlerUI(DataStore.MyLang.ContactLang[64], 5000);
                                 iFubCarzz = 1;
                             }
                             else if (Game.Player.Character.Position.DistanceTo(FubarCarX.Position) < 15.00f)
@@ -3171,7 +3080,7 @@ namespace NSPM_Contacts
                             {
                                 if (bFuToMishTarg)
                                 {
-                                    ControlerUI(DataStore.MyLang.ContactLang[66], 1);
+                                    UiDisplay.ControlerUI(DataStore.MyLang.ContactLang[66], 1);
                                     if (Game.IsControlJustPressed(2, GTA.Control.Detonate))
                                     {
                                         bFubarRide = false;
@@ -3184,7 +3093,7 @@ namespace NSPM_Contacts
                                         bFooWayPot = false;
                                     else
                                     {
-                                        ControlerUI(DataStore.MyLang.ContactLang[75], 1);
+                                        UiDisplay.ControlerUI(DataStore.MyLang.ContactLang[75], 1);
                                         if (Game.IsControlJustPressed(2, GTA.Control.Detonate))
                                         {
                                             bFubarRide = false;
@@ -3217,7 +3126,7 @@ namespace NSPM_Contacts
                                     bFooWayPot = true;
                                 }
                                 else if (!Function.Call<bool>(Hash.IS_WAYPOINT_ACTIVE))
-                                    ControlerUI(DataStore.MyLang.ContactLang[67], 1);
+                                    UiDisplay.ControlerUI(DataStore.MyLang.ContactLang[67], 1);
                                 else
                                 {
                                     vFuDest = World.GetWaypointPosition();
@@ -3242,7 +3151,7 @@ namespace NSPM_Contacts
                 {
                     if (iFubCarzz == 0)
                     {
-                        if (Game.Player.Character.IsInVehicle() || FUbarDrv.IsDead || Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 155.00f)
+                        if (Game.Player.Character.IsInVehicle() || FUbarDrv.IsDead || Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 355.00f)
                         {
                             bWeaponMan = false;
                             Fubar_Clean();
@@ -3306,7 +3215,7 @@ namespace NSPM_Contacts
                         }
                         else if (Game.Player.Character.Position.DistanceTo(Vpos) < 1.50f && FubarCarX.IsDoorOpen(VehicleDoor.BackLeftDoor))
                         {
-                            ControlerUI(DataStore.MyLang.ContactLang[68], 1);
+                            UiDisplay.ControlerUI(DataStore.MyLang.ContactLang[68], 1);
 
                             if (Game.IsControlJustPressed(2, GTA.Control.Detonate))
                             {
@@ -3321,7 +3230,7 @@ namespace NSPM_Contacts
                 {
                     if (iFubCarzz == 0)
                     {
-                        if (FUbarDrv.IsDead || Game.Player.Character.IsInVehicle() || Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 95.00f)
+                        if (FUbarDrv.IsDead || Game.Player.Character.IsInVehicle() || Game.Player.Character.Position.DistanceTo(FubarCarX.Position) > 355.00f)
                         {
                             bMeeddicc = false;
                             Fubar_Clean();
