@@ -16,6 +16,7 @@
         public int iNSPMCHighRisk { get; set; }         //11
         public int iWantedBribe { get; set; }           //12
         public int iFubard { get; set; }                //13
+        public int iTrinket { get; set; }               //14
 
         public DatFile()
         {
@@ -33,6 +34,7 @@
             iNSPMCHighRisk = 100;
             iWantedBribe = 0;
             iFubard = 0;
+            iTrinket = 0;
         }
     }
 }

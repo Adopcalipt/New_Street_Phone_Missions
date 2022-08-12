@@ -7,11 +7,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-
 namespace New_Street_Phone_Missions
 {
     public class ObjectHand 
     {
+        private static float fKeepMoving = 0.00f;
+        private static int iClearing = 0;
+        public static int iPhonedID = 0;
         public static int iFaster_01 = 0;
         public static int iFaster_02 = 0;
         public static int iFaster_03 = 0;
@@ -483,13 +485,13 @@ namespace New_Street_Phone_Missions
         {
             if (bPrimary)
             {
-                MissionData.Target_01 = GTA.World.CreateBlip(vPlace);
+                MissionData.Target_01 = AddBlips(vPlace);
                 MissionData.Target_01.Color = BlipColor.Yellow;
                 ObjectHand.ReadWriteBlips(false, true, MissionData.Target_01.Handle, -1, -1, -1, -1, -1);
             }
             else
             {
-                MissionData.Target_02 = GTA.World.CreateBlip(vPlace);
+                MissionData.Target_02 = AddBlips(vPlace);
                 MissionData.Target_02.Color = BlipColor.Yellow;
                 MissionData.Target_02.Scale = 0.50f;
                 ObjectHand.ReadWriteBlips(false, true, MissionData.Target_02.Handle, -1, -1, -1, -1, -1);
@@ -519,7 +521,7 @@ namespace New_Street_Phone_Missions
             ObjectHand.CleanUpCorrona(MissionData.iCoronaList, true);
             ObjectHand.CleanUpBlips(ObjectHand.ConvertToHandle(MissionData.BlipList_01, null, null, null), true);
             ObjectHand.CleanUpPeds(ObjectHand.ConvertToHandle(null, MissionData.PedList_01, null, null), true, false);
-            ObjectHand.CleanUpProps(ObjectHand.ConvertToHandle(null, null, MissionData.PropList_01, null), true, true);
+            ObjectHand.CleanUpProps(ObjectHand.ConvertToHandle(null, null, MissionData.PropList_01, null), true, false);
             ObjectHand.CleanUpVehicles(ObjectHand.ConvertToHandle(null, null, null, MissionData.VehicleList_01), true, false);
             MissionData.PedList_01.Clear();
             MissionData.PropList_01.Clear();
@@ -570,7 +572,7 @@ namespace New_Street_Phone_Missions
             {
                 for (int i = 0; i < MissionData.PedList_01.Count; i++)
                 {
-                    if (ReturnStuff.PedListExists(MissionData.PedList_01, i))
+                    if (MissionData.PedList_01[i].Exists())
                     {
                         if (MissionData.PedList_01[i].CurrentBlip.Exists())
                             MissionData.PedList_01[i].CurrentBlip.Remove();
@@ -581,7 +583,7 @@ namespace New_Street_Phone_Missions
             {
                 for (int i = 0; i < MissionData.MishPed.Count; i++)
                 {
-                    if (ReturnStuff.PedListExists(MissionData.MishPed, i))
+                    if (MissionData.MishPed[i].Exists())
                     {
                         if (MissionData.MishPed[i].CurrentBlip.Exists())
                             MissionData.MishPed[i].CurrentBlip.Remove();
@@ -675,12 +677,12 @@ namespace New_Street_Phone_Missions
                 }
             }
         }
-        public static void Groupies(bool bAdd)
+        public static void Groupies(bool bAdd, Ped Leader)
         {
             if (bAdd)
             {
                 DataStore.iPlayerGroup = Function.Call<int>(Hash.CREATE_GROUP);
-                Function.Call(Hash.SET_PED_AS_GROUP_LEADER, Game.Player.Character.Handle, DataStore.iPlayerGroup);
+                Function.Call(Hash.SET_PED_AS_GROUP_LEADER, Leader.Handle, DataStore.iPlayerGroup);
             }
             else
             {
@@ -709,7 +711,7 @@ namespace New_Street_Phone_Missions
                 {
                     if (fRadius < 2.00f)
                     {
-                        MissionData.Target_01 = GTA.World.CreateBlip(Vlocal);
+                        MissionData.Target_01 = AddBlips(Vlocal);
                         MissionData.Target_01.IsFlashing = bFlasher;
                         if (bRoute && DataStore.MySettings.ShowRoute)
                             MissionData.Target_01.ShowRoute = true;
@@ -724,12 +726,12 @@ namespace New_Street_Phone_Missions
                     }
                     else
                     {
-                        MissionData.BackUpT = GTA.World.CreateBlip(Vlocal);
+                        MissionData.BackUpT = AddBlips(Vlocal);
                         MissionData.BackUpT.Color = BlipColor.Yellow;
                         if (iCon != -1)
                             TaggetIcon(MissionData.BackUpT, iCon);
 
-                        MissionData.Target_01 = GTA.World.CreateBlip(Vlocal, fRadius);
+                        MissionData.Target_01 = AddBlips(Vlocal, fRadius);
                         MissionData.Target_01.Color = BlipColor.Yellow;
                         MissionData.Target_01.Alpha = 85;
                         MissionData.Target_01.IsFlashing = bFlasher;
@@ -750,14 +752,14 @@ namespace New_Street_Phone_Missions
                 {
                     if (fRadius < 2.00f)
                     {
-                        MissionData.Target_02 = GTA.World.CreateBlip(Vlocal);
+                        MissionData.Target_02 = ObjectHand.AddBlips(Vlocal);
                         MissionData.Target_02.Color = BlipColor.Orange;
                         MissionData.Target_02.Scale = 0.5f;
                         MissionData.Target_02.IsFlashing = bFlasher;
                     }
                     else
                     {
-                        MissionData.Target_02 = GTA.World.CreateBlip(Vlocal, fRadius);
+                        MissionData.Target_02 = AddBlips(Vlocal, fRadius);
                         MissionData.Target_02.Color = BlipColor.Orange;
                         MissionData.Target_02.Alpha = 85;
                         MissionData.Target_02.IsFlashing = bFlasher;
@@ -770,6 +772,14 @@ namespace New_Street_Phone_Missions
                 }
                 ObjectHand.ReadWriteBlips(false, true, MissionData.Target_02.Handle, -1, -1, -1, -1, -1);
             }
+        }
+        public static Blip AddBlips(Vector3 Vlocal)
+        {
+            return Function.Call<Blip>(Hash.ADD_BLIP_FOR_COORD, Vlocal.X, Vlocal.Y, Vlocal.Z);
+        }
+        public static Blip AddBlips(Vector3 Vlocal, float fRadi)
+        {
+            return Function.Call<Blip>(Hash.ADD_BLIP_FOR_RADIUS, Vlocal.X, Vlocal.Y, Vlocal.Z, fRadi);
         }
         public static void AppeyNess(Vector3 MyAppy)
         {
@@ -787,387 +797,45 @@ namespace New_Street_Phone_Missions
             }
 
         }
-        public static void ControlSelect(int iChoices, bool bPhoneAnim)
-        {
-            LoggerLight.LogThis("ObjectHand.ControlSelect, iChoices == " + iChoices);
-            bool bSelecta = true;
-            int iQuickPause = Game.GameTime + 1000;
-            string sDisplay = "";
-            if (DataStore.bSubscribeNag)
-            {
-                DataStore.bSubscribeNag = false;
-                UI.Notify(DataStore.MyLang.Othertext[157]);
-            }
-            while (bSelecta)
-            {
-                if (sDisplay != "")
-                    UiDisplay.ControlerUI(sDisplay, 1);
-
-                if (iQuickPause < Game.GameTime)
-                {
-                    if (iChoices == 1)
-                    {
-                        if (sDisplay == "")
-                            sDisplay = DataStore.MyLang.Context[1];
-
-                        if (ReturnStuff.ButtonDown(21))
-                        {
-                            if (MissionData.iJobType == 11)
-                            {
-                                MissionData.iCurrentLap = 1;
-                                iQuickPause = Game.GameTime + 1000;
-                                iChoices = 2;
-                            }
-                            else
-                            {
-                                iChoices = 0;
-                                TheMissions.PlayerPlays();
-                            }
-                        }
-                        else if (ReturnStuff.ButtonDown(22))
-                        {
-                            iChoices = 0;
-                            MissionData.bOnTheJob = false;
-                            DataStore.bLookingForPB = true;
-                        }
-                        else if (ReturnStuff.ButtonDown(47))
-                        {
-                            iChoices = 0;
-                            TheMenus.SettingsMenu(false);
-                        }
-                        else if (Game.Player.Character.Position.DistanceTo(DataStore.vPhoneCorona) > 2.50f)
-                        {
-                            iChoices = 0;
-                            MissionData.bOnTheJob = false;
-                            DataStore.bLookingForPB = true;
-                        }
-                    }       //PhoneAnswer
-                    else if (iChoices == 2)
-                    {
-                        if (sDisplay == "")
-                        {
-                            if (MissionData.bSoloRace)
-                                sDisplay = DataStore.MyLang.Context[5] + DataStore.MyLang.Context[6];
-                            else
-                                sDisplay = DataStore.MyLang.Context[5] + DataStore.MyLang.Context[7];
-                        }
-
-                        if (ReturnStuff.ButtonDown(21))
-                        {
-                            iQuickPause = Game.GameTime + 1000;
-                            iChoices = 3;
-                        }
-                        else if (ReturnStuff.ButtonDown(47))
-                        {
-                            iQuickPause = Game.GameTime + 500;
-                            MissionData.bSoloRace = !MissionData.bSoloRace;
-                        }
-                    }       //Racism
-                    else if (iChoices == 3)
-                    {
-                        if (sDisplay == "")
-                            sDisplay = DataStore.MyLang.Context[3] + MissionData.iCurrentLap;
-
-                        if (ReturnStuff.ButtonDown(21))
-                        {
-                            iChoices = 0;
-                            if (DataStore.bOnCayoLand)
-                                TheMissions.Raceist();
-                            else
-                                TheMissions.PlayerPlays();
-                        }
-                        else if (ReturnStuff.ButtonDown(47))
-                        {
-                            iQuickPause = Game.GameTime + 500;
-                            if (MissionData.iCurrentLap > 1)
-                                MissionData.iCurrentLap = MissionData.iCurrentLap - 1;
-                        }
-                        else if (ReturnStuff.ButtonDown(51))
-                        {
-                            iQuickPause = Game.GameTime + 500;
-                            if (MissionData.iCurrentLap < 10)
-                                MissionData.iCurrentLap = MissionData.iCurrentLap + 1;
-                        }
-                    }       //Raceism2
-                    else if (iChoices == 4)
-                    {
-                        if (sDisplay == "")
-                            sDisplay = DataStore.MyLang.Context[9];
-
-                        TheMissions.TakeNote();
-                        if (ReturnStuff.ButtonDown(47))
-                        {
-                            iChoices = 0;
-                            TheMenus.SettingsMenu(false);
-                        }
-                        else if (Game.Player.Character.Position.DistanceTo(DataStore.vPhoneCorona) > 2.50f)
-                        {
-                            iChoices = 0;
-                            MissionData.bOnTheJob = false;
-                            DataStore.bLookingForPB = true;
-                        }
-                    }       //PhoneBox No Jobs Selected
-                    else if (iChoices == 5)
-                    {
-                        if (MissionData.iWait4Sec < Game.GameTime)
-                        {
-
-                            if (sDisplay == "")
-                                sDisplay = DataStore.MyLang.Context[2];
-
-                            if (!UiDisplay.bSubDisplay)
-                            {
-                                UiDisplay.bSubDisplay = true;
-                                UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[190];
-                            }
-
-                            if (ReturnStuff.ButtonDown(21))
-                            {
-                                MissionData.bPacBouns = false;
-                                iChoices = 0;
-                                MissionData.iMissionSeq = 0;
-                                MissionData.iLocationX = 99;
-                                TheMissions.GetAwayDriver();
-                            }
-                            else if (ReturnStuff.ButtonDown(22))
-                            {
-                                MissionData.bPacBouns = false;
-                                iChoices = 0;
-                                ObjectHand.PostMess();
-                            }
-                        }
-                    }       //Pacstandard
-                    else if (iChoices == 6)
-                    {
-                        if (sDisplay == "")
-                            sDisplay = DataStore.MyLang.Context[2];
-
-                        if (ReturnStuff.ButtonDown(21))
-                        {
-                            ObjectHand.RemoveTargets();
-                            ObjectHand.CleanUpPeds(ObjectHand.ConvertToHandle(null, MissionData.PedList_01, null, null), true, false);
-                            MissionData.PedList_01.Clear();
-                            iChoices = 0;
-                            MissionData.bMoreFubar = true;
-                            MissionData.bJobLoaded = false;
-                            DataStore.MyDatSet.iFubard += 1;
-                            RWDatFile.SaveDat(13, DataStore.MyDatSet.iFubard);
-                            MissionData.iRepMisssion += 1;
-                            MissionData.iCashReward += MissionData.iCashBouns;
-                            TheMissions.AreULocal();
-                        }
-                        else if (ReturnStuff.ButtonDown(22) || !(Game.Player.Character.IsInVehicle()))
-                        {
-                            MissionData.bMoreFubar = false;
-                            iChoices = 0;
-                            DataStore.MyDatSet.iFubard += 1;
-                            RWDatFile.SaveDat(13, DataStore.MyDatSet.iFubard);
-                            MissionData.iRepMisssion += 1;
-                            MissionData.iCashReward += MissionData.iCashBouns;
-                            MissionData.iMissionSeq = 9;
-                        }
-                    }       //fubar
-                    else if (iChoices == 7)
-                    {
-                        if (sDisplay == "")
-                            sDisplay = DataStore.MyLang.Context[2];
-
-                        if (ReturnStuff.ButtonDown(21))
-                        {
-                            MissionData.iRepMisssion += 1;
-                            iChoices = 0;
-                            MissionData.iMissionSeq = 0;
-                            MissionData.iCashReward += MissionData.iCashBouns;
-                            TheMissions.Ambulance();
-                        }
-                        else if (ReturnStuff.ButtonDown(22))
-                        {
-                            MissionData.bAmberAntz = false;
-                            iChoices = 0;
-                            MissionData.iRepMisssion += 1;
-                            MissionData.iCashReward += MissionData.iCashBouns;
-                            MissionData.iMissionSeq = 9;
-                        }
-                    }       //Ambullance
-                    else if (iChoices == 8)
-                    {
-                        if (sDisplay == "")
-                            sDisplay = DataStore.MyLang.Context[2];
-
-                        if (ReturnStuff.ButtonDown(21))
-                        {
-
-                            ObjectHand.ClearOutAllStuff();
-                            ObjectHand.CleanUpFire(MissionData.iFireList);
-                            MissionData.iFireList.Clear();
-                            ObjectHand.RemoveTargets();
-                            MissionData.iMissionSeq = 0;
-                            MissionData.iCashReward += MissionData.iCashBouns;
-                            MissionData.iRepMisssion += 1;
-                            iChoices = 0;
-                            TheMissions.FireDept();
-                        }
-                        else if (ReturnStuff.ButtonDown(22))
-                        {
-                            MissionData.iMissionSeq = 40;
-                            MissionData.iCashReward += MissionData.iCashBouns;
-                            MissionData.bReFire = false;
-                            MissionData.iRepMisssion += 1;
-                            iChoices = 0;
-                        }
-                    }       //Fire
-                    else if (iChoices == 9)
-                    {
-                        if (sDisplay == "")
-                            sDisplay = DataStore.MyLang.Context[8];
-
-                        if (ReturnStuff.ButtonDown(21))
-                        {
-                            MissionData.iMissionSeq = 7;
-                            iChoices = 0;
-                            DataStore.MySettings.StartOnYAcht = true;
-                            ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
-                        }
-                        else if (ReturnStuff.ButtonDown(22))
-                        {
-                            MissionData.iMissionSeq = 7;
-                            iChoices = 0;
-                            DataStore.MySettings.StartOnYAcht = false;
-                            ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
-                        }
-                    }       //Yacht2
-                    else if (iChoices == 10)
-                    {
-                        if (sDisplay == "")
-                            sDisplay = ReturnStuff.ShowComs(DataStore.MySettings.YachtPrice, true, false) + DataStore.MyLang.Context[4];
-
-                        if (DataStore.MySettings.YachtPrice < 0)
-                            DataStore.MySettings.YachtPrice = 0;
-                        else if (ReturnStuff.ButtonDown(21))
-                        {
-                            if (DataStore.MyDatSet.iNSPMBank > DataStore.MySettings.YachtPrice)
-                            {
-                                iChoices = 9;
-                                iQuickPause = Game.GameTime + 1000;
-                                MissionData.iCashReward = 0;
-                                DataStore.MySettings.YachtPrice *= -1;
-                                UiDisplay.YourCoinPopUp(DataStore.MySettings.YachtPrice, 1, "Yacht Purchased");
-                                DataStore.MyDatSet.iOwnaYacht = DataStore.iProcessForYacht;
-                                DataStore.MyAssets.OwnaYacht = true;
-                                DataStore.MySettings.YachtPrice = 0;
-                                RWDatFile.SaveDat(0, DataStore.iProcessForYacht);
-                                TheMissions.Water02_BoatLaunch();
-                            }
-                            else
-                            {
-                                UI.Notify("Funds not avalable");
-                                iChoices = 0;
-                                MissionData.iMissionSeq = 7;
-                                MissionData.iCashReward = 20000;
-                                DataStore.MyAssets.OwnaYacht = false;
-                                DataStore.MyDatSet.iOwnaYacht = 0;
-                                if (!MissionData.VehTrackin_01.IsDead)
-                                    ObjectBuild.WarptoAnyVeh(MissionData.VehTrackin_01, Game.Player.Character, 1);
-                                else
-                                {
-                                    Vector3 Vpos = new Vector3(-1848.826f, -1200.298f, 19.14339f);
-                                    SlowFastTravel(Vpos, 165.84f);
-                                }
-                                if (MissionData.bOldYacht)
-                                    TheMissions.Water02_AddHeistYacht(false);
-                                ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
-                            }
-                        }
-                        else if (ReturnStuff.ButtonDown(22))
-                        {
-                            iChoices = 0;
-                            MissionData.iMissionSeq = 7;
-                            MissionData.iCashReward = 20000;
-                            ///YachtStuff_TheBlip(false);
-                            DataStore.MyAssets.OwnaYacht = false;
-                            DataStore.MyDatSet.iOwnaYacht = 0;
-                            if (!MissionData.VehTrackin_01.IsDead)
-                                ObjectBuild.WarptoAnyVeh(MissionData.VehTrackin_01, Game.Player.Character, 1);
-                            else
-                            {
-                                Vector3 Vpos = new Vector3(-1848.826f, -1200.298f, 19.14339f);
-                                SlowFastTravel(Vpos, 165.84f);
-                            }
-                            if (MissionData.bOldYacht)
-                                TheMissions.Water02_AddHeistYacht(false);
-                            ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
-                        }
-                    }      //Yacht
-                    else if (iChoices == 11)
-                    {
-                        if (sDisplay == "")
-                            sDisplay = DataStore.MyLang.Context[2];
-
-                        if (ReturnStuff.ButtonDown(21))
-                        {
-                            MissionData.iMissionSeq = 0;
-                            iChoices = 0;
-                            MissionData.bDeliverWowRep = true;
-                            MissionData.iCashReward += MissionData.iCashBouns;
-                            TheMissions.Deliverwho();
-                        }
-                        else if (ReturnStuff.ButtonDown(22))
-                        {
-                            iChoices = 0;
-                            MissionData.bDeliverWowRep = false;
-                            ObjectBuild.XmlPedDresser(Game.Player.Character, ReadWriteXML.LoadXmlClothDefault(DataStore.sDefaulted));
-                            NSCoinInvestments(true, 5, 7, "Deliverwho");
-                            TheMissions.GameOver(false, "", false, MissionData.iCashReward);
-                        }
-                    }       //Delliverwho
-                    else
-                    {
-                        if (bPhoneAnim)
-                        {
-                            if (MissionData.bPickUpHangUp)
-                            {
-                                ObjectBuild.ForceAnimOnceEnding(Game.Player.Character, "oddjobs@assassinate@multi@call", "ass_multi_target_call_p1", Game.Player.Character.Position, Game.Player.Character.Rotation, 0.88f);
-                                Script.Wait(4000);
-                                Game.Player.Character.Task.ClearAnimation("oddjobs@assassinate@multi@call", "ass_multi_target_call_p1");
-                                MissionData.bPickUpHangUp = false;
-                            }
-                        }
-                        UiDisplay.bSubDisplay = false;
-                        bSelecta = false;
-                    }
-                }
-                Script.Wait(1);
-            }
-
-            LoggerLight.LogThis("ObjectHand.ControlSelect End, iChoices == " + iChoices);
-        }
         public static void DoorsNear(Vector3 VDoorPos, float fRadius, bool bLock)
         {
             LoggerLight.LogThis("DoorsNear");
 
             Prop[] Opensesme = World.GetNearbyProps(VDoorPos, fRadius);
+            List<Prop> Mydoors = new List<Prop>();
             for (int i = 0; i < Opensesme.Count(); i++)
+                Mydoors.Add(new Prop(Opensesme[i].Handle));
+
+            for (int i = 0; i < Mydoors.Count(); i++)
             {
-                if (ReturnStuff.PropExists(Opensesme, i))
+                try
                 {
-                    Prop ThisDoor = Opensesme[i];
-                    for (int ii = 0; ii < DataStore.sDoorList.Count; ii++)
+                    Prop ThisDoor = Mydoors[i];
+                    if (ThisDoor.Exists())
                     {
-                        if (Function.Call<int>(Hash.GET_HASH_KEY, DataStore.sDoorList[ii]) == ThisDoor.Model.Hash)
+                        for (int ii = 0; ii < DataStore.sDoorList.Count; ii++)
                         {
-                            if (bLock)
+                            if (Function.Call<int>(Hash.GET_HASH_KEY, DataStore.sDoorList[ii]) == ThisDoor.Model.Hash)
                             {
-                                ShutThatDoor(ThisDoor.Position, DataStore.sDoorList[ii]);
+                                if (bLock)
+                                {
+                                    ShutThatDoor(ThisDoor.Position, DataStore.sDoorList[ii]);
+                                }
+                                else
+                                {
+                                    ThisDoor.FreezePosition = false;
+                                    Function.Call(Hash.SET_STATE_OF_CLOSEST_DOOR_OF_TYPE, ThisDoor.Model.Hash, ThisDoor.Position.X, ThisDoor.Position.Y, ThisDoor.Position.Z, false, 0, 1);
+                                }
+                                break;
                             }
-                            else
-                            {
-                                ThisDoor.FreezePosition = false;
-                                Function.Call(Hash.SET_STATE_OF_CLOSEST_DOOR_OF_TYPE, ThisDoor.Model.Hash, ThisDoor.Position.X, ThisDoor.Position.Y, ThisDoor.Position.Z, false, 0, 1);
-                            }
-                            break;
                         }
                     }
                 }
+                catch
+                {
+                    LoggerLight.LogThis("DoorsNear  dataloss");
+                }
+
             }
         }
         public static void FindTheTime(int iTime, int iOutput, string sLabel, bool bDrawPool)
@@ -1690,13 +1358,25 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("ShutThatDoor");
 
             Prop[] Opensesme = World.GetNearbyProps(VDoorPos, 6.00f);
+            List<Prop> MyProps = new List<Prop>();
+
             for (int i = 0; i < Opensesme.Count(); i++)
+                MyProps.Add(new Prop(Opensesme[i].Handle));
+
+            for (int i = 0; i < MyProps.Count; i++)
             {
-                if (ReturnStuff.PropExists(Opensesme, i))
+                try
                 {
-                    Prop ThisDoor = Opensesme[i];
-                    if (ThisDoor.Model == Function.Call<int>(Hash.GET_HASH_KEY, SDoorTag))
-                        ThisDoor.FreezePosition = true;
+                    Prop ThisDoor = MyProps[i];
+                    if (ThisDoor.Exists())
+                    {
+                        if (ThisDoor.Model == Function.Call<int>(Hash.GET_HASH_KEY, SDoorTag))
+                            ThisDoor.FreezePosition = true;
+                    }
+                }
+                catch
+                {
+                    LoggerLight.LogThis("ShutThatDoor  Data loss");
                 }
             }
         }
@@ -1798,6 +1478,66 @@ namespace New_Street_Phone_Missions
         public static void TaggetIcon(Blip bLip, int iCon)
         {
             Function.Call(Hash.SET_BLIP_SPRITE, bLip.Handle, iCon);
+        }
+        public static void PlaySoundFrom(string sAudioBank, string sSound, string sSoundSet, Vector3 Vposy, bool bPhone)
+        {
+            LoggerLight.LogThis("PlaySoundFrom, bPhone == " + bPhone);
+
+            while (!Function.Call<bool>(Hash.REQUEST_SCRIPT_AUDIO_BANK, sAudioBank, false))
+                Script.Wait(1);
+            iPhonedID = Function.Call<int>(Hash.GET_SOUND_ID);
+            if (bPhone)
+                Function.Call(Hash.PLAY_SOUND_FROM_COORD, iPhonedID, sSound, Vposy.X, Vposy.Y, Vposy.Z, 0, 0, 50, 0);
+            else
+                Function.Call(Hash.PLAY_SOUND_FROM_COORD, iPhonedID, sSound, Vposy.X, Vposy.Y, Vposy.Z, sSoundSet, 0, 0, 0);
+
+            ObjectHand.ReadWriteBlips(false, true, -1, -1, -1, -1, -1, iPhonedID);
+        }
+        public static void KeepMoving(Ped Peddy, Vector3 Vtarg, int iWait4)
+        {
+            MissionData.iWait4Sec = Game.GameTime + iWait4;
+            if (ReturnStuff.BeInRange(0.75f, fKeepMoving, Peddy.Position.DistanceTo(Vtarg)))
+            {
+                Peddy.Task.ClearAll();
+                Peddy.Position += Peddy.ForwardVector * 2.50f;
+                ObjectHand.WalkThisWay(Peddy, Vtarg, 2.00f);
+            }
+            else
+                fKeepMoving = Peddy.Position.DistanceTo(Vtarg);
+        }
+        public static void ClearTheWay(bool bExtra)
+        {
+            Function.Call(Hash.SET_PED_DENSITY_MULTIPLIER_THIS_FRAME, 0.00f);
+            Function.Call(Hash.SET_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME, 0.00f);
+
+            Function.Call(Hash.SET_RANDOM_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME, 0.00f);
+            Function.Call(Hash.SET_PARKED_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME, 0.00f);
+
+            Entity[] Entz = World.GetAllEntities();
+
+            List<Entity> Elist = new List<Entity>();
+
+            iClearing = Game.GameTime + 1000;
+            for (int i = 0; i < Entz.Count(); i++)
+                Elist.Add(Entz[i]);
+            for (int i = 0; i < Elist.Count; i++)
+            {
+                try
+                {
+                    Entity Ent = Elist[i];
+                    if (Ent.Exists())
+                    {
+                        if (Function.Call<bool>(Hash.IS_ENTITY_A_PED, Ent.Handle) && Ent.IsPersistent == false)
+                            Ent.Delete();
+                        if (Function.Call<bool>(Hash.IS_ENTITY_A_VEHICLE, Ent.Handle) && Ent.IsPersistent == false)
+                            Ent.Delete();
+                    }
+                }
+                catch
+                {
+                    LoggerLight.LogThis("ClearTheWay -- LostData");
+                }
+            }
         }
     }
 }

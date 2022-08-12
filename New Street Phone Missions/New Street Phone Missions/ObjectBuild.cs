@@ -5,23 +5,11 @@ using New_Street_Phone_Missions.Classes;
 using System.Collections.Generic;
 using System.Linq;
 
-
 namespace New_Street_Phone_Missions
 {
     public class ObjectBuild
     {
-        public static void XmlPedDresser(Ped Peddy, ClothBank MyCloth)
-        {
-            LoggerLight.LogThis("XmlPedDresser");
-
-            Function.Call(Hash.CLEAR_ALL_PED_PROPS, Peddy.Handle);
-            for (int i = 0; i < MyCloth.ClothA.Count; i++)
-                Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, i, MyCloth.ClothA[i], MyCloth.ClothB[i], 2);
-
-            for (int i = 0; i < MyCloth.ExtraA.Count; i++)
-                Function.Call(Hash.SET_PED_PROP_INDEX, Peddy.Handle, i, MyCloth.ExtraA[i], MyCloth.ExtraB[i], false);
-        }
-        public static void RandPlayerTypes(Ped Pedx, bool bMale)
+        private static void RandPlayerTypes(Ped Pedx, bool bMale)
         {
             LoggerLight.LogThis("RandPlayerTypes, bMale == " + bMale);
 
@@ -160,7 +148,7 @@ namespace New_Street_Phone_Missions
 
             Function.Call(Hash._SET_PED_HAIR_COLOR, Pedx.Handle, iHair, iHair2);
         }
-        public static void OnlinePlayers(Ped Pedx, bool bMale, int iPreset)
+        private static void OnlinePlayers(Ped Pedx, bool bMale, int iPreset)
         {
             LoggerLight.LogThis("OnlinePlayers, bMale == " + bMale + ", iPreset == " + iPreset);
 
@@ -216,7 +204,7 @@ namespace New_Street_Phone_Missions
                 else
                 {
                     if (DataStore.MaleCloth.Outfits.Count > 0)
-                        XmlPedDresser(Pedx, DataStore.MaleCloth.Outfits[ReturnStuff.FindRandom(103, 0, DataStore.MaleCloth.Outfits.Count - 1)]);
+                        DressinRoom.PedDresser(Pedx, DataStore.MaleCloth.Outfits[ReturnStuff.FindRandom(103, 0, DataStore.MaleCloth.Outfits.Count - 1)]);
                     else
                     {
                         int RanChar = ReturnStuff.RandInt(1, 5);
@@ -328,7 +316,7 @@ namespace New_Street_Phone_Missions
                 else
                 {
                     if (DataStore.FemaleCloth.Outfits.Count > 0)
-                        XmlPedDresser(Pedx, DataStore.FemaleCloth.Outfits[ReturnStuff.FindRandom(104, 0, DataStore.FemaleCloth.Outfits.Count - 1)]);
+                        DressinRoom.PedDresser(Pedx, DataStore.FemaleCloth.Outfits[ReturnStuff.FindRandom(104, 0, DataStore.FemaleCloth.Outfits.Count - 1)]);
                     else
                     {
                         int RanChar = ReturnStuff.RandInt(1, 5);
@@ -486,7 +474,7 @@ namespace New_Street_Phone_Missions
 
             return BuildPed;
         }
-        public static void NpcTasks(Ped Peddy, int iTask)
+        private static void NpcTasks(Ped Peddy, int iTask)
         {
             LoggerLight.LogThis("NpcTasks, iTask == " + iTask);
 
@@ -506,13 +494,13 @@ namespace New_Street_Phone_Missions
             {
                 Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, 3, 0, 0, 2);
                 Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, 4, 0, 0, 2);
-                Convicts_KrishaLine(Peddy, true);
+                TheMissions.Convicts_KrishaLine(Peddy, true);
             }        //Convicts leader
             else if (iTask == 4)
             {
                 Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, 3, 0, 0, 2);
                 Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, 4, 0, 0, 2);
-                Convicts_KrishaLine(Peddy, false);
+                TheMissions.Convicts_KrishaLine(Peddy, false);
             }        //Convicts
             else if (iTask == 5)
             {
@@ -584,7 +572,7 @@ namespace New_Street_Phone_Missions
             else if (iTask == 16)
             {
                 Peddy.IsEnemy = true;
-                Hitman_AddVisionCones(Peddy);
+                TheMissions.Hitman_AddVisionCones(Peddy);
                 Peddy.BlockPermanentEvents = true;
             }       //HitMan Mobs
             else if (iTask == 17)
@@ -619,12 +607,12 @@ namespace New_Street_Phone_Missions
             }       //Water Phishing
             else if (iTask == 22)
             {
-                BbBomb_BombAtractor(Peddy);
+                TheMissions.BbBomb_BombAtractor(Peddy);
             }       //Bbomb Atractor
             else if (iTask == 23)
             {
                 Function.Call(Hash.TASK_SET_BLOCKING_OF_NON_TEMPORARY_EVENTS, Peddy.Handle, true);
-                Hitman_AddVisionCones(Peddy);
+                TheMissions.Hitman_AddVisionCones(Peddy);
                 EnterAnyVeh(MissionData.VehTrackin_01, Peddy, 0, 1.0f);
             }       //MoresMan
             else if (iTask == 24)
@@ -634,7 +622,7 @@ namespace New_Street_Phone_Missions
             }       //peds in back of plane
             else if (iTask == 25)
             {
-                BikerRaids_BizzPedsSec(Peddy, MissionData.iMissionVar_02);
+                TheMissions.BikerRaids_BizzPedsSec(Peddy, MissionData.iMissionVar_02);
                 AttackThePlayer(Peddy, true);
             }       //BikerBizSecurity
             else if (iTask == 26)
@@ -642,14 +630,14 @@ namespace New_Street_Phone_Missions
                 Function.Call(Hash.SET_PED_FLEE_ATTRIBUTES, Peddy.Handle, 0, true);
                 Function.Call(Hash.TASK_SET_BLOCKING_OF_NON_TEMPORARY_EVENTS, Peddy.Handle, true);
                 Function.Call(Hash.SET_PED_RANDOM_COMPONENT_VARIATION, Peddy.Handle, false);
-                BikerRaids_BizzPedsWork(Peddy, MissionData.iMissionVar_02, false);
+                TheMissions.BikerRaids_BizzPedsWork(Peddy, MissionData.iMissionVar_02, false);
             }       //BikerBizFemail
             else if (iTask == 27)
             {
                 Function.Call(Hash.SET_PED_FLEE_ATTRIBUTES, Peddy.Handle, 0, true);
                 Function.Call(Hash.TASK_SET_BLOCKING_OF_NON_TEMPORARY_EVENTS, Peddy.Handle, true);
                 Function.Call(Hash.SET_PED_RANDOM_COMPONENT_VARIATION, Peddy.Handle, false);
-                BikerRaids_BizzPedsWork(Peddy, MissionData.iMissionVar_02, true);
+                TheMissions.BikerRaids_BizzPedsWork(Peddy, MissionData.iMissionVar_02, true);
             }       //BikerBizmail
             else if (iTask == 28)
             {
@@ -667,7 +655,7 @@ namespace New_Street_Phone_Missions
             }       //Club Bouncer
             else if (iTask == 31)
             {
-                TempAgency_02_BuildCluber(Peddy);
+                TheMissions.TempAgency_02_BuildCluber(Peddy);
             }       //DrinkNDance Clubber
             else if (iTask == 32)
             {
@@ -700,17 +688,29 @@ namespace New_Street_Phone_Missions
                 AttackThePlayer(Peddy, false);
                 Function.Call(Hash.SET_PED_COMBAT_MOVEMENT, Peddy.Handle, 2);
                 Function.Call(Hash.SET_PED_RANDOM_COMPONENT_VARIATION, Peddy.Handle, false);
-                Follow_AddToMuilti(Peddy, "", Peddy.CurrentBlip, null);
+                TheMissions.Follow_AddToMuilti(Peddy, "", Peddy.CurrentBlip, null);
                 GunningIt(Peddy, 10);
             }       //GreenyAttack
+            else if (iTask == 38)
+            {
+                Peddy.IsEnemy = true;
+                Peddy.RelationshipGroup = DataStore.GP_BNPCs;
+            }       //SniperRunner
+            else if (iTask == 39)
+            {
+                Peddy.IsEnemy = true;
+                Peddy.RelationshipGroup = DataStore.GP_BNPCs;
+                AddGroupie(Peddy);
+                OhDoKeepUp(Peddy, MissionData.Npc_01, MissionData.fMission_01, MissionData.BeOnOff[5]);
+            }       //SniperFollow
         }
-        public static void NpcVehicleTasks(Ped Peddy, Vehicle Vehic, int iTask)
+        private static void NpcVehicleTasks(Ped Peddy, Vehicle Vehic, int iTask)
         {
             if (iTask == 1)
             {
                 Function.Call(Hash.SET_PED_CAN_BE_KNOCKED_OFF_VEHICLE, Peddy.Handle, 1);
                 Function.Call(Hash.SET_PED_CONFIG_FLAG, Peddy.Handle, 32, false);
-                Racist_MultiPed(Peddy, Vehic);
+                TheMissions.Racist_MultiPed(Peddy, Vehic);
             }       //Race Drivers
             else if (iTask == 2)
             {
@@ -903,28 +903,6 @@ namespace New_Street_Phone_Missions
                 ///OnlinePlayers(Peddy, false, 0);
             }       //Drive Playerped F
         }
-        public static void BbBomb_BombAtractor(Ped Peddy)
-        {
-            LoggerLight.LogThis("BbBomb_BombAtractor");
-
-            Peddy.Task.ClearAll();
-            Peddy.Task.WanderAround(MissionData.vTarget_01, 4.75f);
-        }
-        public static void Hitman_AddVisionCones(Ped Peddy)
-        {
-            LoggerLight.LogThis("Hitman_AddVisionCones");
-
-            Peddy.IsPersistent = true;
-            Function.Call(Hash.SET_PED_TARGET_LOSS_RESPONSE, Peddy.Handle, 2);
-            Script.Wait(50);
-            Function.Call((Hash)0xD30C50DF888D58B5, Peddy.Handle, true);
-            Script.Wait(50);
-            Function.Call((Hash)0x0C4BBF625CA98C4E, Peddy.Handle, true);
-            Script.Wait(50);
-            Function.Call((Hash)0x97C65887D4B37FA9, Peddy.Handle, 45.00f);
-            Script.Wait(50);
-            Function.Call(Hash.HIDE_SPECIAL_ABILITY_LOCKON_OPERATION, Peddy.Handle, true);
-        }
         public static void ForceAnimOnce(Ped peddy, string sAnimDict, string sAnimName, Vector3 AnPos, Vector3 AnRot)
         {
             LoggerLight.LogThis("ObjectBuild.ForceAnimOnce, sAnimName == " + sAnimName);
@@ -961,427 +939,71 @@ namespace New_Street_Phone_Missions
 
             Function.Call(Hash.TASK_START_SCENARIO_AT_POSITION, Peddy.Handle, sCenario, Vpos.X, Vpos.Y, Vpos.Z, fHead, 0, bSeated, true);
         }
-        public static void Convicts_KrishaLine(Ped Harry, bool Leader)
-        {
-            LoggerLight.LogThis("Convicts_KrishaLine, Leader == " + Leader);
-
-            MissionData.iList_01.Add(MissionData.iMissionVar_01);
-            if (Leader)
-                Function.Call(Hash.SET_PED_AS_GROUP_LEADER, Harry.Handle, DataStore.GP_ANPCs);
-
-            MissionData.iList_01[MissionData.iList_01.Count - 1] = ReturnStuff.PedWalkies(Harry, MissionData.VectorList_01, MissionData.iList_01[MissionData.iList_01.Count - 1]);
-        }
-        public static void BikerRaids_BizzPedsSec(Ped Peddy, int iVariant)
-        {
-            LoggerLight.LogThis("BikerRaids_BizzPedsSec, iVariant == " + iVariant);
-
-            List<int> iComp = new List<int>();
-            List<int> itext = new List<int>();
-            if (iVariant == 1)
-            {
-                iComp.Add(1); itext.Add(2);//head
-                iComp.Add(0); itext.Add(0);//beard
-                iComp.Add(1); itext.Add(0);//hair
-                iComp.Add(1); itext.Add(0);//Torso
-                iComp.Add(1); itext.Add(0);//Legs
-                iComp.Add(0); itext.Add(0);//Hands
-                iComp.Add(1); itext.Add(0);//shoes
-                iComp.Add(0); itext.Add(0);//Scarf
-                iComp.Add(1); itext.Add(0);//AccTop
-                iComp.Add(0); itext.Add(0);//Armor
-                iComp.Add(0); itext.Add(0);//Emb--not used
-                iComp.Add(0); itext.Add(0);//Top2
-            }                //cocaine_
-            else if (iVariant == 2)
-            {
-                iComp.Add(3); itext.Add(0);//head
-                iComp.Add(0); itext.Add(0);//beard
-                iComp.Add(2); itext.Add(0);//hair
-                iComp.Add(2); itext.Add(0);//Torso
-                iComp.Add(3); itext.Add(0);//Legs
-                iComp.Add(0); itext.Add(0);//Hands
-                iComp.Add(0); itext.Add(0);//shoes
-                iComp.Add(0); itext.Add(0);//Scarf
-                iComp.Add(0); itext.Add(0);//AccTop
-                iComp.Add(0); itext.Add(0);//Armor
-                iComp.Add(0); itext.Add(0);//Emb--not used
-                iComp.Add(0); itext.Add(0);//Top2
-            }           //counterfeit_
-            else if (iVariant == 3)
-            {
-                iComp.Add(3); itext.Add(0);//head
-                iComp.Add(0); itext.Add(0);//beard
-                iComp.Add(0); itext.Add(0);//hair
-                iComp.Add(3); itext.Add(0);//Torso
-                iComp.Add(3); itext.Add(0);//Legs
-                iComp.Add(0); itext.Add(0);//Hands
-                iComp.Add(0); itext.Add(0);//shoes
-                iComp.Add(0); itext.Add(0);//Scarf
-                iComp.Add(1); itext.Add(0);//AccTop
-                iComp.Add(0); itext.Add(0);//Armor
-                iComp.Add(0); itext.Add(0);//Emb--not used
-                iComp.Add(0); itext.Add(0);//Top2
-            }           //forgery_
-            else if (iVariant == 4)
-            {
-                iComp.Add(2); itext.Add(0);//head
-                iComp.Add(0); itext.Add(0);//beard
-                iComp.Add(2); itext.Add(0);//hair
-                iComp.Add(2); itext.Add(0);//Torso
-                iComp.Add(1); itext.Add(0);//Legs
-                iComp.Add(0); itext.Add(0);//Hands
-                iComp.Add(0); itext.Add(0);//shoes
-                iComp.Add(0); itext.Add(0);//Scarf
-                iComp.Add(2); itext.Add(0);//AccTop
-                iComp.Add(0); itext.Add(0);//Armor
-                iComp.Add(0); itext.Add(0);//Emb--not used
-                iComp.Add(0); itext.Add(0);//Top2
-            }           //meth_
-            else
-            {
-                iComp.Add(1); itext.Add(2);//head
-                iComp.Add(0); itext.Add(0);//beard
-                iComp.Add(1); itext.Add(0);//hair
-                iComp.Add(1); itext.Add(0);//Torso
-                iComp.Add(1); itext.Add(0);//Legs
-                iComp.Add(0); itext.Add(0);//Hands
-                iComp.Add(1); itext.Add(0);//shoes
-                iComp.Add(0); itext.Add(0);//Scarf
-                iComp.Add(1); itext.Add(0);//AccTop
-                iComp.Add(0); itext.Add(0);//Armor
-                iComp.Add(0); itext.Add(0);//Emb--not used
-                iComp.Add(0); itext.Add(0);//Top2
-            }                                    //weed_
-
-            for (int i = 0; i < iComp.Count; i++)
-            {
-                int iDrawId = iComp[i];
-                int iDrawTx = itext[i];
-                Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, i, iDrawId, iDrawTx, 2);
-            }
-        }
-        public static void BikerRaids_BizzPedsWork(Ped Peddy, int iVariant, bool bMale)
-        {
-
-            LoggerLight.LogThis("BikerRaids_BizzPedsWork, iVariant == " + iVariant + ", bMale == " + bMale);
-
-            List<int> iComp = new List<int>();
-            List<int> itext = new List<int>();
-
-            if (bMale)
-            {
-                if (iVariant == 1)
-                {
-                    int iRace = ReturnStuff.RandInt(0, 1);
-                    iComp.Add(iRace); itext.Add(0);//head
-                    iComp.Add(0); itext.Add(0);//beard
-                    iComp.Add(0); itext.Add(0);//hair
-                    iComp.Add(0); itext.Add(iRace);//Torso
-                    iComp.Add(0); itext.Add(iRace);//Legs
-                    iComp.Add(0); itext.Add(0);//Hands
-                    iComp.Add(0); itext.Add(iRace);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(0); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(0); itext.Add(0);//Top2
-                }                //cocaine_
-                else if (iVariant == 2)
-                {
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//head
-                    iComp.Add(0); itext.Add(0);//beard
-                    iComp.Add(0); itext.Add(0);//hair
-                    iComp.Add(0); itext.Add(0);//Torso
-                    iComp.Add(0); itext.Add(0);//Legs
-                    iComp.Add(0); itext.Add(0);//Hands
-                    iComp.Add(0); itext.Add(0);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(0); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(1); itext.Add(0);//Top2
-                }           //counterfeit_
-                else if (iVariant == 3)
-                {
-                    iComp.Add(ReturnStuff.RandInt(0, 2)); itext.Add(0);//head
-                    iComp.Add(0); itext.Add(0);//beard
-                    iComp.Add(0); itext.Add(0);//hair
-                    iComp.Add(0); itext.Add(0);//Torso
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//Legs
-                    iComp.Add(1); itext.Add(0);//Hands
-                    iComp.Add(0); itext.Add(0);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(0); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(0); itext.Add(0);//Top2
-                }           //forgery_
-                else if (iVariant == 4)
-                {
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//head
-                    iComp.Add(0); itext.Add(0);//beard
-                    iComp.Add(0); itext.Add(0);//hair
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//Torso
-                    iComp.Add(0); itext.Add(0);//Legs
-                    iComp.Add(0); itext.Add(0);//Hands
-                    iComp.Add(0); itext.Add(0);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(0); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(0); itext.Add(0);//Top2
-                }           //meth_
-                else
-                {
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//head
-                    iComp.Add(0); itext.Add(0);//beard
-                    iComp.Add(0); itext.Add(0);//hair
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//Torso
-                    iComp.Add(ReturnStuff.RandInt(0, 3)); itext.Add(0);//Legs
-                    iComp.Add(0); itext.Add(0);//Hands
-                    iComp.Add(0); itext.Add(0);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(0); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(0); itext.Add(0);//Top2
-                }                                    //weed_
-            }
-            else
-            {
-                if (iVariant == 1)
-                {
-                    int iRace = ReturnStuff.RandInt(0, 1);
-                    iComp.Add(iRace); itext.Add(0);//head
-                    if (iRace == 0)
-                        iRace = 1;
-                    else
-                        iRace = 3;
-                    iComp.Add(0); itext.Add(0);//beard
-                    iComp.Add(0); itext.Add(2);//hair
-                    iComp.Add(0); itext.Add(iRace);//Torso
-                    iComp.Add(0); itext.Add(iRace);//Leggs
-                    iComp.Add(0); itext.Add(0);//Hands
-                    if (iRace == 1)
-                        iRace = 2;
-                    else
-                        iRace = 1;
-                    iComp.Add(0); itext.Add(iRace);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(0); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(0); itext.Add(0);//Top2
-                }                //cocaine_
-                else if (iVariant == 2)
-                {
-                    int iRace = ReturnStuff.RandInt(0, 2);
-
-                    iComp.Add(iRace); itext.Add(0);//head
-                    iComp.Add(0); itext.Add(0);//beard
-                    iComp.Add(ReturnStuff.RandInt(0, 2)); itext.Add(0);//hair
-                    if (iRace == 0)
-                        iComp.Add(1);
-                    else
-                        iComp.Add(0);
-                    itext.Add(0);//Torso
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//Legs
-                    iComp.Add(0); itext.Add(0);//Hands
-                    iComp.Add(0); itext.Add(0);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(0); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(0); itext.Add(0);//Top2
-                }           //counterfeit_
-                else if (iVariant == 3)
-                {
-                    int iRace = ReturnStuff.RandInt(0, 3);
-                    iComp.Add(iRace); itext.Add(0);//head
-                    iComp.Add(0); itext.Add(0);//beard
-                    if (iRace == 0)
-                        iComp.Add(ReturnStuff.RandInt(0, 1));
-                    else if (iRace == 1)
-                        iComp.Add(2);
-                    else if (iRace == 2)
-                        iComp.Add(4);
-                    else
-                        iComp.Add(5);
-                    itext.Add(0);//hair
-                    if (iRace == 0)
-                        iComp.Add(ReturnStuff.RandInt(0, 1));
-                    else if (iRace == 1)
-                        iComp.Add(2);
-                    else if (iRace == 2)
-                        iComp.Add(3);
-                    else
-                        iComp.Add(4);
-                    itext.Add(0);//Torso
-                    if (iRace == 0)
-                        iComp.Add(0);
-                    else if (iRace == 1)
-                        iComp.Add(3);
-                    else if (iRace == 2)
-                        iComp.Add(4);
-                    else
-                        iComp.Add(5);
-                    itext.Add(0);//Legs
-                    iComp.Add(0); itext.Add(0);//Hands
-                    iComp.Add(0); itext.Add(0);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(2); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(0); itext.Add(0);//Top2
-                }           //forgery_
-                else if (iVariant == 4)
-                {
-                    iComp.Add(0); itext.Add(0);//head
-                    iComp.Add(0); itext.Add(0);//beard
-                    iComp.Add(0); itext.Add(0);//hair
-                    iComp.Add(0); itext.Add(0);//Torso
-                    iComp.Add(0); itext.Add(0);//Legs
-                    iComp.Add(0); itext.Add(0);//Hands
-                    iComp.Add(0); itext.Add(0);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(0); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(0); itext.Add(0);//Top2
-                }           //meth_
-                else
-                {
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//head
-                    iComp.Add(0); itext.Add(0);//beard
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//hair
-                    iComp.Add(ReturnStuff.RandInt(0, 1)); itext.Add(0);//Torso
-                    iComp.Add(0); itext.Add(0);//Legs
-                    iComp.Add(0); itext.Add(0);//Hands
-                    iComp.Add(0); itext.Add(0);//shoes
-                    iComp.Add(0); itext.Add(0);//Scarf
-                    iComp.Add(0); itext.Add(0);//AccTop
-                    iComp.Add(0); itext.Add(0);//Armor
-                    iComp.Add(0); itext.Add(0);//Emb--not used
-                    iComp.Add(0); itext.Add(0);//Top2
-                }                                    //weed_
-            }
-
-            for (int i = 0; i < iComp.Count; i++)
-            {
-                int iDrawId = iComp[i];
-                int iDrawTx = itext[i];
-                Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, i, iDrawId, iDrawTx, 2);
-            }
-            MissionData.MishPed.Add(Peddy);
-        }
-        public static void TempAgency_02_BuildCluber(Ped Peddy)
-        {
-            PedMultiTask MyCluber = new PedMultiTask
-            {
-                MyPed = new Ped(Peddy.Handle),
-                MySwitch_01 = false,
-                MySwitch_02 = false,
-                MySwitch_03 = false,
-                MyFloat_01 = 0.00f,
-                MyTarget_01 = Vector3.Zero,
-                MyTask_01 = -1,
-                MyTask_02 = -1,
-                MyTask_03 = -1,
-                MyTimer_01 = -1,
-                MyTimer_02 = -1
-            };
-            MissionData.MultiPed.Add(MyCluber);
-        }
-        public static void Pilot04_ImportBob(Vehicle Vhicary)
-        {
-            LoggerLight.LogThis("Pilot04_ImportBob");
-
-            int irandCar = ReturnStuff.RandInt(1, 50);
-            if (irandCar < 10)
-                Vhicary.NumberPlate = "D3V1L";
-            else if (irandCar < 20)
-                Vhicary.NumberPlate = "D34TH4U";
-            else if (irandCar < 30)
-                Vhicary.NumberPlate = "C4TCHM3";
-            else if (irandCar < 40)
-                Vhicary.NumberPlate = "D3V1L";
-            else
-                Vhicary.NumberPlate = "M4K3B4NK";
-            Vhicary.AttachTo(MissionData.VehTrackin_02, Vhicary.Handle, new Vector3(0.0f, 0.0f, -3.0f), new Vector3(0.0f, -15.0f, 0.0f));
-        }
-        public static void ImportsExpo_FunPlates(Vehicle vhicary)
-        {
-            LoggerLight.LogThis("ImportsExpo_FunPlates");
-
-            List<string> IPlate = new List<string>
-            {
-                "JU52FKU",
-                "ZR0 KIDZ",
-                "MUAHAHA",
-                "P54CH0",
-                "B88B8BB",
-                "P004MAD",
-                "CARDIEM",
-                "MNNGFUL",
-                "SU55PCT",
-                "M11LFS",
-                "G5POT",
-                "H0R5SH1T",
-                "CU11NNT",
-                "PB4UGO",
-                "PMS247",
-                "HUF4RTD",
-                "N1NJA",
-                "STFUPLZ",
-                "3JOH22A",
-                "4EVERL8",
-                "KSMYGAS",
-                "EASYRDR",
-                "CYABYE",
-                "JEDIIAM",
-                "X32iAR0",
-                "JC51BEL",
-                "D4TBOI",
-                "YSOFFCR",
-                "TPL55FUN",
-                "A5RSE",
-                "BE11END",
-                "UT02SER",
-                "PENN15",
-                "UG04POO"
-            };
-
-            vhicary.NumberPlate = IPlate[ReturnStuff.RandInt(0, IPlate.Count - 1)];
-        }
-        public static void Racist_MultiPed(Ped Peddy, Vehicle VKick)
-        {
-            PedMultiTask MyRacer = ObjectBuild.AddAMultiped();
-
-            MyRacer.MyName = DataStore.MyLang.Jobtext[10];
-            MyRacer.MyBlip = Peddy.CurrentBlip;
-            MyRacer.MyPed = Peddy;
-            MyRacer.MyVehicle = VKick;
-            MyRacer.MyTarget_01 = VKick.Position;
-            MyRacer.MyTarget_02 = VKick.Position;
-            MyRacer.MyTask_01 = 0;
-            MyRacer.MyTask_02 = 0;
-            MyRacer.MySwitch_01 = false;
-            MyRacer.MySwitch_02 = false;
-            MissionData.MultiPed.Add(MyRacer);
-        }
-        public static void Follow_AddToMuilti(Ped Bob, string sBobsName, Blip BobsBlip, Vehicle VMick)
-        {
-            PedMultiTask MyBob = ObjectBuild.AddAMultiped();
-            MyBob.MyPed = Bob;
-            MyBob.MyName = sBobsName;
-            MyBob.MyBlip = BobsBlip;
-            MyBob.MyVehicle = VMick;
-            MyBob.MyTask_01 = 1;
-            MissionData.MultiPed.Add(MyBob);
-        }
-        public static void AddGroupie(Ped Peddy)
+        private static void AddGroupie(Ped Peddy)
         {
             Function.Call(Hash.SET_PED_AS_GROUP_MEMBER, Peddy.Handle, DataStore.iPlayerGroup);
+        }
+        private static void OhDoKeepUp(Ped Peddy, Ped Leader, float fSpeed, bool bClose)
+        {
+            float fXpos = -2.50f;
+            float fYpos = 1.50f;
+            if (bClose)
+            {
+                if (DataStore.iFolPos > 0)
+                {
+                    fXpos = -1.20f;
+                    fYpos = -0.20f;
+                    DataStore.iFolPos = 0;
+                }
+                else
+                {
+                    fXpos = 1.20f;
+                    fYpos = -0.20f;
+                    DataStore.iFolPos++;
+                }
+            }
+            else
+            {
+                DataStore.iFolPos++;
+                if (DataStore.iFolPos == 1)
+                {
+                    fXpos = -2.50f;
+                    fYpos = 0.00f;
+                }
+                else if (DataStore.iFolPos == 2)
+                {
+                    fXpos = -2.50f;
+                    fYpos = -2.50f;
+                }
+                else if (DataStore.iFolPos == 3)
+                {
+                    fXpos = 2.50f;
+                    fYpos = 0.00f;
+                }
+                else if (DataStore.iFolPos == 4)
+                {
+                    fXpos = 1.50f;
+                    fYpos = 0.00f;
+                }
+                else if (DataStore.iFolPos == 5)
+                {
+                    fXpos = -1.50f;
+                    fYpos = 0.00f;
+                }
+                else if (DataStore.iFolPos == 6)
+                {
+                    fXpos = 2.50f;
+                    fYpos = -2.50f;
+                }
+                else if (DataStore.iFolPos == 7)
+                {
+                    fXpos = -1.50f;
+                    fYpos = -2.50f;
+                    DataStore.iFolPos = 0;
+                }
+            }
+
+            Function.Call(Hash.TASK_FOLLOW_TO_OFFSET_OF_ENTITY, Peddy.Handle, Leader.Handle, fXpos, fYpos, 0.0f, fSpeed, -1, 2.5f, true);
         }
         public static PedMultiTask AddAMultiped()
         {
@@ -1433,7 +1055,7 @@ namespace New_Street_Phone_Missions
                 ArmsRegulator(Pedd, 5);
             }
         }
-        public static void DriveByPlayer(Ped Pedd, bool bDriver)
+        private static void DriveByPlayer(Ped Pedd, bool bDriver)
         {
             LoggerLight.LogThis("DriveByPlayer");
             Pedd.RelationshipGroup = DataStore.GP_Attack;
@@ -1448,7 +1070,7 @@ namespace New_Street_Phone_Missions
             ArmsRegulator(Pedd, 4);
             ArmsRegulator(Pedd, 5);
         }
-        public static void DriveByPed(Ped Pedd, Ped Victim, bool bDriver)
+        private static void DriveByPed(Ped Pedd, Ped Victim, bool bDriver)
         {
             LoggerLight.LogThis("DriveByPlayer");
             Pedd.CanBeTargette﻿d﻿ = true;
@@ -1484,26 +1106,6 @@ namespace New_Street_Phone_Missions
             Function.Call(Hash.SET_PED_COMBAT_ATTRIBUTES, Pedd.Handle, 5, true);
             Function.Call(Hash.SET_PED_COMBAT_ATTRIBUTES, Pedd.Handle, 46, true);
             Function.Call(Hash.SET_PED_COMBAT_ABILITY, Pedd.Handle, 100);
-        }
-        public static void ScaredBy(Vector3 vLoc)
-        {
-            LoggerLight.LogThis("ScaredBy");
-
-            Ped[] LocPeds = World.GetNearbyPeds(vLoc, 65.00f);
-            for (int i = 0; i < LocPeds.Count(); i++)
-            {
-                if (ReturnStuff.PedExists(LocPeds, i))
-                {
-                    Ped Pedx = LocPeds[i];
-
-                    if (Pedx.CurrentPedGroup != Game.Player.Character.CurrentPedGroup)
-                    {
-                        Pedx.Task.ClearAll();
-                        Pedx.Task.ReactAndFlee(Game.Player.Character);
-                        Pedx.AlwaysKeepTask = true;
-                    }
-                }
-            }
         }
         public static void GunningIt(Ped Peddy, int iGun)
         {
@@ -1564,7 +1166,7 @@ namespace New_Street_Phone_Missions
         {
             Function.Call(Hash.GIVE_WEAPON_TO_PED, Peddy.Handle, Function.Call<int>(Hash.GET_HASH_KEY, sWeap), ReturnStuff.MaxAmmo(sWeap, Peddy), false, true);
         }
-        public static void ArmNpcAtachment(string sWeap, string sAttach, Ped Peddy)
+        private static void ArmNpcAtachment(string sWeap, string sAttach, Ped Peddy)
         {
             Function.Call(Hash.GIVE_WEAPON_COMPONENT_TO_PED, Peddy.Handle, Function.Call<int>(Hash.GET_HASH_KEY, sWeap), Function.Call<int>(Hash.GET_HASH_KEY, sAttach));
         }
@@ -1754,7 +1356,7 @@ namespace New_Street_Phone_Missions
             }
             LoggerLight.LogThis("GetOutofVeh Exit == " + bExited);
         }
-        public static void FleeFromVeh(Ped Peddy)
+        private static void FleeFromVeh(Ped Peddy)
         {
             LoggerLight.LogThis("FleeFromVeh");
 
@@ -1808,7 +1410,7 @@ namespace New_Street_Phone_Missions
             Peddy.AlwaysKeepTask = true;
             Peddy.BlockPermanentEvents = true;
         }
-        public static void FlyNShoot(Ped Pedd, Vehicle vHeli, Ped Target)
+        private static void FlyNShoot(Ped Pedd, Vehicle vHeli, Ped Target)
         {
             LoggerLight.LogThis("FlyNShoot");
 
@@ -1822,13 +1424,13 @@ namespace New_Street_Phone_Missions
             Pedd.AlwaysKeepTask = true;
             Pedd.BlockPermanentEvents = true;
         }
-        public static void PlayerAtackTracker()
+        private static void PlayerAtackTracker()
         {
             while (MissionData.bPlayerAtt)
             {
                 if (MissionData.Npc_01 != null)
                 {
-                    if (Game.Player.Character.Position.DistanceTo(MissionData.Npc_01.Position) > 250.00f || MissionData.Npc_01.IsDead || Game.Player.Character.IsDead)
+                    if (TheMissions.AmIFar(MissionData.Npc_01.Position, 250f) || MissionData.Npc_01.IsDead || Game.Player.Character.IsDead)
                     {
                         MissionData.Npc_01 = null;
                         MissionData.bPlayerAtt = false;
@@ -1844,6 +1446,7 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("VehicleSpawn, sVehModel == " + sVehModel + ", bIsInvinc == " + bIsInvinc + ", bFreeze == " + bFreeze + ", iMod == " + iMod + ", iExtraMod == " + iExtraMod + ", iVehTrack == " + iVehTrack);
 
             Vehicle BuildVehicle = null;
+
             int iVehHash = -1;
 
             if (sVehModel == "GetPlayersVeh")
@@ -1973,7 +1576,7 @@ namespace New_Street_Phone_Missions
                 else if (iExtraMod == 5)
                 {
                     Vehic.CurrentBlip.Color = BlipColor.Blue;
-                    ImportsExpo_FunPlates(Vehic);
+                    TheMissions.ImportsExpo_FunPlates(Vehic);
                     MissionData.iMissionSeq = 3;
                 }
                 else if (iExtraMod == 6)
@@ -2114,7 +1717,7 @@ namespace New_Street_Phone_Missions
             }    // Add a NPCPiolot -- Job 6 area 4
             else if (iMod == 7)
             {
-                Pilot04_ImportBob(Vehic);
+                TheMissions.Pilot04_ImportBob(Vehic);
             }    // Attach to cargobob -- Job 6 area 4
             else if (iMod == 8)
             {
@@ -2146,9 +1749,9 @@ namespace New_Street_Phone_Missions
                         Pedro.RelationshipGroup = DataStore.GP_BNPCs;
 
                         if (iNoSeats == 1)
-                            Follow_AddToMuilti(Pedro, "", Vehic.CurrentBlip, Vehic);
+                            TheMissions.Follow_AddToMuilti(Pedro, "", Vehic.CurrentBlip, Vehic);
                         else
-                            Follow_AddToMuilti(Pedro, "", null, null);
+                            TheMissions.Follow_AddToMuilti(Pedro, "", null, null);
 
                         iNoSeats -= 1;
                     }
@@ -2182,9 +1785,9 @@ namespace New_Street_Phone_Missions
                         Pedro.RelationshipGroup = DataStore.GP_BNPCs;
 
                         if (iNoSeats == 1)
-                            Follow_AddToMuilti(Pedro, "", Vehic.CurrentBlip, Vehic);
+                            TheMissions.Follow_AddToMuilti(Pedro, "", Vehic.CurrentBlip, Vehic);
                         else
-                            Follow_AddToMuilti(Pedro, "", null, null);
+                            TheMissions.Follow_AddToMuilti(Pedro, "", null, null);
 
                         iNoSeats -= 1;
                     }
@@ -2355,8 +1958,8 @@ namespace New_Street_Phone_Missions
             }   // thief heli
             else if (iMod == 29)
             {
-
-            }   // Empty
+                MissionData.Npc_02 = NPCSpawn(ReturnStuff.RandNPC(32), Vehic.Position, Vehic.Heading, false, 150, 7, 1, Vehic, 0, false, 0, 0, "");
+            }   // BlankNpc2 Sitting In Vehicle
             else if (iMod == 30)
             {
                 Function.Call(Hash._SET_VEHICLE_LANDING_GEAR, Vehic.Handle, 3);

@@ -22,41 +22,40 @@ namespace New_Street_Phone_Missions
         public static bool bBuildMode { get; set; }
         public static bool bNotPause { get; set; }
 
-        public static int iProcessForYacht { get; set; }
-        public static int iProcessForPegs { get; set; }
-        public static int iPegsSafeHeli { get; set; }
-        public static int iPegsWarHeli { get; set; }
-        public static int iPegsSafePlane { get; set; }
-        public static int iPegsWarPlane { get; set; }
-        public static int iPegsboats { get; set; }
-        public static int iPegsimortas { get; set; }
-        public static int iMeddicc { get; set; }
+        public static readonly int iProcessForYacht = System.Environment.ProcessorCount* 15;
+        public static readonly int iProcessForPegs = System.Environment.ProcessorCount* 17;
+        public static readonly int iPegsSafeHeli = System.Environment.ProcessorCount* 7;
+        public static readonly int iPegsWarHeli = System.Environment.ProcessorCount* 4;
+        public static readonly int iPegsSafePlane = System.Environment.ProcessorCount* 13;
+        public static readonly int iPegsWarPlane = System.Environment.ProcessorCount* 9;
+        public static readonly int iPegsboats = System.Environment.ProcessorCount* 3;
+        public static readonly int iPegsimortas = System.Environment.ProcessorCount* 11;
+        public static readonly int iMeddicc = System.Environment.ProcessorCount* 18;
 
         public static byte iCoinBats { get; set; }
         public static byte iLookForPB { get; set; }
         public static byte iBuildingUp { get; set; }
+        public static byte iFolPos { get; set; }
 
         public static int iPlayerGroup { get; set; }
         public static int GP_Player { get; set; }
-        public static int GP_ANPCs { get; set; }
-        public static int GP_BNPCs { get; set; }
-        public static int GP_Attack { get; set; }
-        public static int GP_Mental { get; set; }
+        public static readonly int GP_ANPCs = World.AddRelationshipGroup("GroupA");
+        public static readonly int GP_BNPCs = World.AddRelationshipGroup("GroupB");
+        public static readonly int GP_Attack = World.AddRelationshipGroup("AttackNPCs");
+        public static readonly int GP_Mental = World.AddRelationshipGroup("MentalNPCs");
 
-        public static string sBoatLaunch { get; set; }
-        public static string sDefaulted { get; set; }
-        public static string sNSPMSet { get; set; }
-        public static string sBoatOff { get; set; }
-        public static string sNEW_SPM_XML { get; set; }
-        public static string sOLD_SPM_XML { get; set; }
-        public static string sNSPMLanguage { get; set; }
-        public static string sNSPMAddonCarz { get; set; }
-        public static string sNSPMBlips { get; set; }
-        public static string sNSPMDatafile { get; set; }
-        public static string sNSPMCont { get; set; }
-        public static string sNSPMYacht { get; set; }
-        public static string sNSPMRandNum { get; set; }
-        public static string sVersion { get; set; }
+        public static readonly string sVersion = "3.71";
+        public static readonly string sDefaulted = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe/DefaultOut.Xml";
+        public static readonly string sNSPMSet = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Settings.Xml";
+        public static readonly string sNEW_SPM_XML = "" + Directory.GetCurrentDirectory() + "/Scripts/NEW_SPM_XML.Xml";
+        public static readonly string sOLD_SPM_XML = "" + Directory.GetCurrentDirectory() + "/Scripts/OLD_SPM_XML.Xml";
+        public static readonly string sNSPMLanguage = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Language";
+        public static readonly string sNSPMAddonCarz = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMAddonCarz.Xml";
+        public static readonly string sNSPMBlips = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Blips.Xml";
+        public static readonly string sNSPMDatafile = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMData.NSPM";
+        public static readonly string sNSPMCont = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMContact.Xml";
+        public static readonly string sNSPMYacht = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM_Yacht.dll";
+        public static readonly string sNSPMRandNum = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Rando.Xml";
 
         public static Vector3 vPhoneCorona { get; set; }
 
@@ -67,12 +66,10 @@ namespace New_Street_Phone_Missions
         public static Lingoo MyLang { get; set; }
         public static ClothBankXML MaleCloth { get; set; }
         public static ClothBankXML FemaleCloth { get; set; }
+        public static RandList MyRands { get; set; }
 
         public static DatFile MyDatSet { get; set; }
         public static PlayerAssets MyAssets { get; set; }
-
-
-        public static RandomPlusList RNGod { get; set; }
 
         public static List<string> sPhoneType { get; set; }
         public static List<string> sDoorList { get; set; }
@@ -109,41 +106,13 @@ namespace New_Street_Phone_Missions
             bBuildMode = false;
             bNotPause = false;
 
-            iProcessForYacht = System.Environment.ProcessorCount * 15;
-            iProcessForPegs = System.Environment.ProcessorCount * 17;
-            iPegsSafeHeli = System.Environment.ProcessorCount * 7;
-            iPegsWarHeli = System.Environment.ProcessorCount * 4;
-            iPegsSafePlane = System.Environment.ProcessorCount * 13;
-            iPegsWarPlane = System.Environment.ProcessorCount * 9;
-            iPegsboats = System.Environment.ProcessorCount * 3;
-            iPegsimortas = System.Environment.ProcessorCount * 11;
-            iMeddicc = System.Environment.ProcessorCount * 18;
-
             iCoinBats = 0;
             iLookForPB = 0;
             iBuildingUp = 0;
-
-            sVersion = "3.4";
-            sBoatLaunch = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/BooatLaunch.txt";
-            sDefaulted = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe/DefaultOut.Xml";
-            sNSPMSet = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Settings.Xml";
-            sBoatOff = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/BooatOff.txt";
-            sNEW_SPM_XML = "" + Directory.GetCurrentDirectory() + "/Scripts/NEW_SPM_XML.Xml";
-            sOLD_SPM_XML = "" + Directory.GetCurrentDirectory() + "/Scripts/OLD_SPM_XML.Xml";
-            sNSPMLanguage = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Language";
-            sNSPMAddonCarz = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMAddonCarz.Xml";
-            sNSPMBlips = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Blips.Xml";
-            sNSPMDatafile = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMData.NSPM";
-            sNSPMCont = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMContact.Xml";
-            sNSPMYacht = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM_Yacht.dll";
-            sNSPMRandNum = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/NSPMrCount.Xml";
+            iFolPos = 0;
 
             iPlayerGroup = 0;
             GP_Player = Game.Player.Character.RelationshipGroup;
-            GP_ANPCs = World.AddRelationshipGroup("GroupA");
-            GP_BNPCs = World.AddRelationshipGroup("GroupB");
-            GP_Attack = World.AddRelationshipGroup("AttackNPCs");
-            GP_Mental = World.AddRelationshipGroup("MentalNPCs");
 
             LangXLists = LangFiles();
 
@@ -176,20 +145,33 @@ namespace New_Street_Phone_Missions
 
             MaleCloth = new ClothBankXML();
             FemaleCloth = new ClothBankXML();
+            MyRands = MakeRands();
 
             AppMadness = AppyNess();
 
             Mk2WeapsMain = new List<MyMk2Weaps>();
             PlayerWeapXList = new List<PlayerWeaps>();
 
-            RNGod = LoadUpRando();
-
             OnLoadup();
             MissionData.MissionDataLoad();
             RWDatFile.SaveDat(-1, 0);
             bHasLoaded = true;
         }
+        public static RandList MakeRands()
+        {
+            RandList ThisList = null;
 
+            if (File.Exists(DataStore.sNSPMRandNum))
+            {
+                ThisList = ReadWriteXML.LoadXmlRand(DataStore.sNSPMRandNum);
+                if (ThisList == null)
+                    ThisList = new RandList();
+            }
+            else
+                ThisList = new RandList();
+
+            return ThisList;
+        }
         public static void DelOldLog()
         {
             string sBeeLogs = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/BeeLog.txt";
@@ -780,9 +762,12 @@ namespace New_Street_Phone_Missions
             sMistext.Add("Make your way to the center of the ~y~Drop Zone~w~.");										//235
             sMistext.Add("You are outside of the ~y~Drop Zone~w~.");													//236
             sMistext.Add("Goto the ~y~Facility~w~.");										                            //237
-            sMistext.Add("");										//238
-            sMistext.Add("");										//239
-            sMistext.Add("");										//240
+            sMistext.Add("Get to the ~y~Vantage Point~w~.");										//238
+            sMistext.Add("Collect the ~y~Sniper Rifle~w~.");										//239
+            sMistext.Add("Eliminate the ~y~Target~w~.");										//240
+            sMistext.Add("");										//241
+            sMistext.Add("");										//242
+            sMistext.Add("");										//243
 
             sContext.Clear();
             sContext.Add("Use the ~INPUT_DETONATE~ for Down and ~INPUT_CONTEXT~ for Up, Builder Mission = ");								//0
@@ -817,10 +802,11 @@ namespace New_Street_Phone_Missions
             sContext.Add("Hold ~INPUT_CONTEXT~ to jump from the plane.");																	//29
             sContext.Add("~n~ ~INPUT_JUMP~ to exit. ~INPUT_DETONATE~/~INPUT_CONTEXT~, to Deduct/Add.");										//30
             sContext.Add("Press ~INPUT_VEH_EXIT~ to reset to last checkpoint.");                                                            //31
-            sContext.Add("");           //32
-            sContext.Add("");           //33
-            sContext.Add("");           //34
+            sContext.Add("Press ~INPUT_CONTEXT~ to go prone.");           //32
+            sContext.Add(" , Press ~INPUT_CONTEXT~ to change.");           //33
+            sContext.Add("Press ~INPUT_CONTEXT~ to stand up.");           //34
             sContext.Add("");           //35
+            sContext.Add("");           //36
 
             sJobtext.Clear();
             sJobtext.Add("Trucking");                                                          	                    		//0
@@ -914,7 +900,7 @@ namespace New_Street_Phone_Missions
             sJobtext.Add("This state has gone in to ~b~Free Fall~w~ are you ready to take a jump.");                     	//88
             sJobtext.Add("No one wants to eat out anymore.. So we must ~b~Deliverwho~w~ the restaurant to them.");			//89
             sJobtext.Add("You have no mission types selected.");                                                          	//90
-            sJobtext.Add("");                                                                                               //91
+            sJobtext.Add("Sniper");                                                                                               //91
             sJobtext.Add("");                                                                                               //92
             sJobtext.Add("");                                                                                               //93
             sJobtext.Add("");                                                                                               //94
@@ -1273,9 +1259,9 @@ namespace New_Street_Phone_Missions
             }
 
 
-            if (NewSet.ModVersion != 35000)
+            if (NewSet.ModVersion != 37000)
             {
-                NewSet.ModVersion = 35000;
+                NewSet.ModVersion = 37000;
                 ReadWriteXML.SaveXmlSets(NewSet, sNSPMSet);
             }
 
@@ -1639,15 +1625,6 @@ namespace New_Street_Phone_Missions
             }
 
             return Carzz;
-        }
-        public static RandomPlusList LoadUpRando()
-        {
-            RandomPlusList MyRando = new RandomPlusList();
-
-            if (File.Exists(sNSPMRandNum))
-                MyRando = ReadWriteXML.LoadXmlRand(DataStore.sNSPMRandNum);
-
-            return MyRando;
         }
         public static void LoadOnlineIps(bool bAdd)
         {

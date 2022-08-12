@@ -1,4 +1,5 @@
 ﻿using New_Street_Phone_Missions.Classes;
+using GTA;
 using System;
 using System.IO;
 using System.Xml.Serialization;
@@ -57,11 +58,11 @@ namespace New_Street_Phone_Missions
                 xml.Serialize(sw, config);
             }
         }
-        public static void SaveXmlRand(RandomPlusList config, string fileName)
+        public static void SaveXmlRand(RandList config, string fileName)
         {
             LoggerLight.LogThis("SaveXmlRand : fileName :" + fileName);
 
-            XmlSerializer xml = new XmlSerializer(typeof(RandomPlusList));
+            XmlSerializer xml = new XmlSerializer(typeof(RandList));
             using (StreamWriter sw = new StreamWriter(fileName))
             {
                 xml.Serialize(sw, config);
@@ -97,6 +98,31 @@ namespace New_Street_Phone_Missions
                 xml.Serialize(sw, config);
             }
         }
+        public static void SaveXmlContacts(XmlContacts config, string fileName)
+        {
+            XmlSerializer xml = new XmlSerializer(typeof(XmlContacts));
+            using (StreamWriter sw = new StreamWriter(fileName))
+            {
+                xml.Serialize(sw, config);
+            }
+        }
+        public static XmlContacts LoadXmlContacts(string fileName)
+        {
+            try
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(XmlContacts));
+                using (StreamReader sr = new StreamReader(fileName))
+                {
+                    return (XmlContacts)xml.Deserialize(sr);
+                }
+                
+            }
+            catch
+            {
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
+                return new XmlContacts();
+            }
+        }
         public static ClothBank LoadXmlClothDefault(string fileName)
         {
             LoggerLight.LogThis("LoadXmlClothDefault : " + fileName);
@@ -110,12 +136,11 @@ namespace New_Street_Phone_Missions
                 {
                     YourBank = (ClothBank)xml.Deserialize(sr);
                 }
-                LoggerLight.LogThis("LoadXmlClothDefault : Worked");
                 return YourBank;
             }
             catch (Exception)
             {
-                LoggerLight.LogThis("LoadXmlClothDefault : Failed");
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
                 return null;
             }
         }
@@ -132,12 +157,11 @@ namespace New_Street_Phone_Missions
                 {
                     YourBank = (ClothBankXML)xml.Deserialize(sr);
                 }
-                LoggerLight.LogThis("LoadXmlCloth : Worked");
                 return YourBank;
             }
             catch (Exception)
             {
-                LoggerLight.LogThis("LoadXmlCloth : Failed");
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
                 return null;
             }
 
@@ -155,12 +179,11 @@ namespace New_Street_Phone_Missions
                 {
                     YourBank = (XmlSetings)xml.Deserialize(sr);
                 }
-                LoggerLight.LogThis("LoadXmlSets : Worked");
                 return YourBank;
             }
             catch (Exception)
             {
-                LoggerLight.LogThis("LoadXmlSets : Failed");
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
                 return null;
             }
         }
@@ -177,12 +200,11 @@ namespace New_Street_Phone_Missions
                 {
                     YourBank = (CustomVeh)xml.Deserialize(sr);
                 }
-                LoggerLight.LogThis("LoadXmlCustom : Worked");
                 return YourBank;
             }
             catch (Exception)
             {
-                LoggerLight.LogThis("LoadXmlCustom : Failed");
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
                 return null;
             }
         }
@@ -199,34 +221,32 @@ namespace New_Street_Phone_Missions
                 {
                     YourBank = (XmlContacts)xml.Deserialize(sr);
                 }
-                LoggerLight.LogThis("LoadXmlCont : Worked");
                 return YourBank;
             }
             catch (Exception)
             {
-                LoggerLight.LogThis("LoadXmlCont : Failed");
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
                 return null;
             }
         }
-        public static RandomPlusList LoadXmlRand(string fileName)
+        public static RandList LoadXmlRand(string fileName)
         {
             LoggerLight.LogThis("LoadXmlRand : " + fileName);
 
-            RandomPlusList YourBank;
+            RandList YourBank;
 
             try
             {
-                XmlSerializer xml = new XmlSerializer(typeof(RandomPlusList));
+                XmlSerializer xml = new XmlSerializer(typeof(RandList));
                 using (StreamReader sr = new StreamReader(fileName))
                 {
-                    YourBank = (RandomPlusList)xml.Deserialize(sr);
+                    YourBank = (RandList)xml.Deserialize(sr);
                 }
-                LoggerLight.LogThis("LoadXmlRand : Worked");
                 return YourBank;
             }
             catch (Exception)
             {
-                LoggerLight.LogThis("LoadXmlRand : Failed");
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
                 return null;
             }
         }
@@ -243,12 +263,11 @@ namespace New_Street_Phone_Missions
                 {
                     YourBank = (BlipStore)xml.Deserialize(sr);
                 }
-                LoggerLight.LogThis("LoadXmlBlip : Worked");
                 return YourBank;
             }
             catch (Exception)
             {
-                LoggerLight.LogThis("LoadXmlBlip : Failed");
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
                 return null;
             }
         }
@@ -265,12 +284,11 @@ namespace New_Street_Phone_Missions
                 {
                     YourBank = (Lingoo)xml.Deserialize(sr);
                 }
-                LoggerLight.LogThis("LoadXmlLing : Worked");
                 return YourBank;
             }
             catch (Exception)
             {
-                LoggerLight.LogThis("LoadXmlLing : Failed");
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
                 return null;
             }
         }
@@ -287,12 +305,11 @@ namespace New_Street_Phone_Missions
                 {
                     YourBank = (MissionBuilder)xml.Deserialize(sr);
                 }
-                LoggerLight.LogThis("LoadXmMissions : Worked");
                 return YourBank;
             }
             catch (Exception)
             {
-                LoggerLight.LogThis("LoadXmMissions : Failed");
+                UI.Notify("~r~" + fileName + "Is broken please delete or fix this Xml");
                 return null;
             }
         }

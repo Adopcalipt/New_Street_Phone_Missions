@@ -1,6 +1,7 @@
 ﻿using New_Street_Phone_Missions.Classes;
 using System.Collections.Generic;
 using System.IO;
+using GTA;
 
 namespace New_Street_Phone_Missions
 {
@@ -9,70 +10,76 @@ namespace New_Street_Phone_Missions
         public static void SaveDat(int iChanges, int iChange)
         {
             LoggerLight.LogThis("SaveDat, iChanges == " + iChanges + ",iChange == " + iChange);
-            List<int> iData = new List<int>();
-
-            if (File.Exists(DataStore.sNSPMDatafile))
+            if (iChanges < 15)
             {
-                using (FileStream fs = File.Open(DataStore.sNSPMDatafile, FileMode.Open))
+                List<int> iData = new List<int>();
+
+                if (File.Exists(DataStore.sNSPMDatafile))
                 {
-                    try
+                    using (FileStream fs = File.Open(DataStore.sNSPMDatafile, FileMode.Open))
                     {
-                        using (BinaryReader r = new BinaryReader(fs))
+                        try
                         {
-                            iData.Add(r.ReadInt32());       //0
-                            iData.Add(r.ReadInt32());       //1
-                            iData.Add(r.ReadInt32());       //2
-                            iData.Add(r.ReadInt32());       //3
-                            iData.Add(r.ReadInt32());       //4
-                            iData.Add(r.ReadInt32());       //5
-                            iData.Add(r.ReadInt32());       //6
-                            iData.Add(r.ReadInt32());       //7
-                            iData.Add(r.ReadInt32());       //8
-                            iData.Add(r.ReadInt32());       //9
-                            iData.Add(r.ReadInt32());       //10
-                            iData.Add(r.ReadInt32());       //11
-                            iData.Add(r.ReadInt32());       //12
-                            iData.Add(r.ReadInt32());       //13
+                            using (BinaryReader r = new BinaryReader(fs))
+                            {
+                                iData.Add(r.ReadInt32());       //0
+                                iData.Add(r.ReadInt32());       //1
+                                iData.Add(r.ReadInt32());       //2
+                                iData.Add(r.ReadInt32());       //3
+                                iData.Add(r.ReadInt32());       //4
+                                iData.Add(r.ReadInt32());       //5
+                                iData.Add(r.ReadInt32());       //6
+                                iData.Add(r.ReadInt32());       //7
+                                iData.Add(r.ReadInt32());       //8
+                                iData.Add(r.ReadInt32());       //9
+                                iData.Add(r.ReadInt32());       //10
+                                iData.Add(r.ReadInt32());       //11
+                                iData.Add(r.ReadInt32());       //12
+                                iData.Add(r.ReadInt32());       //13
+                                iData.Add(r.ReadInt32());       //14
+                            }
+                        }
+                        catch
+                        {
+                            UI.Notify("~r~" + DataStore.sNSPMDatafile + "Is broken please delete this file");
+                            for (int i = 0; i < 15; i++)
+                                iData.Add(0);
                         }
                     }
-                    catch
-                    {
-                        for (int i = 0; i < 14; i++)
-                            iData.Add(0);
-                    }
-                }
 
-                if (iChanges != -1)
-                    iData[iChanges] = iChange;
-                using (FileStream fs = File.Open(DataStore.sNSPMDatafile, FileMode.Create))
-                {
-                    using (BinaryWriter w = new BinaryWriter(fs))
+                    if (iChanges != -1)
+                        iData[iChanges] = iChange;
+                    using (FileStream fs = File.Open(DataStore.sNSPMDatafile, FileMode.Create))
                     {
-                        for (int i = 0; i < iData.Count; i++)
-                            w.Write(iData[i]);
+                        using (BinaryWriter w = new BinaryWriter(fs))
+                        {
+                            for (int i = 0; i < iData.Count; i++)
+                                w.Write(iData[i]);
+                        }
                     }
                 }
-            }
-            else
-            {
-                using (FileStream fs = File.Open(DataStore.sNSPMDatafile, FileMode.Create))
+                else
                 {
-                    using (BinaryWriter w = new BinaryWriter(fs))
+                    using (FileStream fs = File.Open(DataStore.sNSPMDatafile, FileMode.Create))
                     {
-                        w.Write(DataStore.MyDatSet.iOwnaYacht);            //0
-                        w.Write(DataStore.MyDatSet.iGotPegsus);            //1
-                        w.Write(DataStore.MyDatSet.iPegsSafeHeliTest);     //2
-                        w.Write(DataStore.MyDatSet.iPegsWarHeliTest);      //3
-                        w.Write(DataStore.MyDatSet.iPegsSafePlaneTest);    //4
-                        w.Write(DataStore.MyDatSet.iPegsWarPlaneTest);     //5
-                        w.Write(DataStore.MyDatSet.iPegsboatsTest);        //6
-                        w.Write(DataStore.MyDatSet.iPegsimortasTest);      //7
-                        w.Write(DataStore.MyDatSet.iMeddicTest);           //8
-                        w.Write(DataStore.MyDatSet.iNSPMBank);             //9
-                        w.Write(DataStore.MyDatSet.iNSPMCLowRisk);         //10
-                        w.Write(DataStore.MyDatSet.iNSPMCHighRisk);        //11
-                        w.Write(DataStore.MyDatSet.iWantedBribe);          //12
-                        w.Write(DataStore.MyDatSet.iFubard);               //13
+                        using (BinaryWriter w = new BinaryWriter(fs))
+                        {
+                            w.Write(DataStore.MyDatSet.iOwnaYacht);            //0
+                            w.Write(DataStore.MyDatSet.iGotPegsus);            //1
+                            w.Write(DataStore.MyDatSet.iPegsSafeHeliTest);     //2
+                            w.Write(DataStore.MyDatSet.iPegsWarHeliTest);      //3
+                            w.Write(DataStore.MyDatSet.iPegsSafePlaneTest);    //4
+                            w.Write(DataStore.MyDatSet.iPegsWarPlaneTest);     //5
+                            w.Write(DataStore.MyDatSet.iPegsboatsTest);        //6
+                            w.Write(DataStore.MyDatSet.iPegsimortasTest);      //7
+                            w.Write(DataStore.MyDatSet.iMeddicTest);           //8
+                            w.Write(DataStore.MyDatSet.iNSPMBank);             //9
+                            w.Write(DataStore.MyDatSet.iNSPMCLowRisk);         //10
+                            w.Write(DataStore.MyDatSet.iNSPMCHighRisk);        //11
+                            w.Write(DataStore.MyDatSet.iWantedBribe);          //12
+                            w.Write(DataStore.MyDatSet.iFubard);               //13
+                            w.Write(DataStore.MyDatSet.iTrinket);              //14
+                        }
                     }
                 }
             }
@@ -105,11 +112,14 @@ namespace New_Street_Phone_Missions
                             DamDat.iNSPMCHighRisk = r.ReadInt32();        //11
                             DamDat.iWantedBribe = r.ReadInt32();          //12
                             DamDat.iFubard = r.ReadInt32();               //13
+                            DamDat.iTrinket = r.ReadInt32();              //14
                         }
                     }
                 }
                 catch
                 {
+                    UI.Notify("~r~" + DataStore.sNSPMDatafile + "Is broken please delete this file");
+
                     DamDat.iOwnaYacht = 0;            //0
                     DamDat.iGotPegsus = 0;            //1
                     DamDat.iPegsSafeHeliTest = 0;     //2
@@ -124,6 +134,7 @@ namespace New_Street_Phone_Missions
                     DamDat.iNSPMCHighRisk = 0;        //11
                     DamDat.iWantedBribe = 0;          //12
                     DamDat.iFubard = 0;               //13
+                    DamDat.iTrinket = 0;              //14
                 }
             }
             else
@@ -142,6 +153,7 @@ namespace New_Street_Phone_Missions
                 DamDat.iNSPMCHighRisk = 0;        //11
                 DamDat.iWantedBribe = 0;          //12
                 DamDat.iFubard = 0;               //13
+                DamDat.iTrinket = 0;              //14
             }
             
             return DamDat;

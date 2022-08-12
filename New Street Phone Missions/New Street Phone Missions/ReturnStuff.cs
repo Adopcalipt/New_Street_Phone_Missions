@@ -8,7 +8,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 
-
 namespace New_Street_Phone_Missions
 {
     public class ReturnStuff 
@@ -2977,10 +2976,6 @@ namespace New_Street_Phone_Missions
                 sPeds.Add("a_f_m_beach_01");    //"Beach Female" />
                 sPeds.Add("a_f_y_beach_01");    //"Beach Young Female" />
                 sPeds.Add("a_f_m_bodybuild_01");    //"Bodybuilder Female" />
-                sPeds.Add("a_f_y_fitness_01");    //"Fitness Female" />
-                sPeds.Add("a_f_y_fitness_02");    //"Fitness Female 2" />
-                sPeds.Add("a_f_y_runner_01");    //"Jogger Female" />
-                sPeds.Add("a_f_y_yoga_01");    //"Yoga Female" />
                 sPeds.Add("a_m_m_beach_01");    //"Beach Male" />
                 sPeds.Add("a_m_m_beach_02");    //"Beach Male 2" />
                 sPeds.Add("a_m_y_musclbeac_01");    //"Beach Muscle Male" />
@@ -2989,8 +2984,6 @@ namespace New_Street_Phone_Missions
                 sPeds.Add("a_m_y_beach_01");    //"Beach Young Male" />
                 sPeds.Add("a_m_y_beach_02");    //"Beach Young Male 2" />
                 sPeds.Add("a_m_y_beach_03");    //"Beach Young Male 3" />
-                sPeds.Add("a_m_y_runner_01");    //"Jogger Male" />
-                sPeds.Add("a_m_y_runner_02");    //"Jogger Male 2" />
                 sPeds.Add("a_m_m_malibu_01");    //"Malibu Male" />
                 sPeds.Add("a_m_y_sunbathe_01");    //"Sunbather Male" />
                 sPeds.Add("a_m_y_surfer_01");    //"Surfer" />
@@ -3113,6 +3106,12 @@ namespace New_Street_Phone_Missions
             {
                 sPeds.Add("a_m_y_hiker_01");    //"Hiker Male" />
                 sPeds.Add("a_f_y_hiker_01");    //"Hiker Female" />
+                sPeds.Add("a_m_y_runner_01");    //"Jogger Male" />
+                sPeds.Add("a_m_y_runner_02");    //"Jogger Male 2" />
+                sPeds.Add("a_f_y_fitness_01");    //"Fitness Female" />
+                sPeds.Add("a_f_y_fitness_02");    //"Fitness Female 2" />
+                sPeds.Add("a_f_y_runner_01");    //"Jogger Female" />
+                sPeds.Add("a_f_y_yoga_01");    //"Yoga Female" />
             }       //Outdoors
             else if (iRando == 20)
             {
@@ -4015,14 +4014,14 @@ namespace New_Street_Phone_Missions
 
             return iReturnInt;
         }
-        public static bool PedRunToFoward(Ped Peddy, List<Vector3> MyLister, int iLocal)
+        public static bool PedRunToFoward(Ped Peddy, List<Vector3> MyLister, int iLocal, float fSpeed)
         {
             LoggerLight.LogThis("PedRunToFoward");
 
             bool bInUse = true;
 
             if (iLocal < MyLister.Count)
-                ObjectHand.WalkThisWay(Peddy, MyLister[iLocal], 2.00f);
+                ObjectHand.WalkThisWay(Peddy, MyLister[iLocal], fSpeed);
             else
                 bInUse = false;
 
@@ -4359,6 +4358,8 @@ namespace New_Street_Phone_Missions
                     sVehicles.Add("ZENO");//
                     sVehicles.Add("ZENTORNO");//
                     sVehicles.Add("ZORRUSSO");//
+                    sVehicles.Add("torero2");//
+                    sVehicles.Add("lm87");//
                 }       //Super
                 else if (iList == 2)
                 {
@@ -4449,6 +4450,12 @@ namespace New_Street_Phone_Missions
                     sVehicles.Add("VECTRE");//
                     sVehicles.Add("VERLIERER2");//
                     sVehicles.Add("ZR350");//
+                    sVehicles.Add("corsita");//
+                    sVehicles.Add("omnisegt");//
+                    sVehicles.Add("sm722");//
+                    sVehicles.Add("tenf");//
+                    sVehicles.Add("tenf2");//
+                    sVehicles.Add("sentinel4");//
                 }       //Sports
                 else if (iList == 3)
                 {
@@ -4467,6 +4474,8 @@ namespace New_Street_Phone_Missions
                     sVehicles.Add("WINDSOR2");//<!-- Windsor Drop -->
                     sVehicles.Add("ZION");//
                     sVehicles.Add("ZION2");//<!-- Zion Cabrio -->
+                    sVehicles.Add("kanjosj");//
+                    sVehicles.Add("postlude");//
                 }       //Coups
                 else if (iList == 4)
                 {
@@ -4531,6 +4540,10 @@ namespace New_Street_Phone_Missions
                     sVehicles.Add("VOODOO2");//<!-- Voodoo Custom -->
                     sVehicles.Add("TAMPA3");//<!-- Weaponized Tampa -->
                     sVehicles.Add("YOSEMITE");//
+                    sVehicles.Add("greenwood");//
+                    sVehicles.Add("ruiner4");//
+                    sVehicles.Add("vigero2");//
+                    sVehicles.Add("weevil2");//
                 }       //Muscle
                 else if (iList == 5)
                 {
@@ -4617,6 +4630,7 @@ namespace New_Street_Phone_Missions
                     sVehicles.Add("WARRENER");//
                     sVehicles.Add("WARRENER2");//<!-- Warrener HKR -->
                     sVehicles.Add("WASHINGTON");//
+                    sVehicles.Add("rhinehart");//
                 }       //Sedan
                 else if (iList == 7)
                 {
@@ -4668,6 +4682,7 @@ namespace New_Street_Phone_Missions
                     sVehicles.Add("WINKY");//
                     sVehicles.Add("YOSEMITE3");//<!-- Yosemite Rancher -->
                     sVehicles.Add("ZHABA");//
+                    sVehicles.Add("draugur");//
                 }       //Offroad
                 else if (iList == 8)
                 {
@@ -4727,6 +4742,7 @@ namespace New_Street_Phone_Missions
                     sVehicles.Add("PRAIRIE");//
                     sVehicles.Add("RHAPSODY");//
                     sVehicles.Add("WEEVIL");//
+                    sVehicles.Add("brioso3");//
                 }       //Compact
                 else if (iList == 10)
                 {
@@ -5040,6 +5056,7 @@ namespace New_Street_Phone_Missions
                     sVehicles.Add("SWIFT");//
                     sVehicles.Add("SWIFT2");//<!-- Swift Deluxe -->
                     sVehicles.Add("VOLATUS");//
+                    sVehicles.Add("conada");//
                 }       //Helli
                 else
                 {
@@ -5125,9 +5142,9 @@ namespace New_Street_Phone_Missions
                 if (iList == 0)
                 {
                     if (DataStore.MyCusVeh.MyPlanez.Count > 0)
-                        sVehicles = DataStore.MyCusVeh.MyCarz;
+                        sVehicles = DataStore.MyCusVeh.MyPlanez;
                     else
-                        sVehicles.Add("BJXL");
+                        sVehicles.Add("duster");
                 }            //Custom
                 else if (iList == 1)
                 {
@@ -5423,42 +5440,46 @@ namespace New_Street_Phone_Missions
             ObjectHand.ButtonDisabler(CButt);
             return Function.Call<bool>(Hash.IS_DISABLED_CONTROL_PRESSED, 0, CButt);
         }
+        public static bool ButtonDownNoDis(int CButt)
+        {
+            return Function.Call<bool>(Hash.IS_DISABLED_CONTROL_PRESSED, 0, CButt);
+        }
         public static int FindRandom(int iList, int iMin, int iMax)
         {
             LoggerLight.LogThis("FindRandom, iList == " + iList);
 
             int iReturn;
 
-            if (DataStore.RNGod.BigRanList.Count() < iList + 1)
+            for (int i = DataStore.MyRands.RandNums.Count() -1; i < iList + 1; i++)
             {
-                for (int i = DataStore.RNGod.BigRanList.Count() - 1; i < iList + 1; i++)
-                {
-                    RandomPlus iBlank = new RandomPlus();
-                    DataStore.RNGod.BigRanList.Add(iBlank);
-                }
+                RandomInt iBlank = new RandomInt();
+                DataStore.MyRands.RandNums.Add(iBlank);
             }
 
-            for (int i = 0; i < DataStore.RNGod.BigRanList[iList].RandNums.Count; i++)
-            {
-                if (DataStore.RNGod.BigRanList[iList].RandNums[i] > iMax)
-                    DataStore.RNGod.BigRanList[iList].RandNums.RemoveAt(i);
-                else if (DataStore.RNGod.BigRanList[iList].RandNums[i] < iMin)
-                    DataStore.RNGod.BigRanList[iList].RandNums.RemoveAt(i);
-            }
 
-            if (DataStore.RNGod.BigRanList[iList].RandNums.Count == 0)
+            if (DataStore.MyRands.RandNums[iList].RandNums.Count == 0)
             {
                 for (int i = iMin; i < iMax + 1; i++)
-                    DataStore.RNGod.BigRanList[iList].RandNums.Add(i);
+                    DataStore.MyRands.RandNums[iList].RandNums.Add(i);
+            }
+            else
+            {
+                for (int i = 0; i < DataStore.MyRands.RandNums[iList].RandNums.Count; i++)
+                {
+                    if (DataStore.MyRands.RandNums[iList].RandNums[i] > iMax)
+                        DataStore.MyRands.RandNums[iList].RandNums.RemoveAt(i);
+                    else if (DataStore.MyRands.RandNums[iList].RandNums[i] < iMin)
+                        DataStore.MyRands.RandNums[iList].RandNums.RemoveAt(i);
+                }
             }
 
             if (iMin == iMax)
                 iReturn = iMin;
             else
             {
-                int iRanNum = RandInt(0, DataStore.RNGod.BigRanList[iList].RandNums.Count - 1);
-                iReturn = DataStore.RNGod.BigRanList[iList].RandNums[iRanNum];
-                DataStore.RNGod.BigRanList[iList].RandNums.RemoveAt(iRanNum);
+                int iRanNum = RandInt(0, DataStore.MyRands.RandNums[iList].RandNums.Count - 1);
+                iReturn = DataStore.MyRands.RandNums[iList].RandNums[iRanNum];
+                DataStore.MyRands.RandNums[iList].RandNums.RemoveAt(iRanNum);
             }
 
             LoggerLight.LogThis("FoundRandom, iList == " + iList + "iRandom Num == " + iReturn);
@@ -5664,125 +5685,6 @@ namespace New_Street_Phone_Missions
 
             return bRight;
         }
-        public static bool EntityExists(Entity[] EntList, int iPos)
-        {
-            bool b = false;
-            if (iPos < EntList.Count())
-            {
-                try
-                {
-                    if (EntList[iPos].Exists())
-                        b = true;
-                }
-                catch
-                {
-
-                }
-            }
-            return b;
-        }
-        public static bool PropExists(Prop[] Proplist, int iPos)
-        {
-            bool b = false;
-
-            if (iPos < Proplist.Count())
-            {
-                try
-                {
-                    if (Proplist[iPos].Exists())
-                        b = true;
-                }
-                catch
-                {
-
-                }
-            }
-
-            return b;
-        }
-        public static bool VehExists(Vehicle[] Vlist, int iPos)
-        {
-            bool b = false;
-
-            if (iPos < Vlist.Count())
-            {
-                try
-                {
-                    if (Vlist[iPos].Exists())
-                       b = true;
-                }
-                catch
-                {
-
-                }
-            }
-
-            return b;
-        }
-        public static bool PedExists(Ped[] Pedlist, int iPos)
-        {
-            bool b = false;
-
-            if (iPos < Pedlist.Count())
-            {
-                try
-                {
-                    if (Pedlist[iPos].Exists())
-                        b = true;
-                }
-                catch
-                {
-
-                }
-            }
-
-            return b;
-        }
-        public static bool PedListExists(List<Ped> Pedlist, int iPos)
-        {
-            bool b = false;
-
-            if (iPos < Pedlist.Count())
-            {
-                try
-                {
-                    if (Pedlist[iPos].Exists())
-                        b = true;
-                }
-                catch
-                {
-
-                }
-            }
-            return b;
-        }
-        public static bool VectorCheck(List<Vector3> MyVectors, int iPos)
-        {
-            bool bCheck = false;
-
-            if (iPos < MyVectors.Count)
-                bCheck = true;
-
-            return bCheck;
-        }
-        public static bool PullProp(List<Prop> Proper, int iPos)
-        {
-            bool b = false;
-
-            if (iPos < Proper.Count)
-            {
-                try
-                {
-                    if (Proper[iPos].Exists())
-                        b = true;
-                }
-                catch
-                {
-
-                }
-            }
-            return b;
-        }
         public static int NSPMCoin(int iGet)
         {
             int iCash;
@@ -5925,7 +5827,13 @@ namespace New_Street_Phone_Missions
 
                 "WEAPON_FERTILIZERCAN",//100
 
-                "WEAPON_STUNGUN_MP"//101
+                "WEAPON_STUNGUN_MP",//101
+
+                "WEAPON_METALDETECTOR",
+
+                "WEAPON_PRECISIONRIFLE", //| 0x6E7DDDEC
+
+                "WEAPON_TACTICALRIFLE" //| 0xD1D5F52B
             };
 
             return sWeapList;
@@ -6337,7 +6245,12 @@ namespace New_Street_Phone_Missions
                 "COMPONENT_HEAVYRIFLE_CAMO1",// | 0xEC9FECD9
                 "COMPONENT_APPISTOL_VARMOD_SECURITY",//
                 "COMPONENT_MICROSMG_VARMOD_SECURITY",//
-                "COMPONENT_PUMPSHOTGUN_VARMOD_SECURITY"//
+                "COMPONENT_PUMPSHOTGUN_VARMOD_SECURITY",//
+
+                "COMPONENT_AT_AR_FLSH_REH", //| 0x9DB1E023
+                "COMPONENT_TACTICALRIFLE_CLIP_02", //| 0x8594554F
+                "COMPONENT_AT_AR_SUPP_02", ///| 0xA73D4664
+                "COMPONENT_AT_AR_AFGRIP" //| 0xC164F53
             };
 
             return sAddsList;

@@ -4,7 +4,6 @@ using New_Street_Phone_Missions.Classes;
 using System.Collections.Generic;
 using System.IO;
 
-
 namespace New_Street_Phone_Missions
 {
     public class TheMenus
@@ -34,7 +33,7 @@ namespace New_Street_Phone_Missions
             DataStore.bMenuOpen = true;
             mainMenu.Visible = !mainMenu.Visible;
         }
-        public static void AddCustomVehcis(UIMenu XMen)
+        private static void AddCustomVehcis(UIMenu XMen)
         {
             var SubHeadder = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.Othertext[57]);
             var Submenu_01 = YtmenuPool.AddSubMenu(SubHeadder, DataStore.MyLang.Othertext[58]);
@@ -278,7 +277,7 @@ namespace New_Street_Phone_Missions
                 SettingsMenu(true);
             };
         }
-        public static void MissionSelectSet(UIMenu XMen)
+        private static void MissionSelectSet(UIMenu XMen)
         {
             var Selectmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.Othertext[66]);
 
@@ -616,7 +615,7 @@ namespace New_Street_Phone_Missions
                 MissionData.iMissionList.Clear();
             };
         }
-        public static void SettingsSet(UIMenu XMen)
+        private static void SettingsSet(UIMenu XMen)
         {
             var Selectmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.Othertext[67]);
 
@@ -788,12 +787,11 @@ namespace New_Street_Phone_Missions
                         Rand_12.SetRightBadge(UIMenuItem.BadgeStyle.Tick);
                     else
                     {
-                        RWDatFile.SaveDat(0, 0);
                         Rand_12.SetRightBadge(UIMenuItem.BadgeStyle.None);
-                        RWDatFile.SaveDat(15, 0);
                         DataStore.MySettings.StartOnYAcht = false;
                         DataStore.MyDatSet.iOwnaYacht = 0;
                         DataStore.MyAssets.OwnaYacht = false;
+                        RWDatFile.SaveDat(0, 0);
                     }
                 }
                 ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
@@ -813,7 +811,7 @@ namespace New_Street_Phone_Missions
             DataStore.bMenuOpen = true;
             mainMenu.Visible = !mainMenu.Visible;
         }
-        public static void MishconBuild(UIMenu XMen)
+        private static void MishconBuild(UIMenu XMen)
         {
             LoggerLight.LogThis("MishconBuild");
 
@@ -879,7 +877,7 @@ namespace New_Street_Phone_Missions
                 YtmenuPool.CloseAllMenus();
             };
         }
-        public static void MishXMlListed(UIMenu XMen)
+        private static void MishXMlListed(UIMenu XMen)
         {
             LoggerLight.LogThis("MishXMlListed");
 
@@ -916,7 +914,7 @@ namespace New_Street_Phone_Missions
                 YtmenuPool.CloseAllMenus();
             };
         }
-        public static void AddNewCustoms()
+        private static void AddNewCustoms()
         {
             CustomVeh Carzz = new CustomVeh
             {
@@ -1028,7 +1026,7 @@ namespace New_Street_Phone_Missions
             DataStore.bMenuOpen = true;
             mainMenu.Visible = !mainMenu.Visible;
         }
-        public static void Ambulance_Diagnosis(UIMenu XMen)
+        private static void Ambulance_Diagnosis(UIMenu XMen)
         {
             LoggerLight.LogThis("Ambulance_Diagnosis");
 
@@ -1065,6 +1063,7 @@ namespace New_Street_Phone_Missions
                     {
                         MissionData.bCovidInf = true;
                         MissionData.BeOnOff[6] = true;
+                        MissionData.iMissionSeq = 15;
                         MissionData.iWait4Sec = Game.GameTime + iAniTime;
                         Game.Player.Character.Task.TurnTo(MissionData.Npc_01);
                         ObjectBuild.PedScenario(Game.Player.Character, "CODE_HUMAN_MEDIC_TEND_TO_DEAD", Game.Player.Character.Position, Game.Player.Character.Heading, false);

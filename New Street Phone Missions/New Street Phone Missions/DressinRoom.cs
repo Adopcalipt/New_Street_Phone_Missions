@@ -1,5 +1,6 @@
 ﻿using GTA;
 using GTA.Native;
+using System.Collections.Generic;
 using New_Street_Phone_Missions.Classes;
 using System.IO;
 using System.Linq;
@@ -132,32 +133,29 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("WardrobeScan, iOutfit == " + iOutfit);
 
             ClothBank ThisOut = new ClothBank();
+            Ped Peddy = Game.Player.Character;
 
-            int iPed = 0;
+            int iPed;
 
-            if (Game.Player.Character.Model == PedHash.Franklin)
+            if (Peddy.Model == PedHash.Franklin)
                 iPed = 1;
-            else if (Game.Player.Character.Model == PedHash.Michael)
+            else if (Peddy.Model == PedHash.Michael)
                 iPed = 2;
-            else if (Game.Player.Character.Model == PedHash.Trevor)
+            else if (Peddy.Model == PedHash.Trevor)
                 iPed = 3;
-            else if (Game.Player.Character.Model == PedHash.FreemodeFemale01)
+            else if (Peddy.Model == PedHash.FreemodeFemale01)
                 iPed = 4;
-            else if (Game.Player.Character.Model == PedHash.FreemodeMale01)
+            else if (Peddy.Model == PedHash.FreemodeMale01)
                 iPed = 5;
             else
                 iPed = 99;
             if (iPed == 99)
             {
                 if (iOutfit == 2)
-                {
                     TheMissions.Deliverwho_Backpack(iPed);
-                }
             }
             else
             {
-                Ped Peddy = Game.Player.Character;
-
                 int iCloth = 0;
                 while (iCloth < 12)
                 {
@@ -190,6 +188,17 @@ namespace New_Street_Phone_Missions
                     TheMissions.Deliverwho_Backpack(iPed);
                 }
             }
+        }
+        public static void PedDresser(Ped Peddy, ClothBank MyCloth)
+        {
+            LoggerLight.LogThis("PedDresser");
+
+            Function.Call(Hash.CLEAR_ALL_PED_PROPS, Peddy.Handle);
+            for (int i = 0; i < MyCloth.ClothA.Count; i++)
+                Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, i, MyCloth.ClothA[i], MyCloth.ClothB[i], 2);
+
+            for (int i = 0; i < MyCloth.ExtraA.Count; i++)
+                Function.Call(Hash.SET_PED_PROP_INDEX, Peddy.Handle, i, MyCloth.ExtraA[i], MyCloth.ExtraB[i], false);
         }
     }
 }

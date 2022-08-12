@@ -26,6 +26,7 @@ namespace New_Street_Phone_Missions
         public static bool bPacBouns { get; set; }
         public static bool bPickUpHangUp { get; set; }
         public static bool bDontPull { get; set; }
+        public static bool bSnipers { get; set; }
         public static bool bGOURANGA { get; set; }
 
         public static byte iLocationX { get; set; }
@@ -115,6 +116,9 @@ namespace New_Street_Phone_Missions
         public static Vector3 vTarget_09 { get; set; }
         public static Vector3 vTarget_10 { get; set; }
 
+        public static Vector4 v4Targ_01 { get; set; }
+        public static Vector4 v4Targ_02 { get; set; }
+
         public static Crash4Cash Crash4s { get; set; }
 
         public static List<bool> BeOff { get; set; }
@@ -181,6 +185,7 @@ namespace New_Street_Phone_Missions
             bPacBouns = false;
             bPickUpHangUp = false;
             bDontPull = false;
+            bSnipers = false;
             bGOURANGA = false;
 
             iLocationX = 0;
@@ -270,6 +275,8 @@ namespace New_Street_Phone_Missions
             vTarget_09 = Vector3.Zero;
             vTarget_10 = Vector3.Zero;
 
+            v4Targ_01 = new Vector4();
+            v4Targ_02 = new Vector4();
             Crash4s = null;
 
             BeOff = new List<bool>();
