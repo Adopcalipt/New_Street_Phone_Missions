@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XmlSetings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Truckin>false</Truckin>
+  <Getaway>false</Getaway>
+  <Packages>false</Packages>
+  <Convicts>false</Convicts>
+  <FUber>false</FUber>
+  <Pilot>false</Pilot>
+  <Amulance>false</Amulance>
+  <Follow>false</Follow>
+  <LSFD>false</LSFD>
+  <Johnny>false</Johnny>
+  <Raceist>false</Raceist>
+  <BBBomb>false</BBBomb>
+  <Assassination>false</Assassination>
+  <Sniper>false</Sniper>
+  <Gruppe6>false</Gruppe6>
+  <Sailor>false</Sailor>
+  <ImportantEx>false</ImportantEx>
+  <DebtCollect>false</DebtCollect>
+  <MCBusiness>false</MCBusiness>
+  <BayLift>false</BayLift>
+  <Sharks>false</Sharks>
+  <HappyShopper>false</HappyShopper>
+  <MoresMute>false</MoresMute>
+  <TempJob>true</TempJob>
+  <ParaDisplay>false</ParaDisplay>
+  <Deliverwho>false</Deliverwho>
+  <ShowRoute>true</ShowRoute>
+  <EnemyStrength>true</EnemyStrength>
+  <FastTraveltoStart>false</FastTraveltoStart>
+  <Subtitles>true</Subtitles>
+  <PhoneCone>true</PhoneCone>
+  <PhoneAudio>true</PhoneAudio>
+  <BulderOnly>false</BulderOnly>
+  <YachtPrice>3794042</YachtPrice>
+  <PhoneAnim>true</PhoneAnim>
+  <PreLoadOnline>true</PreLoadOnline>
+  <StartOnYAcht>false</StartOnYAcht>
+  <LangSupport>0</LangSupport>
+  <LowerAim>25</LowerAim>
+  <UpperAim>75</UpperAim>
+  <AssZone01>1</AssZone01>
+  <AssZone02>1</AssZone02>
+  <AssZone03>1</AssZone03>
+  <AssZone04>1</AssZone04>
+  <AssZone05>1</AssZone05>
+  <AssZone06>1</AssZone06>
+  <AssZone07>1</AssZone07>
+  <ModVersion>40000</ModVersion>
+  <SPDelayTime>4000</SPDelayTime>
+  <WhyNotSubscribe>0</WhyNotSubscribe>
+  <PhoneBlock />
+</XmlSetings>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XmlContacts xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ImpXCars>
+    <ImportExVeh>
+      <VehList>5</VehList>
+      <VehicleS>MONROE</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>5</VehList>
+      <VehicleS>TORERO</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>5</VehList>
+      <VehicleS>FELTZER3</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>6</VehList>
+      <VehicleS>CINQUEMILA</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>6</VehList>
+      <VehicleS>STRATUM</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>6</VehList>
+      <VehicleS>SUPERD</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>1</VehList>
+      <VehicleS>CHAMPION</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>1</VehList>
+      <VehicleS>S80</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>1</VehList>
+      <VehicleS>VIGILANTE</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>9</VehList>
+      <VehicleS>def90</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>9</VehList>
+      <VehicleS>OUTLAW</VehicleS>
+    </ImportExVeh>
+    <ImportExVeh>
+      <VehList>9</VehList>
+      <VehicleS>DUBSTA3</VehicleS>
+    </ImportExVeh>
+  </ImpXCars>
+  <MyMk2Weaps />
+</XmlContacts>
