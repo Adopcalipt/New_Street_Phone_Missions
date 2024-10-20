@@ -123,7 +123,7 @@ namespace New_Street_Phone_Missions
                 if (MissionData.PedList_01[i].IsDead)
                 {
                     if (Function.Call<int>(Hash.GET_WEAPON_DAMAGE_TYPE, Function.Call<int>(Hash.GET_PED_CAUSE_OF_DEATH, MissionData.PedList_01[i].Handle)) < 3)
-                        MissionData.iUltMelle += 1;
+                        MissionData.iUltMelle++;
 
                     if (MissionData.PedList_01[i].CurrentBlip.Exists())
                         MissionData.PedList_01[i].CurrentBlip.Remove();
@@ -134,7 +134,7 @@ namespace New_Street_Phone_Missions
                     }
                     MissionData.PedList_01[i].MarkAsNoLongerNeeded();
                     MissionData.PedList_01.RemoveAt(i);
-                    MissionData.iUltPed01 += 1;
+                    MissionData.iUltPed01++;
                 }
             }
         }

@@ -8,7 +8,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-//using System.Windows.Forms;
 
 namespace New_Street_Phone_Missions
 {
@@ -102,12 +101,24 @@ namespace New_Street_Phone_Missions
 
         public NSPM()
         {
-            DataStore.DataStoreLoad();
             Tick += OnTick;
             //KeyDown += Main_KeyDown;
             Interval = 1;
         }
+        private void BlockPlayZero(bool bAdd)
+        {
+            if (bAdd)
+            {
+                using (FileStream fs = File.Open(DataStore.sPlayZeroBy, FileMode.Create))
+                {
 
+                }
+            }
+            else
+            {
+                File.Delete(DataStore.sPlayZeroBy);
+            }
+        }
         private void JobLot()
         {
             LoggerLight.LogThis("JobLot");
@@ -349,6 +360,9 @@ namespace New_Street_Phone_Missions
         }
         public static void TakeNote()
         {
+            if (DataStore.GotNoFunk)
+                UI.Notify(DataStore.MyLang.Jobtext[96]);
+           
             if (JobType == 1)
                 UiDisplay.sSubDisplay = DataStore.MyLang.Jobtext[49];
             else if (JobType == 2)
@@ -548,7 +562,7 @@ namespace New_Street_Phone_Missions
                 CayoFollow();
             else if (JobType == 105)
                 CayoThief();
-
+         
             LoggerLight.LogThis("JobType == " + JobType + ", LocationX == " + LocationX);
         }
         private void Truckin()
@@ -556,8 +570,10 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("Truckin");
 
             TruckMissions = new Trucking(LocationX);
-
             Trucking_AttachStuff(TruckMissions.Start.Type, TruckMissions.Trail, TruckMissions.Trail2);
+
+            MissionData.vFuMiss = TruckMissions.Start.FuStop;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[0], "", 5000);
 
@@ -613,6 +629,7 @@ namespace New_Street_Phone_Missions
             PackManMissions = new Packaging(LocationX);
 
             MissionData.vFuMiss = PackManMissions.MyPacks.FuStop;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[3], "" + PackManMissions.PackDeliv + "/" + PackManMissions.PackCount + "", 0f, false));
             UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[1], "", 0f, false));
@@ -623,13 +640,8 @@ namespace New_Street_Phone_Missions
             {
                 if (Vdel.Exists())
                 {
-                    Vector4 Here = new Vector4(Vdel.Position.X, Vdel.Position.Y, Vdel.Position.Z, Vdel.Heading);
                     Vdel.Delete();
                     EntityBuild.WarptoAnyVeh(PackManMissions.DeliverVeh, Game.Player.Character, 1);
-                    PackManMissions.DeliverVeh.Position = Here.V3;
-                    PackManMissions.DeliverVeh.Heading = Here.R;
-                    EntityBuild.DriveToDest(PackManMissions.DeliverVeh, PackManMissions.Packlist[PackManMissions.PackDeliv], Game.Player.Character, 35f, 1074528293);
-                    JobSeq = 1;
                 }
             }
 
@@ -642,6 +654,7 @@ namespace New_Street_Phone_Missions
             ConvictMissions = new ConFetch(MissionData.FindCons(LocationX));
 
             MissionData.vFuMiss = ConvictMissions.Parade.FuPark;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
             ConvictMissions.Bus = EntityBuild.VehicleSpawn(new VehMods("PBus", 0, 66, true, DataStore.MyLang.Maptext[4]), ConvictMissions.Parade.BusPark);
             ConvictMissions.Patrol = RandomX.RandInt(0, ConvictMissions.Parade.ConMarch.Count - 1);
 
@@ -653,7 +666,7 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("FUber");
 
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[4], "", 5000);
-            SearchFor.MakeCarz.Add(new FindVeh(5f, 120f, new VehMods("Dilettante", 3, 66, false, DataStore.MyLang.Maptext[16], false, true, 111, 111, -10, "Fubar"), true, true));
+            SearchFor.MakeCarz.Add(new FindVeh(5f, 120f, Game.Player.Character.Position, new VehMods("Dilettante", 3, 66, false, DataStore.MyLang.Maptext[16], false, true, 111, 111, -10, "Fubar"), true, true));
 
             Fubar_GetLocals(0, 1, null);
 
@@ -687,6 +700,7 @@ namespace New_Street_Phone_Missions
                 MissionData.MishVeh = EntityBuild.VehicleSpawn(new VehMods(ReturnStuff.SelectAVeh(22, 0), 0, 66, true, DataStore.MyLang.Maptext[6], true, true, ReturnStuff.FunPlates()), RacingMissions.YourRace.PickVeh);
                 BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[5], DataStore.MyLang.Jobtext[25], 5000);
                 MissionData.vFuMiss = MyRace.Fubars;
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                 RacingMissions.StartLine = true;
                 JobType = 11;
 
@@ -696,8 +710,9 @@ namespace New_Street_Phone_Missions
             else if (LocationX == 2)
             {
                 MissionData.vFuMiss = new Vector3(-752.767f, -243.5818f, 36.58149f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
-                FubarMissions = new FubarCars(0,0,null);
+                FubarMissions = new FubarCars(0, 0, null);
 
                 FubarMissions.Start = MissionData.AppartmentBlocks(RandomX.FindRandom("Pilot02a", 1, 2), 2, -1, -1, true);
                 FubarMissions.End = MissionData.AppartmentBlocks(2, 15, -1, -1, true);
@@ -710,6 +725,7 @@ namespace New_Street_Phone_Missions
             else if (LocationX == 3)
             {
                 MissionData.vFuMiss = new Vector3(-2471.704f, 3226.925f, 32.31913f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
                 BertMissions = new DeliverBert();
                 BertMissions.Bert = EntityBuild.VehicleSpawn(new VehMods("Strikeforce", 0, 66, true, DataStore.MyLang.Maptext[6], true), BertMissions.BertPark);
@@ -727,6 +743,7 @@ namespace New_Street_Phone_Missions
             else if (LocationX == 4)
             {
                 MissionData.vFuMiss = new Vector3(2558.651f, -344.7433f, 92.48465f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
                 CeoExMissions = new CeoImpExp();
                 
@@ -739,6 +756,7 @@ namespace New_Street_Phone_Missions
             else if (LocationX == 5)
             {
                 MissionData.vFuMiss = new Vector3(2167.74f, 4771.713f, 40.70564f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
                 CropMissions = new CropDusting();
 
@@ -747,6 +765,7 @@ namespace New_Street_Phone_Missions
             else
             {
                 MissionData.vFuMiss = new Vector3(-279.6988f, 6106.246f, 30.70985f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
                 HiggsMissions = new HiggsTours();
 
@@ -816,6 +835,7 @@ namespace New_Street_Phone_Missions
             AmbMissions = new LsHealthTrust(LocationX, false, null, 0, 0, 0, 0, false, new ClothBank(Game.Player.Character));
 
             MissionData.vFuMiss = AmbMissions.FuStop;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             if (VAmbu == null)
                 AmbMissions.Ambuantz = EntityBuild.VehicleSpawn(new VehMods("Ambulance", 0, 5, true, DataStore.MyLang.Maptext[7]), AmbMissions.AmbPark01);
@@ -824,7 +844,7 @@ namespace New_Street_Phone_Missions
                 JobType = 7;
                 AmbMissions.Ambuantz = VAmbu;
                 JobSeq = 1;
-                EntityBuild.DriveToDest(AmbMissions.Ambuantz, AmbMissions.FubStuff.PedHere.V3, Game.Player.Character, 35f, 1074528293);
+                VAmbu.SirenActive = true;
                 MissionData.VehicleList_01.Add(VAmbu);
             }
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[6], "", 5000);
@@ -880,11 +900,12 @@ namespace New_Street_Phone_Missions
                 JobType = 9;
                 JobSeq = 1;
                 FireMissions.FireTruck = VEngin;
-                EntityBuild.DriveToDest(FireMissions.FireTruck, FireMissions.FireLocal.V3, Game.Player.Character, 35f, 1074528293);
+                VEngin.SirenActive = true;
                 MissionData.VehicleList_01.Add(VEngin);
             }
             EntityBuild.VehBlip(FireMissions.TkBlip, FireMissions.FireTruck);
             MissionData.vFuMiss = FireMissions.FuStops;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             SideBar MySide = new SideBar(DataStore.MyLang.Othertext[9], "", 0f, true);
             MySide.Backing = new RGBA(1);
@@ -903,6 +924,7 @@ namespace New_Street_Phone_Missions
             JohnnyMissions = new JohnDeer(LocationX);
 
             MissionData.vFuMiss = World.GetNextPositionOnStreet(JohnnyMissions.Start.PedHere.V3);
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[9], "", 5000);
             UiDisplay.SideBars.Add(new SideBar("" + DataStore.MyLang.Othertext[10] + "", "", 0f, false));
             EntityBuild.AddTarget(new BlipForm(JohnnyMissions.Start.PedHere.V3, true, 3, 50, "", 1f, -1f));
@@ -936,6 +958,7 @@ namespace New_Street_Phone_Missions
                 UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[11], "", 0f, false));
 
             MissionData.vFuMiss = RacingMissions.YourRace.Fubars;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
             MissionData.MishVeh = EntityBuild.VehicleSpawn(new VehMods(ReturnStuff.SelectAVeh(RacingMissions.RaceSet.VehClass, 0), 0, 66, true, DataStore.MyLang.Maptext[6], true, true, ReturnStuff.FunPlates()), RacingMissions.YourRace.PickVeh);
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[10], "", 5000);
             DataStore.OnTheJob = true;
@@ -948,6 +971,7 @@ namespace New_Street_Phone_Missions
 
             BombingMissions = new DaBomb(LocationX);
             MissionData.vFuMiss = BombingMissions.FubStop;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[11], "", 5000);
             DataStore.OnTheJob = true;
@@ -959,6 +983,7 @@ namespace New_Street_Phone_Missions
             HitMissions = new SmashHits(LocationX);
 
             MissionData.vFuMiss = HitMissions.MyHits.FubarStop;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[12], "", 5000);
 
@@ -975,6 +1000,7 @@ namespace New_Street_Phone_Missions
             SnipMissions = new TakinSnip(LocationX);
 
             MissionData.vFuMiss = World.GetNextPositionOnStreet(SnipMissions.MySnips.GoHere[SnipMissions.GoTo]);
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[91], "", 5000);
             DataStore.OnTheJob = true;
         }
@@ -994,7 +1020,6 @@ namespace New_Street_Phone_Missions
                 JobType = 15;
                 MoneyMissions.Truck = van;
                 JobSeq = 1;
-                EntityBuild.DriveToDest(MoneyMissions.Truck, MoneyMissions.Shops.ParkHere.V3, Game.Player.Character, 35f, 1074528293);
                 MissionData.VehicleList_01.Add(van);
                 if (MoneyMissions.Truck.IsSeatFree(VehicleSeat.Passenger))
                     MoneyMissions.Buddy = EntityBuild.NPCSpawn(new PedFeat("s_m_m_security_01", true, 180, 9, 2, MoneyMissions.Truck, 2, false, 0, ""), MoneyMissions.Truck.Position, MoneyMissions.Truck.Heading);
@@ -1004,6 +1029,7 @@ namespace New_Street_Phone_Missions
             }
 
             MissionData.vFuMiss = MoneyMissions.FuStops;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[13], "", 5000);
             DataStore.OnTheJob = true;
@@ -1014,10 +1040,10 @@ namespace New_Street_Phone_Missions
 
             if (LocationX == 1)
             {
-
                 BargeMissions = new ArgyBargy();
 
                 MissionData.vFuMiss = new Vector3(-267.8495f, -2553.718f, 5.492561f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
                 Water01_BargeCars(BargeMissions.Car01, BargeMissions.BargeMv, 1);
                 Water01_BargeCars(BargeMissions.Car02, BargeMissions.BargeMv, 3);
@@ -1036,6 +1062,7 @@ namespace New_Street_Phone_Missions
 
                 int iRandFub = RandomX.FindRandom("SeaBattles02a", 0, 2);
                 MissionData.vFuMiss = YachtMissions.Fubs[iRandFub];
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
                 UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[7], "", 0f, false));
                 DataStore.AddHeistYacht(true);
@@ -1057,6 +1084,7 @@ namespace New_Street_Phone_Missions
                 UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[1], "0:05", 0f, false));
 
                 MissionData.vFuMiss = new Vector3(-1504.369f, 1483.937f, 116.4095f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                 BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[14], DataStore.MyLang.Jobtext[33], 5000);
             }
             else if (LocationX == 4)
@@ -1068,6 +1096,7 @@ namespace New_Street_Phone_Missions
                 UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[1], "", 0f, false));
 
                 MissionData.vFuMiss = new Vector3(682.1233f, -1501.779f, 9.200512f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                 BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[14], DataStore.MyLang.Jobtext[34], 5000);
             }
             else if (LocationX == 5)
@@ -1098,6 +1127,7 @@ namespace New_Street_Phone_Missions
                 EntityBuild.AddTarget(new BlipForm(BoatDelMissions.VStart, true, 5, 371, DataStore.MyLang.Maptext[61]));
 
                 MissionData.vFuMiss = new Vector3(1349.204f, 4370.698f, 43.82962f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
                 BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[14], DataStore.MyLang.Jobtext[35], 5000);
             }
@@ -1113,6 +1143,7 @@ namespace New_Street_Phone_Missions
                 EntityBuild.BuildProp("xm_prop_x17_sub", Posy, Rota, false, true);
 
                 MissionData.vFuMiss = new Vector3(-307.1304f, 6081.307f, 30.701f);
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                 BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[14], DataStore.MyLang.Jobtext[36], 5000);
             }
 
@@ -1148,6 +1179,7 @@ namespace New_Street_Phone_Missions
             DebtMissions = new Wonga(LocationX);
 
             MissionData.vFuMiss = DebtMissions.MyFlat.ParkHere.V3;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             EntityBuild.AddTarget(new BlipForm(DebtMissions.MyFlat.PedHere.V3, true, 5, 408, DataStore.MyLang.Maptext[62], 1f, -1f));
 
@@ -1167,6 +1199,7 @@ namespace New_Street_Phone_Missions
 
             EntityBuild.AddTarget(new BlipForm(BikerMissions.Buissness.PedHere.V3, true, 5, BikerMissions.Icon, DataStore.MyLang.Maptext[28], 1f, -1f));
             MissionData.vFuMiss = BikerMissions.Buissness.ParkHere.V3;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[17], "", 5000);
             DataStore.OnTheJob = true;
         }
@@ -1180,6 +1213,7 @@ namespace New_Street_Phone_Missions
             CargoMissions = new CargoLift(LocationX);
 
             MissionData.vFuMiss = CargoMissions.Buissness.ParkHere.V3;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
             int iBeCon = 474; int iNames = 34;
             if (CargoMissions.Buissness.PedNum == 4)
             { iBeCon = 557; iNames = 33; }
@@ -1196,6 +1230,7 @@ namespace New_Street_Phone_Missions
             SharkMissions = new SharkTank(LocationX);
 
             MissionData.vFuMiss = SharkMissions.Sharky.FuPark;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
             MissionData.MishVeh = EntityBuild.VehicleSpawn(new VehMods(ReturnStuff.SubList[0], 15, 5, true, DataStore.MyLang.Maptext[13]), SharkMissions.Sharky.SubPark);
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[19], "", 5000);
             DataStore.OnTheJob = true;
@@ -1206,6 +1241,7 @@ namespace New_Street_Phone_Missions
             HappySMissions = new MiniMart(LocationX);
 
             MissionData.vFuMiss = HappySMissions.Buissness.ParkHere.V3;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
             EntityBuild.AddTarget(new BlipForm(HappySMissions.Buissness.PedHere.V3, true, 5, 52, DataStore.MyLang.Maptext[58]));
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[20], "", 5000);
             UiDisplay.SideBars.Add(HappySMissions.ShopBar);
@@ -1223,6 +1259,7 @@ namespace New_Street_Phone_Missions
             MoresMissions = new MoreThan(LocationX);
 
             MissionData.vFuMiss = MoresMissions.FubStop;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[21], "", 5000);
             DataStore.OnTheJob = true;
@@ -1242,6 +1279,7 @@ namespace New_Street_Phone_Missions
                 Temp01Missions = new CarBall();
 
                 MissionData.vFuMiss = Temp01Missions.FuStop;
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
                 EntityBuild.AddBlips(new BlipForm(Temp01Missions.ExEntrance, true, 5, 546, DataStore.MyLang.Maptext[88], 1f));
                 BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[22], DataStore.MyLang.Jobtext[37], 5000);
@@ -1257,6 +1295,7 @@ namespace New_Street_Phone_Missions
                 Temp02Missions = new Cales();
 
                 MissionData.vFuMiss = Temp02Missions.ClubX.ParkHere.V3;
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                 MissionData.iUltPed01 = 0;
 
                 EntityBuild.AddBlips(new BlipForm(Temp02Missions.ClubX.PedHere.V3, true, 5, 614, DataStore.MyLang.Maptext[73], 1f, -1f));
@@ -1267,6 +1306,7 @@ namespace New_Street_Phone_Missions
                 Temp03Missions = new Dupes();
 
                 MissionData.vFuMiss = Temp03Missions.Fubar;
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                 List<PropLists> sPoper = new List<PropLists>
                 {
                     new PropLists("xm_prop_lab_door02_r", new Vector3(-1300.87854f, -2989.34937f, -34.0867786f), new Vector3(0.00f, 0.00f, 2.0027160f)),
@@ -1287,6 +1327,7 @@ namespace New_Street_Phone_Missions
                 Temp04Missions = new Dimond();
 
                 MissionData.vFuMiss = Temp04Missions.Fubs;
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                 EntityBuild.AddBlips(new BlipForm(Temp04Missions.ExtDoor, true, 5, 679, DataStore.MyLang.Maptext[80], 1f));
                 BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[22], DataStore.MyLang.Jobtext[40], 5000);
             }      // --casino get data...
@@ -1309,12 +1350,13 @@ namespace New_Street_Phone_Missions
                 for (int i = 0; i < RacingMissions.YourRace.PopLists.Count; i++)
                     EntityBuild.BuildProp(RacingMissions.YourRace.PopLists[i].Prop, RacingMissions.YourRace.PopLists[i].Pos, RacingMissions.YourRace.PopLists[i].Rot, true, true);
 
-                FubarMissions = new FubarCars(0,0, null);
+                FubarMissions = new FubarCars(0, 0, null);
 
                 FubarMissions.Start = MissionData.AppartmentBlocks(5, 20, -1, -1, true);
 
                 MissionData.vFuMiss = FubarMissions.Start.ParkHere.V3;
                 RacingMissions.YourRace.Fubars = MissionData.vFuMiss;
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                 RacingMissions.StuntRace = true;
 
                 Function.Call(Hash._0xC54A08C85AE4D410, 1.50f);
@@ -1330,6 +1372,7 @@ namespace New_Street_Phone_Missions
                 MissionData.iUltPed01 = 0;
                 Temp06Missions = new Silo();
                 MissionData.vFuMiss = Temp06Missions.Fubs;
+                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                 EntityBuild.AddBlips(new BlipForm(Temp06Missions.ExDoor, true, 5, 788, DataStore.MyLang.Maptext[87], 1f));
                 BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[22], DataStore.MyLang.Jobtext[42], 5000);
             }       // --Lab
@@ -1356,6 +1399,7 @@ namespace New_Street_Phone_Missions
 
             EntityBuild.AddTarget(new BlipForm(DellWhoMissions.Start.PedHere.V3, true, 5, 408, DataStore.MyLang.Maptext[121], 1f, -1f));
             MissionData.vFuMiss = DellWhoMissions.Start.ParkHere.V3;
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[24], "", 5000);
             DataStore.OnTheJob = true;
         }
@@ -1422,6 +1466,7 @@ namespace New_Street_Phone_Missions
                 int iRand = RandomX.RandInt(0, Hook01.Count - 1);
                 Hook01.RemoveAt(iRand);
                 Hook02.RemoveAt(iRand);
+                Script.Wait(1);
             }
             for (int i = 0; i < Hook01.Count; i++)
             {
@@ -1434,6 +1479,7 @@ namespace New_Street_Phone_Missions
                 int iRand = RandomX.RandInt(0, Cloth01.Count - 1);
                 Cloth01.RemoveAt(iRand);
                 Cloth02.RemoveAt(iRand);
+                Script.Wait(1);
             }
             for (int i = 0; i < Cloth01.Count; i++)
             {
@@ -1446,6 +1492,7 @@ namespace New_Street_Phone_Missions
                 int iRand = RandomX.RandInt(0, Bolt01.Count - 1);
                 Bolt01.RemoveAt(iRand);
                 Bolt02.RemoveAt(iRand);
+                Script.Wait(1);
             }
             for (int i = 0; i < Bolt01.Count; i++)
             {
@@ -1493,6 +1540,7 @@ namespace New_Street_Phone_Missions
             }
 
             MissionData.vFuMiss = new Vector3(4491.126f, -4511.222f, 4.357188f);
+            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
 
             PackManMissions = new Packaging(true, Pack01, Pack02);
 
@@ -1511,6 +1559,8 @@ namespace New_Street_Phone_Missions
 
             UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[17], "", 0f, true));
 
+            EntityLog.PlayZeroTargets(null, CayFolMissions.MyStart[0], false, false);
+
             DataStore.OnTheJob = true;
         }
         private void CayoThief()
@@ -1520,6 +1570,8 @@ namespace New_Street_Phone_Missions
             CayHeiMissions = new CayoHeist(RandomX.FindRandom("CayTheif01", 1, 3));
 
             BigMessageThread.MessageInstance.ShowSimpleShard(DataStore.MyLang.Jobtext[43], "", 5000);
+
+            EntityLog.PlayZeroTargets(null, CayHeiMissions.Chopper.Position + (CayHeiMissions.Chopper.RightVector * 3.00f), false, false);
 
             DataStore.OnTheJob = true;
         }
@@ -1965,17 +2017,22 @@ namespace New_Street_Phone_Missions
             MyAss.Percent = iPer;
             return MyAss;
         }
+        private void Getaway_RemovePlayerMask()
+        {
+            if (BankRobMissions.YourPedMod == "FreeFemale" || BankRobMissions.YourPedMod == "FreeMale")
+                Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Game.Player.Character.Handle, 1, BankRobMissions.OufitMask01, BankRobMissions.OufitMask02, 2);
+            else if (BankRobMissions.YourPedMod == "Franklin" || BankRobMissions.YourPedMod == "Michael" || BankRobMissions.YourPedMod == "Trevor")
+                Function.Call(Hash.SET_PED_PROP_INDEX, Game.Player.Character.Handle, 0, BankRobMissions.OufitMask01, BankRobMissions.OufitMask02, false);
+        }
         private void Getaway_AddPlayerMask()
         {
-            ClothBank Cb = BankRobMissions.Oufit;
-
-            if (Cb.FreeMode)
+            if (BankRobMissions.YourPedMod == "FreeFemale" || BankRobMissions.YourPedMod == "FreeMale")
             {
                 int iMaskPos = 0;
                 int iMask = 0;
                 int iMasktext = 0;
 
-                if (Cb.Male)
+                if (BankRobMissions.YourPedMod == "FreeMale")
                 {
                     iMaskPos = RandomX.FindRandom("OLPSet4af", 0, DataStore.FMMasks.Count - 1);
                     iMask = DataStore.FMMasks[iMaskPos].Cloth;
@@ -1987,43 +2044,45 @@ namespace New_Street_Phone_Missions
                     iMask = DataStore.FFMasks[iMaskPos].Cloth;
                     iMasktext = DataStore.FFMasks[iMaskPos].Textures[RandomX.RandInt(0, DataStore.FFMasks[iMaskPos].Textures.Count - 1)];
                 }
-                Cb.Cothing[Cb.CothInt].Title = "BankRobber";
-                Cb.Cothing[Cb.CothInt].ClothA = new List<int> { 0, iMask, -1, -1, 135, 45, 12, -1, -1, -1, -1, 364 };
-                Cb.Cothing[Cb.CothInt].ClothB = new List<int> { 0, iMasktext, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1 };
+                ClothX MaskUp = new ClothX();
+                MaskUp.Title = "BankRobber";
+                MaskUp.ClothA = new List<int> { -10, iMask, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10 };
+                MaskUp.ClothB = new List<int> { 0, iMasktext, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-                EntityBuild.PedDresser(Game.Player.Character, Cb.Cothing[Cb.CothInt], new List<int> { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });
+                EntityBuild.PedDresser(Game.Player.Character, MaskUp);
             }
             else
             {
-                if (Cb.Name == "Franklin")
+                ClothX MaskUp = new ClothX();
+                if (BankRobMissions.YourPedMod == "Franklin")
                 {
                     int iMask = RandomX.RandInt(8, 14);
-                    Cb.Cothing[Cb.CothInt].Title = "BankRobber";
-                    Cb.Cothing[Cb.CothInt].ClothA = new List<int>();
-                    Cb.Cothing[Cb.CothInt].ClothB = new List<int>();
-                    Cb.Cothing[Cb.CothInt].ExtraA = new List<int> { iMask };
-                    Cb.Cothing[Cb.CothInt].ExtraB = new List<int> { 0 };
-                    EntityBuild.PedDresser(Game.Player.Character, Cb.Cothing[Cb.CothInt]);
+                    MaskUp.Title = "BankRobber";
+                    MaskUp.ClothA = new List<int>();
+                    MaskUp.ClothB = new List<int>();
+                    MaskUp.ExtraA = new List<int> { iMask };
+                    MaskUp.ExtraB = new List<int> { 0 };
+                    EntityBuild.PedDresser(Game.Player.Character, MaskUp);
                 }
-                else if (Cb.Name == "Michael")
+                else if (BankRobMissions.YourPedMod == "Michael")
                 {
                     int iMask = RandomX.RandInt(14, 20);
-                    Cb.Cothing[Cb.CothInt].Title = "BankRobber";
-                    Cb.Cothing[Cb.CothInt].ClothA = new List<int>();
-                    Cb.Cothing[Cb.CothInt].ClothB = new List<int>();
-                    Cb.Cothing[Cb.CothInt].ExtraA = new List<int> { iMask };
-                    Cb.Cothing[Cb.CothInt].ExtraB = new List<int> { 0 };
-                    EntityBuild.PedDresser(Game.Player.Character, Cb.Cothing[Cb.CothInt]);
+                    MaskUp.Title = "BankRobber";
+                    MaskUp.ClothA = new List<int>();
+                    MaskUp.ClothB = new List<int>();
+                    MaskUp.ExtraA = new List<int> { iMask };
+                    MaskUp.ExtraB = new List<int> { 0 };
+                    EntityBuild.PedDresser(Game.Player.Character, MaskUp);
                 }
-                else if (Cb.Name == "Trevor")
+                else if (BankRobMissions.YourPedMod == "Trevor")
                 {
                     int iMask = RandomX.RandInt(14, 20);
-                    Cb.Cothing[Cb.CothInt].Title = "BankRobber";
-                    Cb.Cothing[Cb.CothInt].ClothA = new List<int>();
-                    Cb.Cothing[Cb.CothInt].ClothB = new List<int>();
-                    Cb.Cothing[Cb.CothInt].ExtraA = new List<int> { iMask };
-                    Cb.Cothing[Cb.CothInt].ExtraB = new List<int> { 0 };
-                    EntityBuild.PedDresser(Game.Player.Character, Cb.Cothing[Cb.CothInt]);
+                    MaskUp.Title = "BankRobber";
+                    MaskUp.ClothA = new List<int>();
+                    MaskUp.ClothB = new List<int>();
+                    MaskUp.ExtraA = new List<int> { iMask };
+                    MaskUp.ExtraB = new List<int> { 0 };
+                    EntityBuild.PedDresser(Game.Player.Character, MaskUp);
                 }
             }
         }
@@ -2174,6 +2233,10 @@ namespace New_Street_Phone_Missions
             BankRobMissions.GetAwayVeh.IsExplosionProof = false;
             BankRobMissions.GetAwayVeh.IsOnlyDamagedByPlayer = false;
             BankRobMissions.GetAwayVeh.IsFireProof = false;
+
+            EntityBuild.FreeSeat(BankRobMissions.GetAwayVeh, 2, true);
+            EntityBuild.FreeSeat(BankRobMissions.GetAwayVeh, 3, true);
+            EntityBuild.FreeSeat(BankRobMissions.GetAwayVeh, 4, true);
 
             SearchFor.BackSeat.Add(new FindSeat(2, BankRobMissions.GetAwayVeh, BankRobMissions.Robber01, 2f));
             SearchFor.BackSeat.Add(new FindSeat(3, BankRobMissions.GetAwayVeh, BankRobMissions.Robber02, 2f));
@@ -2634,7 +2697,7 @@ namespace New_Street_Phone_Missions
             FubarMissions.ThatCar = MyCar;
             FubarMissions.ThatDriver = Denis;
         }
-        private static void Fubar_GetLocals(int iTotalPay, int iRepMish, Vehicle fubar)
+        private static void Fubar_GetLocals(int iTotalPay, int iRepMish, Vehicle fubsVeh)
         {
             LoggerLight.LogThis("Fubar_GetLocals");
 
@@ -2642,7 +2705,7 @@ namespace New_Street_Phone_Missions
             MultiPed.Clear();
             UiDisplay.SideBars.Clear();
 
-            FubarMissions = new FubarCars(iTotalPay, iRepMish, fubar);
+            FubarMissions = new FubarCars(iTotalPay, iRepMish, fubsVeh);
 
             int iPlace;
             int iReturn;
@@ -2719,6 +2782,8 @@ namespace New_Street_Phone_Missions
             EntityBuild.FreeSeat(FubarMissions.FubVeh, 2, true);
             EntityBuild.FreeSeat(FubarMissions.FubVeh, 3, true);
             EntityBuild.FreeSeat(FubarMissions.FubVeh, 4, true);
+
+            SearchFor.OpenDoors(FubarMissions.Start.PedHere, 35.00f);
 
             if (FubarMissions.Passengers == 1)
             {
@@ -2852,7 +2917,7 @@ namespace New_Street_Phone_Missions
                     int iNoAttacks = (LocationX - 7) * -1;
                     iAngerTax = 10;
                     for (int i = 0; i < iNoAttacks; i++)
-                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, new VehMods("TAXI", 12, 1, false, DataStore.MyLang.Maptext[24]), true));
+                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, Game.Player.Character.Position, new VehMods("TAXI", 12, 1, false, DataStore.MyLang.Maptext[24]), true));
                     FubarMissions.Attacks = true;
                 }
             }
@@ -3295,7 +3360,8 @@ namespace New_Street_Phone_Missions
                 Script.Wait(1);
             }
             FollMissions.Starting = ReturnStuff.SetZHight(FollMissions.Starting, World.GetGroundHeight(FollMissions.Starting));
-            EntityBuild.AddTarget(new BlipForm(FollMissions.Starting, false, 5, 120f, new BlipForm(FollMissions.Starting, true, 5, 66, DataStore.MyLang.Maptext[26])));
+            EntityBuild.AddTarget(new BlipForm(FollMissions.Starting, false, 5, 120f, new BlipForm(FollMissions.Starting, true, 5, 66, DataStore.MyLang.Maptext[26], "Xmar=")));
+            EntityLog.PlayZeroTargets(null, FollMissions.Starting, true, false);
         }
         private void Follow_AmbushPlayer()
         {
@@ -3309,6 +3375,7 @@ namespace New_Street_Phone_Missions
                 int iLocal = RandomX.RandInt(1, FollMissions.Endings.Count - 1);
                 Ped Bob = EntityBuild.NPCSpawn(new PedFeat(ReturnStuff.RandNPC(RandomX.RandInt(1, 10)), false, 180, 9, 0, null, 5, false, 0, ""), FollMissions.Endings[iLocal], 0.00f);
                 Follow_AddToMuilti(Bob, DataStore.MyLang.Maptext[105], EntityBuild.PedBlimp(new BlipForm(1, DataStore.MyLang.Maptext[105]), Bob), null);
+                Script.Wait(1);
             }
             FollMissions.Attackers += 2;
             FollMissions.YourReward += FollMissions.Attackers * 10;
@@ -3334,6 +3401,7 @@ namespace New_Street_Phone_Missions
             {
                 EntityBuild.FreeSeat(FollMissions.TargetCar, iSittinON, false);
                 iSittinON -= 1;
+                Script.Wait(1);
             }
         }
         public static void Follow_AttackBGroup(Ped Attacker, bool bDriver)
@@ -3624,6 +3692,7 @@ namespace New_Street_Phone_Missions
                     iNpNum -= 1;
                     Vector3 Vrond = Vspot.Around(5.00f);
                     EntityBuild.NPCSpawn(new PedFeat(ReturnStuff.RandNPC(RandomX.RandInt(1, 35)), false, 0, 0), Vrond, XMarks.R);
+                    Script.Wait(1);
                 }
             }
             else if (RandSettin < 20)
@@ -3634,6 +3703,7 @@ namespace New_Street_Phone_Missions
                     iNpNum -= 1;
                     Vector3 Vrond = Vspot.Around(25.00f);
                     EntityBuild.VehicleSpawn(new VehMods(ReturnStuff.AddRandomVeh(17), 10), Vrond, XMarks.R);
+                    Script.Wait(1);
                 }
             }
         }
@@ -3714,7 +3784,7 @@ namespace New_Street_Phone_Missions
 
             Game.FadeScreenOut(1000);
 
-            RacingMissions.RaceVeh.FreezePosition = true;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, RacingMissions.RaceVeh, true);
             EntityBuild.ResetVehPos(RacingMissions.RaceVeh, RacingMissions.YourRace.Start01);
 
             Function.Call(Hash.SET_VEHICLE_POPULATION_BUDGET, 0);
@@ -3737,10 +3807,11 @@ namespace New_Street_Phone_Missions
                     Weth = "Xmas";
                 else
                     Weth = "Snowlight";
-
-                Racist_SnowJoke(true);
-                MemoryAccess.SetSnowRendered(true);
+                
+                EntityLog.CreateIni(DataStore.sRaceSnowOn, new List<string> { "SnowOn" });
                 RacingMissions.SnowIsOn = true;
+                //Racist_SnowJoke(true);
+                //Function.Call((Hash)0x6E9EF3A33C8899F8, true);
             }
             
             EntityBuild.ClearWeather();
@@ -3772,7 +3843,7 @@ namespace New_Street_Phone_Missions
 
             if (RacingMissions.BoatRace)
             {
-                RacingMissions.RaceVeh.FreezePosition = false;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, RacingMissions.RaceVeh, false);
                 RacingMissions.RaceVeh.IsDriveable = false;
                 Function.Call(Hash.SET_BOAT_ANCHOR, RacingMissions.RaceVeh.Handle, true);
             }
@@ -3788,7 +3859,7 @@ namespace New_Street_Phone_Missions
                 RacingMissions.RaceVeh.IsDriveable = true;
                 RacingMissions.RaceVeh.EngineRunning = true;
                 EntityBuild.FlyPlane(Game.Player.Character, RacingMissions.RaceVeh, VTarg, null);
-                RacingMissions.RaceVeh.FreezePosition = false;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, RacingMissions.RaceVeh, false);
                 RacingMissions.RaceVeh.Speed = 35f;
             }
 
@@ -3825,7 +3896,7 @@ namespace New_Street_Phone_Missions
             {
                 for (int i = 0; i < RacingMissions.Raciers.Count; i++)
                 {
-                    RacingMissions.Raciers[i].MyVehicle.FreezePosition = false;
+                    Function.Call(Hash.FREEZE_ENTITY_POSITION, RacingMissions.Raciers[i].MyVehicle, false);
                     if (RacingMissions.RaceSet.PasiveMode)
                     {
                         RacingMissions.Raciers[i].MyVehicle.Alpha = 120;
@@ -3841,7 +3912,7 @@ namespace New_Street_Phone_Missions
             RacingMissions.BestRL.RaceLine.Clear();
             RacingMissions.LapTime = Game.GameTime;
             RacingMissions.Target = Racist_CheckPoint(true);
-            RacingMissions.RaceVeh.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, RacingMissions.RaceVeh, false);
             Game.Player.Character.Task.ClearAll();
         }
         private void Racist_SnowJoke(bool Enable)
@@ -4328,9 +4399,10 @@ namespace New_Street_Phone_Missions
         }
         public static void Racist_RunAnimatior(AnimList MyList, Ped Peddy, bool WithCam)
         {
+            bool Skip = false;
             if (WithCam)
             {
-                Peddy.FreezePosition = true;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, Peddy, true);
                 Vector3 Campo = Peddy.Position + (Peddy.ForwardVector * 4.00f) + (Peddy.UpVector * 1.50f);
                 Vector3 Camro = new Vector3(0.00f, 0.00f, Peddy.Heading - 180.00f);
                 MissionData.cCams = World.CreateCamera(Campo, Camro, 50.00f);
@@ -4341,23 +4413,35 @@ namespace New_Street_Phone_Missions
 
             EntityBuild.ForceAnimOnce(Peddy, MyList.Libary, MyList.Intro);
             Script.Wait(50);
-            while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy.Handle, 134))
-                Script.Wait(50);
+            while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy.Handle, 134) && !Skip)
+            {
+                if (ReturnStuff.ButtonDown(46) || ReturnStuff.ButtonDown(47))
+                    Skip = true;
+                Script.Wait(1);
+            }   
             EntityBuild.ForceAnimOnce(Peddy, MyList.Libary, MyList.Main);
             Script.Wait(50);
-            while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy.Handle, 134))
-                Script.Wait(50);
+            while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy.Handle, 134) && !Skip)
+            {
+                if (ReturnStuff.ButtonDown(46) || ReturnStuff.ButtonDown(47))
+                    Skip = true;
+                Script.Wait(1);
+            }
             EntityBuild.ForceAnimOnce(Peddy, MyList.Libary, MyList.Exit);
             Script.Wait(50);
-            while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy.Handle, 134))
-                Script.Wait(50);
+            while (Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, Peddy.Handle, 134) && !Skip)
+            {
+                if (ReturnStuff.ButtonDown(46) || ReturnStuff.ButtonDown(47))
+                    Skip = true;
+                Script.Wait(1);
+            }
 
             if (WithCam)
             {
                 Script.Wait(3000);
                 EntityClear.CleanCams();
                 EntityClear.RemoveTargets();
-                Peddy.FreezePosition = false;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, Peddy, false);
             }
 
             Peddy.Task.ClearAnimation(MyList.Libary, MyList.Exit);
@@ -4388,8 +4472,9 @@ namespace New_Street_Phone_Missions
 
             if (RacingMissions.SnowIsOn)
             {
-                Racist_SnowJoke(false);
-                MemoryAccess.SetSnowRendered(false);
+                EntityLog.CreateIni(DataStore.sRaceSnowOff, new List<string> { "SnowOff" });
+                //Racist_SnowJoke(false);
+                //Function.Call((Hash)0x6E9EF3A33C8899F8, false);
             }
             
             EntityBuild.ClearWeather();
@@ -4542,6 +4627,7 @@ namespace New_Street_Phone_Missions
         {
             PedMultiTask MyMbMan = new PedMultiTask(Peddy, null, -1);
 
+            Function.Call(Hash.TASK_SET_BLOCKING_OF_NON_TEMPORARY_EVENTS, Peddy, false);
             MyMbMan.MyName = "";
             MyMbMan.MyPed = Peddy;
             MyMbMan.MyBlip = Peddy.CurrentBlip;
@@ -4601,20 +4687,25 @@ namespace New_Street_Phone_Missions
                         }
                     }
                     
-                    if (!bToArms && MultiPed[i].MySpots == null)
+                    if (!bToArms) 
                     {
-                        Vector3 Vdir = (Game.Player.Character.Position - MultiPed[i].MyPed.Position).Normalized;
-                        float fDirValue = Vector3.Dot(Vdir, MultiPed[i].MyPed.ForwardVector);
-                        if (Function.Call<bool>(Hash.HAS_ENTITY_CLEAR_LOS_TO_ENTITY, MultiPed[i].MyPed.Handle, Game.Player.Character.Handle, 17) || Function.Call<bool>(Hash.CAN_PED_HEAR_PLAYER, Game.Player.Character.Handle, MultiPed[i].MyPed.Handle))
+                        if (Function.Call<bool>(Hash.IS_PED_IN_COMBAT, MultiPed[i].MyPed, Game.Player.Character))
+                            bToArms = true;
+                        else if (MultiPed[i].MySpots == null)
                         {
-                            if (MultiPed[i].MyPed.Position.DistanceTo(Game.Player.Character.Position) < 35.00f)
+                            Vector3 Vdir = (Game.Player.Character.Position - MultiPed[i].MyPed.Position).Normalized;
+                            float fDirValue = Vector3.Dot(Vdir, MultiPed[i].MyPed.ForwardVector);
+                            if (Function.Call<bool>(Hash.HAS_ENTITY_CLEAR_LOS_TO_ENTITY, MultiPed[i].MyPed.Handle, Game.Player.Character.Handle, 17) || Function.Call<bool>(Hash.CAN_PED_HEAR_PLAYER, Game.Player.Character.Handle, MultiPed[i].MyPed.Handle))
                             {
-                                if (fDirValue > 0.25f)
+                                if (MultiPed[i].MyPed.Position.DistanceTo(Game.Player.Character.Position) < 35.00f)
                                 {
-                                    MultiPed[i].MySwitch_03 = true;
-                                    MultiPed[i].MySpots = new ISeeYou(i, MultiPed[i].MyPed, new SideBar(DataStore.MyLang.Othertext[17], "", 0f, true));
-                                    UiDisplay.SpotedList.Add(MultiPed[i].MySpots); 
-                                    MultiPed[i].MyPed.CurrentBlip.IsFlashing = true;
+                                    if (fDirValue > 0.25f)
+                                    {
+                                        MultiPed[i].MySwitch_03 = true;
+                                        MultiPed[i].MySpots = new ISeeYou(i, MultiPed[i].MyPed, new SideBar(DataStore.MyLang.Othertext[17], "", 0f, true));
+                                        UiDisplay.SpotedList.Add(MultiPed[i].MySpots);
+                                        MultiPed[i].MyPed.CurrentBlip.IsFlashing = true;
+                                    }
                                 }
                             }
                         }
@@ -5104,7 +5195,7 @@ namespace New_Street_Phone_Missions
             if (MoneyMissions.YourFate == 1)
             {
                 MoneyMissions.AttackTrack = true;
-                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 145.00f, new VehMods(ReturnStuff.AddRandomVeh(16), 8, 3, false, "", false, true, ReturnStuff.FunPlates()), true));
+                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 145.00f, Game.Player.Character.Position, new VehMods(ReturnStuff.AddRandomVeh(16), 8, 3, false, "", false, true, ReturnStuff.FunPlates()), true));
                 MoneyMissions.CashPay *= 20;
 
             }            // vehicle chase
@@ -5128,7 +5219,7 @@ namespace New_Street_Phone_Missions
             else if (MoneyMissions.YourFate == 5)
             {
                 MoneyMissions.AttackTrack = true;
-                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 145.00f, new VehMods(ReturnStuff.AddRandomVeh(17), 8, 3, false, "", false, true, ReturnStuff.FunPlates()), true));
+                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 145.00f, Game.Player.Character.Position, new VehMods(ReturnStuff.AddRandomVeh(17), 8, 3, false, "", false, true, ReturnStuff.FunPlates()), true));
                 MoneyMissions.CashPay *= 40;
             }       // tank attack
             else
@@ -5300,17 +5391,17 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("Water01_HaveACar");
 
             V1.Detach();
-            V1.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, V1, false);
             V1.Position = new Vector3(-448.75f, -2427.25f, 4.33f);
             V1.Heading = 139.65f;
 
             V2.Detach();
-            V2.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, V2, false);
             V2.Position = new Vector3(-444.54f, -2430.93f, 4.33f);
             V2.Heading = 139.65f;
 
             V3.Detach();
-            V3.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, V3, false);
             V3.Position = new Vector3(-440.53f, -2434.34f, 4.33f);
             V3.Heading = 139.65f;
 
@@ -5702,9 +5793,9 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("ImportsExpo_AddVeh");
 
             if (RandomX.FindRandom("ExpoAddVeh", 1, 10) < 5)
-                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, new VehMods(ImpExpMissions.VehList[ImpExpMissions.NoCars].VehicleS, 1, 3, true, DataStore.MyLang.Maptext[14], false, true, ReturnStuff.FunPlates()), false));
+                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, Game.Player.Character.Position, new VehMods(ImpExpMissions.VehList[ImpExpMissions.NoCars].VehicleS, 1, 3, true, DataStore.MyLang.Maptext[14], false, true, ReturnStuff.FunPlates()), false));
             else
-                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, new VehMods(ImpExpMissions.VehList[ImpExpMissions.NoCars].VehicleS, 25, 3, true, DataStore.MyLang.Maptext[14], false, true, ReturnStuff.FunPlates()), true));
+                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, Game.Player.Character.Position, new VehMods(ImpExpMissions.VehList[ImpExpMissions.NoCars].VehicleS, 25, 3, true, DataStore.MyLang.Maptext[14], false, true, ReturnStuff.FunPlates()), true));
         }
         private void ImportsExpo_GotCArs()
         {
@@ -5760,7 +5851,7 @@ namespace New_Street_Phone_Missions
                 if (ImpExpMissions.GangDel < Game.GameTime)
                 {
                     if (MultiPed.Count + SearchFor.MakeCarz.Count < 6)
-                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 90.00f, new VehMods("KURUMA", 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true, false));
+                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 90.00f, Game.Player.Character.Position, new VehMods("KURUMA", 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true, false));
                     else
                         ImpExpMissions.GangDel = Game.GameTime + RandomX.RandInt(30000, 45000);
                 }
@@ -6080,12 +6171,12 @@ namespace New_Street_Phone_Missions
                 if (BikerMissions.Task == 2)
                 {
                     if (MultiPed.Count + SearchFor.MakeCarz.Count < 6)
-                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, new VehMods(ReturnStuff.AddRandomVeh(10), 16, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
+                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, Game.Player.Character.Position, new VehMods(ReturnStuff.AddRandomVeh(32), 16, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
                 }
                 else
                 {
                     if (MultiPed.Count + SearchFor.MakeCarz.Count < 6 && ReturnStuff.AmIFar(BikerMissions.ClubHouse.ParkHere.V3, 250f))
-                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, new VehMods(ReturnStuff.AddRandomVeh(10), 16, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
+                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, Game.Player.Character.Position, new VehMods(ReturnStuff.AddRandomVeh(32), 16, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
                     else
                         BikerMissions.McTimmer = Game.GameTime + RandomX.RandInt(30000, 45000);
                 }
@@ -6193,8 +6284,8 @@ namespace New_Street_Phone_Missions
 
             if (CargoMissions.iSuprise == 1)
             {
-                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, new VehMods(ReturnStuff.AddRandomVeh(18), 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
-                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, new VehMods(ReturnStuff.AddRandomVeh(18), 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
+                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, Game.Player.Character.Position, new VehMods(ReturnStuff.AddRandomVeh(18), 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
+                SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, Game.Player.Character.Position, new VehMods(ReturnStuff.AddRandomVeh(18), 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
                 CargoMissions.CashPay += 4000;
             }            // Arena vehicle chase
             else if (CargoMissions.iSuprise == 2)
@@ -6549,15 +6640,14 @@ namespace New_Street_Phone_Missions
         {
             LoggerLight.LogThis("MoresMuted_DAmmagedGoods");
 
-            int iDamU = 1000 - MyBMW.Health;
+            int iDamU = 1000 - (MyBMW.Health - 90);
             float fDam = 0.00f;
 
             if (iDamU > 100)
                 fDam = 1.00f;
             else
-            {
                 fDam = (float)iDamU / 100;
-            }
+
             return fDam;
         }
         private void MoresMuted_AddAwards()
@@ -6651,7 +6741,7 @@ namespace New_Street_Phone_Missions
             for (int i = 0; i < MissionData.VehicleList_01.Count() - 1; i++)
             {
                 EntityBuild.ResetVehPos(MissionData.VehicleList_01[i], Temp01Missions.Formation[i]);
-                MissionData.VehicleList_01[i].FreezePosition = true;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, MissionData.VehicleList_01[i], true);
             }
 
             Game.FadeScreenIn(1000);
@@ -6665,7 +6755,7 @@ namespace New_Street_Phone_Missions
 
             for (int i = 0; i < MissionData.VehicleList_01.Count(); i++)
             {
-                MissionData.VehicleList_01[i].FreezePosition = false;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, MissionData.VehicleList_01[i], false);
 
                 if (Temp01Missions.Prize == MissionData.VehicleList_01[i])
                 {
@@ -6889,6 +6979,7 @@ namespace New_Street_Phone_Missions
                         EntityBuild.NPCSpawn(new PedFeat("", false, 150, 28, 0), VPedPos, RandomX.RandInt(0, 360));
 
                     iRand--;
+                    Script.Wait(1);
                 }
             }
 
@@ -6901,6 +6992,7 @@ namespace New_Street_Phone_Missions
                 Vector3 VPedPos = DancFloored.Around(4.50f);
                 EntityBuild.NPCSpawn(new PedFeat(ReturnStuff.RandNPC(37), 28), VPedPos, RandomX.RandInt(0, 360));
                 iRand2--;
+                Script.Wait(1);
             }
 
             List<Vector4> Bouncers = new List<Vector4>
@@ -7873,7 +7965,8 @@ namespace New_Street_Phone_Missions
         {
             LoggerLight.LogThis("Parra_Load");
             MultiPed.Clear();
-            Game.Player.Character.FreezePosition = true;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, Game.Player.Character, true);
+            Function.Call(Hash.SET_AUTO_GIVE_PARACHUTE_WHEN_ENTER_PLANE, Game.Player.Character.Handle, true);
             GetWeaps(true);
             List<Vector3> Seat01 = new List<Vector3> { new Vector3(1.14f, -0.07f, 0.34f), new Vector3(0.22f, -0.07f, 0.34f), new Vector3(-0.79f, -0.07f, 0.34f) };
             List<Vector3> Seat02 = new List<Vector3> { new Vector3(-0.04f, 0.15f, -180.00f), new Vector3(0.04f, 0.15f, -180.00f), new Vector3(0.00f, 0.15f, -180.00f) };
@@ -8093,7 +8186,7 @@ namespace New_Street_Phone_Missions
                     FreeFallMissions.Plane.HasCollision = false;
                     Game.Player.Character.Task.ClearAnimation("amb@code_human_in_bus_passenger_idles@male@sit@base", "base");
                     Game.Player.Character.Detach();
-                    Game.Player.Character.FreezePosition = false;
+                    Function.Call(Hash.FREEZE_ENTITY_POSITION, Game.Player.Character, false);
                     FreeFallMissions.PlaneTime = Game.GameTime + 5000;
                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[235];
                     JobSeq++;
@@ -10583,9 +10676,12 @@ namespace New_Street_Phone_Missions
                 if (DataStore.iLookForPB == 2)
                     PhoneClear();
 
+                if (DataStore.ByPassPlayZ)
+                    BlockPlayZero(true);
+
                 LocationX = ReturnStuff.WhereAreYou();
                 Vehicle VBob = null;
-                string[] readNote = File.ReadAllLines(DataStore.NSPMAuto[iMission]);
+                List<string> readNote = EntityLog.FileOutPut(DataStore.NSPMAuto[iMission]);
                 if (iMission == 2)
                     DimondValay();
                 else if (iMission == 5)
@@ -10598,22 +10694,24 @@ namespace New_Street_Phone_Missions
                 {
                     VehHandle = EntityLog.ReadMyInt(readNote[0]);
                     VBob = new Vehicle(VehHandle);
-
                     if (VBob.Exists())
                     {
+                        MissionData.DrivinMissDasy = true;
                         if (iMission == 0)
                             Ambulance(VBob);
                         else if (iMission == 1)
                             FireDept(VBob);
-                        else if (iMission == 2)
-                            Packages(VBob);
                         else if (iMission == 3)
+                        { 
+                            JobType = 3;
                             Packages(VBob);
+                        }
                         else if (iMission == 4)
                             MrMOneyMAn(VBob);
                     }
                 }
                 File.Delete(DataStore.NSPMAuto[iMission]);
+
             }
         }
         private void PhoneClear()
@@ -10706,6 +10804,9 @@ namespace New_Street_Phone_Missions
             NSBanking.SaveAchive();
             NSBanking.SaveBounsData();
 
+            if (DataStore.ByPassPlayZ)
+                BlockPlayZero(false);
+
             Game.FadeScreenIn(100);
 
             if (DataStore.OnlineStuffLoaded && !DataStore.MySettings.PreLoadOnline)
@@ -10784,10 +10885,13 @@ namespace New_Street_Phone_Missions
 
                         if (ReturnStuff.WhileButtonDown(21))
                         {
+                            if (DataStore.ByPassPlayZ)
+                                BlockPlayZero(true);
+
                             if (JobType == 11)
                             {
                                 iChoices = 0;
-                                TheMenus.Racist_Menu();
+                                TheMenusLoc.Racist_Menu();
                             }
                             else
                             {
@@ -10803,7 +10907,7 @@ namespace New_Street_Phone_Missions
                         else if (ReturnStuff.ButtonDown(47))
                         {
                             iChoices = 0;
-                            TheMenus.SettingsMenu();
+                            TheMenusLoc.SettingsMenu();
                         }
                         else if (Game.Player.Character.Position.DistanceTo(DataStore.vPhoneCorona) > 2.50f)
                         {
@@ -10827,7 +10931,7 @@ namespace New_Street_Phone_Missions
                         if (ReturnStuff.ButtonDown(47))
                         {
                             iChoices = 0;
-                            TheMenus.SettingsMenu();
+                            TheMenusLoc.SettingsMenu();
                         }
                         else if (Game.Player.Character.Position.DistanceTo(DataStore.vPhoneCorona) > 2.50f)
                         {
@@ -10849,6 +10953,9 @@ namespace New_Street_Phone_Missions
 
                             if (ReturnStuff.ButtonDown(21))
                             {
+                                if (DataStore.ByPassPlayZ)
+                                    BlockPlayZero(true);
+
                                 iChoices = 0;
                                 LocationX = 99;
                                 GetAwayDriver();
@@ -10926,13 +11033,14 @@ namespace New_Street_Phone_Missions
                         {
                             iChoices = 0;
                             DataStore.MySettings.StartOnYAcht = true;
-                            ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
+
+                            EntityLog.Settings_Out();
                         }
                         else if (ReturnStuff.ButtonDown(22))
                         {
                             iChoices = 0;
                             DataStore.MySettings.StartOnYAcht = false;
-                            ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
+                            EntityLog.Settings_Out();
                         }
                     }       //Yacht2
                     else if (iChoices == 10)
@@ -10967,7 +11075,7 @@ namespace New_Street_Phone_Missions
                                     Vector3 Vpos = new Vector3(-1848.826f, -1200.298f, 19.14339f);
                                     SearchFor.SlowFastTravel(Vpos, 165.84f);
                                 }
-                                ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
+                                EntityLog.Settings_Out();
                             }
                         }
                         else if (ReturnStuff.ButtonDown(22))
@@ -10982,7 +11090,7 @@ namespace New_Street_Phone_Missions
                                 Vector3 Vpos = new Vector3(-1848.826f, -1200.298f, 19.14339f);
                                 SearchFor.SlowFastTravel(Vpos, 165.84f);
                             }
-                            ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
+                            EntityLog.Settings_Out();
                         }
                     }      //Yacht
                     else if (iChoices == 11)
@@ -10997,6 +11105,7 @@ namespace New_Street_Phone_Missions
                             DellWhoMissions = new FubarEats(LocationX, DellWhoMissions.Earnings, DellWhoMissions.TimeTaken, true, DellWhoMissions.Bike, DellWhoMissions.Fuoobd);
                             EntityBuild.AddTarget(new BlipForm(DellWhoMissions.Start.PedHere.V3, true, 5, 408, DataStore.MyLang.Maptext[121], 1f, -1f));
                             MissionData.vFuMiss = DellWhoMissions.Start.ParkHere.V3;
+                            EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                         }
                         else if (ReturnStuff.ButtonDown(22))
                         {
@@ -11031,9 +11140,9 @@ namespace New_Street_Phone_Missions
         {
             fThisWay -= 88.00f;
             int iTFuckedUp = Game.GameTime + 5000;
-            Game.Player.Character.FreezePosition = true;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, Game.Player.Character, true);
             Script.Wait(500);
-            Game.Player.Character.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, Game.Player.Character, false);
             EntityBuild.WalkThisWay(Game.Player.Character, DataStore.vPhoneCorona, 1.00f);
             Script.Wait(2500);
             Game.Player.Character.Task.AchieveHeading(fThisWay, -1);
@@ -11077,9 +11186,9 @@ namespace New_Street_Phone_Missions
             {
                 if (DataStore.MenuOpen)
                 {
-                    if (TheMenus.YtmenuPool.IsAnyMenuOpen())
+                    if (TheMenusLoc.YtmenuPool.IsAnyMenuOpen())
                     {
-                        TheMenus.YtmenuPool.ProcessMenus();
+                        TheMenusLoc.YtmenuPool.ProcessMenus();
                         if (DataStore.iDisplayAch > 0 && DataStore.MySettings.AchiveMents)
                         {
                             if (DataStore.iDisplayAch == 1)
@@ -11146,7 +11255,7 @@ namespace New_Street_Phone_Missions
                     }
                     else
                     {
-                        Game.Player.Character.FreezePosition = false;
+                        Function.Call(Hash.FREEZE_ENTITY_POSITION, Game.Player.Character, false);
                         Game.Player.CanControlCharacter = true;
                         DataStore.iDisplayAch = 0;
                         Function.Call(Hash.DISPLAY_RADAR, true);
@@ -11411,7 +11520,7 @@ namespace New_Street_Phone_Missions
                                             if (BankRobMissions.GetAwayVeh.IsStopped)
                                             {
                                                 JobSeq++;
-                                                EntityBuild.PlaySoundFrom("Alarms", "Burglar_Bell", "Generic_Alarms", BankRobMissions.MyBank.Target02, false);
+                                                BankRobMissions.AlarmId = EntityBuild.PlaySoundFrom("Alarms", "Burglar_Bell", "Generic_Alarms", BankRobMissions.MyBank.Target02, false);
                                                 BankRobMissions.BankAlarm = true;
                                                 SearchFor.OpenDoors(BankRobMissions.MyBank.Target02, 5.00f);
                                                 UiDisplay.bMMDisplay01 = false;
@@ -11468,6 +11577,15 @@ namespace New_Street_Phone_Missions
                                 UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[7];
                                 UiDisplay.bUiDisplay = true;
                             }
+                            else
+                            {
+                                if (iWait4Sec < Game.GameTime)
+                                {
+                                    EntityBuild.WarptoAnyVeh(BankRobMissions.GetAwayVeh, BankRobMissions.Robber01, 2);
+                                    EntityBuild.WarptoAnyVeh(BankRobMissions.GetAwayVeh, BankRobMissions.Robber02, 3);
+                                    EntityBuild.WarptoAnyVeh(BankRobMissions.GetAwayVeh, BankRobMissions.Robber03, 4);
+                                }
+                            }
                         }
                         else if (JobSeq == 4)
                         {
@@ -11510,6 +11628,10 @@ namespace New_Street_Phone_Missions
                                             MissionData.VehicleList_01.Add(new Vehicle(BankRobMissions.GetAwayVeh.Handle));
                                             BankRobMissions.PickyDriver = true;
                                         }
+                                        EntityBuild.FreeSeat(BankRobMissions.GetAwayVeh, 2, true);
+                                        EntityBuild.FreeSeat(BankRobMissions.GetAwayVeh, 3, true);
+                                        EntityBuild.FreeSeat(BankRobMissions.GetAwayVeh, 4, true);
+
                                         SearchFor.BackSeat.Add(new FindSeat(2, BankRobMissions.GetAwayVeh, BankRobMissions.Robber01, 2f));
                                         SearchFor.BackSeat.Add(new FindSeat(3, BankRobMissions.GetAwayVeh, BankRobMissions.Robber02, 2f));
                                         SearchFor.BackSeat.Add(new FindSeat(4, BankRobMissions.GetAwayVeh, BankRobMissions.Robber03, 2f));
@@ -11582,18 +11704,18 @@ namespace New_Street_Phone_Missions
                             SearchFor.BackSeat.Add(new FindSeat(1, BankRobMissions.EndVeh, BankRobMissions.Robber01, 2f));
                             SearchFor.BackSeat.Add(new FindSeat(2, BankRobMissions.EndVeh, BankRobMissions.Robber02, 2f));
                             SearchFor.BackSeat.Add(new FindSeat(3, BankRobMissions.EndVeh, BankRobMissions.Robber03, 2f));
-                            EntityLog.CleanUp(-1, DataStore.iSoundId, -1);
+                            EntityLog.CleanUp(-1, BankRobMissions.AlarmId, -1);
                             BankRobMissions.GetAwayVeh.IsDriveable = false;
                             EntityBuild.ArmsRegulator(Game.Player.Character, 6);
                             UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[9];
                             UiDisplay.bUiDisplay = false;
-                            BankRobMissions.GetAwayVeh.FreezePosition = false;
+                            Function.Call(Hash.FREEZE_ENTITY_POSITION, BankRobMissions.GetAwayVeh, false);
                             BankRobMissions.GetAwayVeh.IsInvincible = false;
-                            BankRobMissions.EndVeh.FreezePosition = false;
+                            Function.Call(Hash.FREEZE_ENTITY_POSITION, BankRobMissions.EndVeh, false);
                             EntityBuild.VehBlip(new BlipForm(1, DataStore.MyLang.Maptext[14]), BankRobMissions.GetAwayVeh);
                             EntityBuild.Groupies(false, Game.Player.Character);
                             if (BankRobMissions.EndVeh.ClassType == VehicleClass.Boats)
-                                BankRobMissions.EndVeh.FreezePosition = false;
+                                Function.Call(Hash.FREEZE_ENTITY_POSITION, BankRobMissions.EndVeh, false);
                             else
                                 EntityBuild.ResetVehPos(BankRobMissions.EndVeh, BankRobMissions.MyEnd.EndVehPos);
 
@@ -11626,8 +11748,7 @@ namespace New_Street_Phone_Missions
                             }
                             else if (BankRobMissions.GetAwayVeh.IsOnFire || BankRobMissions.GetAwayVeh.IsDead)
                             {
-                                if (BankRobMissions.Oufit != null)
-                                    EntityBuild.PedDresser(Game.Player.Character, BankRobMissions.Oufit);
+                                Getaway_RemovePlayerMask();
 
                                 BankRobMissions.CashEarning = BankRobMissions.CashLoss / 4;
                                 BankRobMissions.GetAwayVeh.Explode();
@@ -11639,8 +11760,7 @@ namespace New_Street_Phone_Missions
                         }
                         else if (JobSeq == 45)
                         {
-                            if (BankRobMissions.Oufit != null)
-                                EntityBuild.PedDresser(Game.Player.Character, BankRobMissions.Oufit);
+                            Getaway_RemovePlayerMask();
                             EntityBuild.Groupies(false, Game.Player.Character);
                             Function.Call((Hash)0xDC0F817884CDD856, 2, true);
                             Function.Call((Hash)0xDC0F817884CDD856, 12, true);
@@ -11713,6 +11833,7 @@ namespace New_Street_Phone_Missions
                                 JobSeq = 45;
                             else if (Game.Player.Character.IsInVehicle())
                             {
+
                                 if (PackManMissions.DeliverVeh.CurrentBlip.Exists())
                                     PackManMissions.DeliverVeh.CurrentBlip.Remove();
                             }
@@ -11896,11 +12017,20 @@ namespace New_Street_Phone_Missions
                             {
                                 if (!ConvictMissions.AddOutfit)
                                 {
+                                    if (DataStore.MySettings.Auto_Outfit)
+                                    {
+                                        if (ConvictMissions.Uniform != null)
+                                            EntityBuild.PedDresser(Game.Player.Character, ConvictMissions.Uniform);
+                                    }
+                                    else
+                                        ConvictMissions.Uniform = null;
                                     ConvictMissions.AddOutfit = true;
-                                    if (ConvictMissions.Uniform != null)
-                                        EntityBuild.PedDresser(Game.Player.Character, ConvictMissions.Uniform);
+
                                 }
-                                else if (MissionData.Target_01 == null)
+                                
+
+
+                                if (MissionData.Target_01 == null)
                                 {
                                     ConvictMissions.Bus.CurrentBlip.Remove();
                                     EntityBuild.AddTarget(new BlipForm(ConvictMissions.Parade.ConMarch[ConvictMissions.Patrol], true, 5, 188, DataStore.MyLang.Maptext[44]));
@@ -12182,7 +12312,7 @@ namespace New_Street_Phone_Missions
                         else if (JobSeq == 25)
                         {
                             if (ConvictMissions.Uniform != null)
-                                EntityBuild.PedDresser(Game.Player.Character, ConvictMissions.Oufit);
+                                EntityBuild.PedDresser(Game.Player.Character, ConvictMissions.Oufit.Cothing);
 
                             Convicts_AddingAwards(true);
                             MissionEnd(Convicts_Awards(ConvictMissions.CashPayment, true, true));
@@ -12193,7 +12323,7 @@ namespace New_Street_Phone_Missions
                                 DataStore.Hare.Stop();
 
                             if (ConvictMissions.Uniform != null)
-                                EntityBuild.PedDresser(Game.Player.Character, ConvictMissions.Oufit);
+                                EntityBuild.PedDresser(Game.Player.Character, ConvictMissions.Oufit.Cothing);
 
                             if (ConvictMissions.PrisonAlarm)
                             {
@@ -12208,19 +12338,24 @@ namespace New_Street_Phone_Missions
                     {
                         if (JobSeq == 0)
                         {
-                            if (FubarMissions.StartDriver != null)
+                            if (FubarMissions.NewDriver)
                             {
-                                if (FubarMissions.FubVeh.Position.DistanceTo(FubarMissions.PlayerPos) < 30f)
+                                if (FubarMissions.StartDriver != null)
                                 {
-                                    EntityBuild.GetOutofVeh(FubarMissions.StartDriver, 2);
-                                    FubarMissions.StartDriver.Health = 0;
-                                    FubarMissions.StartDriver = null;
+                                    if (FubarMissions.FubVeh.Position.DistanceTo(Game.Player.Character.Position) < 30f)
+                                    {
+                                        EntityBuild.GetOutofVeh(FubarMissions.StartDriver, 2);
+                                        Function.Call(Hash.SET_ENTITY_HEALTH, FubarMissions.StartDriver, 0);
+                                        FubarMissions.StartDriver = null;
+                                        FubarMissions.NewDriver = false;
+                                    }
+                                    else if (FubarMissions.PlayerPos.DistanceTo(Game.Player.Character.Position) > 30f)
+                                    {
+                                        FubarMissions.PlayerPos = Game.Player.Character.Position;
+                                        EntityBuild.DriveToDest(FubarMissions.FubVeh, FubarMissions.PlayerPos, FubarMissions.StartDriver, 35f, 1074528293);
+                                    }
                                 }
-                                else if (FubarMissions.PlayerPos.DistanceTo(Game.Player.Character.Position) > 30f)
-                                {
-                                    FubarMissions.PlayerPos = Game.Player.Character.Position;
-                                    EntityBuild.DriveToDest(FubarMissions.FubVeh, FubarMissions.PlayerPos, FubarMissions.StartDriver, 35f, 1074528293);
-                                }
+
                             }
                             else if (FubarMissions.FubVeh != null)
                             {
@@ -12336,8 +12471,16 @@ namespace New_Street_Phone_Missions
                                 }
                                 else
                                 {
-                                    if (Game.Player.IsPressingHorn)
+                                    if (FubarMissions.HornBlasts > 4)
+                                    {
+                                        EntityBuild.WarptoPlayerVeh(FubarMissions.Passenger01, 2);
+                                        FubarMissions.HornBlasts = 0;
+                                    }
+                                    else if (Game.Player.IsPressingHorn)
+                                    {
                                         EntityBuild.EnterPlayerVeh(FubarMissions.Passenger01, 2, 2f);
+                                        FubarMissions.HornBlasts++;
+                                    }
                                 }
                             }
                             else if (FubarMissions.Passengers == 2)
@@ -12352,10 +12495,17 @@ namespace New_Street_Phone_Missions
                                 }
                                 else
                                 {
-                                    if (Game.Player.IsPressingHorn)
+                                    if (FubarMissions.HornBlasts > 4)
+                                    {
+                                        EntityBuild.WarptoPlayerVeh(FubarMissions.Passenger01, 2);
+                                        EntityBuild.WarptoPlayerVeh(FubarMissions.Passenger02, 3);
+                                        FubarMissions.HornBlasts = 0;
+                                    }
+                                    else if (Game.Player.IsPressingHorn)
                                     {
                                         EntityBuild.EnterPlayerVeh(FubarMissions.Passenger01, 2, 2f);
                                         EntityBuild.EnterPlayerVeh(FubarMissions.Passenger02, 3, 2f);
+                                        FubarMissions.HornBlasts++;
                                     }
                                 }
                             }
@@ -12372,10 +12522,19 @@ namespace New_Street_Phone_Missions
                                 }
                                 else
                                 {
-                                    if (Game.Player.IsPressingHorn)
+                                    if (FubarMissions.HornBlasts > 4)
+                                    {
+                                        EntityBuild.WarptoPlayerVeh(FubarMissions.Passenger01, 2);
+                                        EntityBuild.WarptoPlayerVeh(FubarMissions.Passenger02, 3);
+                                        EntityBuild.WarptoPlayerVeh(FubarMissions.Passenger03, 4);
+                                        FubarMissions.HornBlasts = 0;
+                                    }
+                                    else if (Game.Player.IsPressingHorn)
                                     {
                                         EntityBuild.EnterPlayerVeh(FubarMissions.Passenger01, 2, 2f);
                                         EntityBuild.EnterPlayerVeh(FubarMissions.Passenger02, 3, 2f);
+                                        EntityBuild.EnterPlayerVeh(FubarMissions.Passenger03, 4, 2f);
+                                        FubarMissions.HornBlasts++;
                                     }
                                 }
                             }
@@ -12387,7 +12546,7 @@ namespace New_Street_Phone_Missions
                         {
                             if (FubarMissions.FollowThatCar)
                             {
-                                SearchFor.MakeCarz.Add(new FindVeh(35f, 120f, new VehMods(ReturnStuff.AddRandomVeh(RandomX.RandInt(1, 9)), 24, false, true, ReturnStuff.FunPlates())));
+                                SearchFor.MakeCarz.Add(new FindVeh(35f, 120f, Game.Player.Character.Position, new VehMods(ReturnStuff.AddRandomVeh(RandomX.RandInt(1, 9)), 24, false, true, ReturnStuff.FunPlates())));
                                 JobSeq = 10;
                             }
                             else
@@ -12547,7 +12706,6 @@ namespace New_Street_Phone_Missions
                         }
                         else if (JobSeq == 11)
                         {
-                            UiDisplay.SpookBarz(FubarMissions.ThatCar, FubarMissions.SlideBarPos, false);
 
                             if (FubarMissions.FubVeh.IsDead || !FubarMissions.FubVeh.IsDriveable || Game.Player.IsAiming && Game.Player.Character.Weapons.Current.Hash != WeaponHash.Unarmed || Game.Player.WantedLevel > 0)
                                 JobSeq = 45;
@@ -12589,6 +12747,9 @@ namespace New_Street_Phone_Missions
                             else
                                 JobSeq = 45;
 
+                            if (UiDisplay.SpookBarz(FubarMissions.ThatCar, FubarMissions.SlideBarPos, false))
+                                JobSeq = 20;
+
                             if (FubarMissions.FuMeter < Game.GameTime)
                                 Fubar_Math(true);
                         }
@@ -12605,11 +12766,13 @@ namespace New_Street_Phone_Missions
                                 JobSeq = 7;
                             }
                         }
-                        else if (JobSeq == 101)
+                        else if (JobSeq == 20)
                         {
                             UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[243];
 
-                            if (FubarMissions.FubVeh.IsStopped)
+                            if (FubarMissions.FubVeh.IsDead || !FubarMissions.FubVeh.IsDriveable || Game.Player.IsAiming && Game.Player.Character.Weapons.Current.Hash != WeaponHash.Unarmed || Game.Player.WantedLevel > 0)
+                                JobSeq = 45;
+                            else if (FubarMissions.FubVeh.IsStopped)
                             {
                                 iWait4Sec = Game.GameTime + 1000;
                                 UiDisplay.sSubDisplay = "";
@@ -12650,7 +12813,7 @@ namespace New_Street_Phone_Missions
                                 {
                                     JobSeq++;
                                     EntityClear.RemoveTargets();
-                                    FubarMissions.FubVeh.FreezePosition = false;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, FubarMissions.FubVeh, false);
                                     EntityBuild.VehBlip(new BlipForm(5, DataStore.MyLang.Maptext[5]), FubarMissions.FubVeh);
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[27];
                                 }
@@ -12818,7 +12981,7 @@ namespace New_Street_Phone_Missions
                                 if (ReturnStuff.AmINear(BertMissions.Bert.Position, 55f))
                                 {
                                     JobSeq++;
-                                    BertMissions.Bert.FreezePosition = false;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, BertMissions.Bert, false);
                                     EntityBuild.ResetVehPos(BertMissions.Bert, BertMissions.BertPark);
 
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[32];
@@ -13157,7 +13320,7 @@ namespace New_Street_Phone_Missions
                                 if (ReturnStuff.AmINear(CropMissions.Plane.Position, 55f))
                                 {
                                     JobSeq++;
-                                    CropMissions.Plane.FreezePosition = false;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, CropMissions.Plane, false);
                                     EntityBuild.ResetVehPos(CropMissions.Plane, CropMissions.PlaneStart);
                                     int iPos = CropMissions.MuckLeft / 10;
                                     UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[5], " " + iPos + " Lbs ", 0f, false));
@@ -13208,7 +13371,7 @@ namespace New_Street_Phone_Missions
 
                                     if (CropMissions.EcoWar)
                                     {
-                                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, new VehMods("TECHNICAL", 8, 1, false, DataStore.MyLang.Maptext[20]), true));
+                                        SearchFor.MakeCarz.Add(new FindVeh(35.00f, 150.00f, Game.Player.Character.Position, new VehMods("TECHNICAL", 8, 1, false, DataStore.MyLang.Maptext[20]), true));
                                         CropMissions.EcoWar = false;
                                     }
                                 }
@@ -13268,7 +13431,7 @@ namespace New_Street_Phone_Missions
                                 if (ReturnStuff.AmINear(HiggsMissions.HiggsHeli.Position, 65f))
                                 {
                                     JobSeq++;
-                                    HiggsMissions.HiggsHeli.FreezePosition = false;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, HiggsMissions.HiggsHeli, false);
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[46];
                                 }
                             }
@@ -13474,9 +13637,15 @@ namespace New_Street_Phone_Missions
                             {
                                 if (!AmbMissions.UniformOn)
                                 {
+                                    if (DataStore.MySettings.Auto_Outfit)
+                                    {
+                                        if (AmbMissions.Uniform != null)
+                                            EntityBuild.PedDresser(Game.Player.Character, AmbMissions.Uniform);
+                                    }
+                                    else
+                                        AmbMissions.Uniform = null;
+
                                     AmbMissions.UniformOn = true;
-                                    if (AmbMissions.Uniform != null)
-                                        EntityBuild.PedDresser(Game.Player.Character, AmbMissions.Uniform);
                                 }
                                 JobSeq++;
                             }
@@ -13524,7 +13693,7 @@ namespace New_Street_Phone_Missions
                         {
                             JobSeq++;
                             Game.Player.CanControlCharacter = true;
-                            AmbMissions.VicTim.FreezePosition = false;
+                            Function.Call(Hash.FREEZE_ENTITY_POSITION, AmbMissions.VicTim, false);
                             Game.Player.Character.Task.ClearAll();
                             AmbMissions.VicTim.Task.ClearAnimation("combat@damage@writhe", "writhe_loop");
                             SearchFor.BackSeat.Add(new FindSeat(3, AmbMissions.Ambuantz, AmbMissions.VicTim, 0.7f));
@@ -13689,7 +13858,7 @@ namespace New_Street_Phone_Missions
                                 UiDisplay.bMMDisplay01 = true;
                             }
                             else if (Game.Player.Character.IsInVehicle())
-                            {
+                            { 
                                 if (AmbMissions.Ambuantz.CurrentBlip.Exists())
                                     AmbMissions.Ambuantz.CurrentBlip.Remove();
                             }
@@ -13723,7 +13892,7 @@ namespace New_Street_Phone_Missions
                                             Game.Player.CanControlCharacter = false;
                                             UiDisplay.FolPed = null;
                                             UiDisplay.bMMDisplay01 = false;
-                                            TheMenus.Ambulance_Menu(AmbMissions.Condition, AmbMissions.Covid, AmbMissions.VicTim);
+                                            TheMenusLoc.Ambulance_Menu(AmbMissions.Condition, AmbMissions.Covid, AmbMissions.VicTim);
                                         }
                                     }
                                 }
@@ -13777,9 +13946,9 @@ namespace New_Street_Phone_Missions
                             Game.Player.CanControlCharacter = true;
                             Game.Player.Character.Task.ClearAll();
                             AmbMissions.Fatalitys++;
-                            AmbMissions.VicTim.Health = 0;
+                            Function.Call(Hash.SET_ENTITY_HEALTH, AmbMissions.VicTim, 0);
                             AmbMissions.Timer = 0;
-                            AmbMissions.VicTim.FreezePosition = false;
+                            Function.Call(Hash.FREEZE_ENTITY_POSITION, AmbMissions.VicTim, false);
                             if (AmbMissions.VicTim.CurrentBlip.Exists())
                                 AmbMissions.VicTim.CurrentBlip.Remove();
                             if (AmbMissions.Fatalitys < 5)
@@ -13800,7 +13969,7 @@ namespace New_Street_Phone_Missions
                             Game.Player.CanControlCharacter = true;
                             Game.Player.Character.Task.ClearAll();
                             AmbMissions.VicTim.Task.ClearAnimation("combat@damage@writhe", "writhe_loop");
-                            AmbMissions.VicTim.FreezePosition = false;
+                            Function.Call(Hash.FREEZE_ENTITY_POSITION, AmbMissions.VicTim, false);
                             AmbMissions.Timer = 0;
                         }
                         else if (JobSeq == 20)
@@ -13826,8 +13995,11 @@ namespace New_Street_Phone_Missions
                         }
                         else if (JobSeq == 21)
                         {
-                            if (AmbMissions.Ambuantz.IsDead || AmbMissions.VicTim.IsDead)
+                            if (AmbMissions.VicTim.IsDead)
+                            {
                                 JobSeq = 45;
+                                SearchFor.SlowFastTravel(AmbMissions.FubStuff.PedHere);
+                            }
                             else if (Game.Player.Character.Position.DistanceTo(AmbMissions.IntDoors[0].V3) > 150f)
                             {
                                 FallFor++;
@@ -13845,7 +14017,7 @@ namespace New_Street_Phone_Missions
                                     Game.Player.CanControlCharacter = false;
                                     UiDisplay.FolPed = null;
                                     UiDisplay.bMMDisplay01 = false;
-                                    TheMenus.Ambulance_Menu(AmbMissions.Condition, AmbMissions.Covid, AmbMissions.VicTim);
+                                    TheMenusLoc.Ambulance_Menu(AmbMissions.Condition, AmbMissions.Covid, AmbMissions.VicTim);
                                 }
                             }
                             else
@@ -13873,7 +14045,7 @@ namespace New_Street_Phone_Missions
                         else if (JobSeq == 35)
                         {
                             if (AmbMissions.Uniform != null)
-                                EntityBuild.PedDresser(Game.Player.Character, AmbMissions.Oufit);
+                                EntityBuild.PedDresser(Game.Player.Character, AmbMissions.Oufit.Cothing);
 
                             NSBanking.NSCoinInvestments(true, 2, 4, "Humane Labs");
                             DataStore.MyDatSet.iMeddicTest = DataStore.iMeddicc;
@@ -13883,10 +14055,11 @@ namespace New_Street_Phone_Missions
                         else if (JobSeq == 45)
                         {
                             if (AmbMissions.Uniform != null)
-                                EntityBuild.PedDresser(Game.Player.Character, AmbMissions.Oufit);
+                                EntityBuild.PedDresser(Game.Player.Character, AmbMissions.Oufit.Cothing);
 
                             if (DataStore.MyAchivments.Ambulance_WinSomeLoseSome < 5)
                                 DataStore.MyAchivments.Ambulance_WinSomeLoseSome = AmbMissions.Fatalitys;
+
                             GameOverFail(false);
                         }
                     }        //Amulance
@@ -13919,7 +14092,8 @@ namespace New_Street_Phone_Missions
                                 UiDisplay.SideBars[1].Data = " " + iFind + " ";
                             }
 
-                            UiDisplay.SpookBarz(FollMissions.TargetCar, 0, FollMissions.NearTrig);
+                            if (UiDisplay.SpookBarz(FollMissions.TargetCar, 0, FollMissions.NearTrig))
+                                JobSeq = 45;
                         }
 
                         if (JobSeq == 0)
@@ -13933,7 +14107,7 @@ namespace New_Street_Phone_Missions
                                     JobSeq++;
                                     int iVehTing = RandomX.RandInt(1, 10);
                                     iWait4Sec = Game.GameTime + 10000;
-                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 250.00f, new VehMods(ReturnStuff.AddRandomVeh(iVehTing), 1, 3, false, DataStore.MyLang.Maptext[14], false, true, ReturnStuff.FunPlates()), true));
+                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 250.00f, Game.Player.Character.Position, new VehMods(ReturnStuff.AddRandomVeh(iVehTing), 1, 3, false, DataStore.MyLang.Maptext[14], false, true, ReturnStuff.FunPlates()), true));
                                 }
                             }
                         }
@@ -13954,6 +14128,7 @@ namespace New_Street_Phone_Missions
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[60];
                                     FollMissions.TargetCar = MissionData.MishVeh;
                                     FollMissions.Driver = EntityBuild.NPCSpawn(new PedFeat(ReturnStuff.RandNPC(RandomX.RandInt(1, 35)), false, 180, 0, 1, FollMissions.TargetCar, 2, false, 0, ""), FollMissions.TargetCar.Position, FollMissions.TargetCar.Heading);
+                                    EntityLog.PlayZeroTargets(FollMissions.Driver, MissionData.vFuMiss, false, false);
                                 }
                             }
                             else if (iWait4Sec < Game.GameTime)
@@ -14002,7 +14177,8 @@ namespace New_Street_Phone_Missions
                             else if (ReturnStuff.AreUNear(FollMissions.ShopsNTings.ParkHere.V3, FollMissions.TargetCar.Position, 5f))
                             {
                                 JobSeq++;
-                                FollMissions.TargetCar.FreezePosition = true;
+
+                                Function.Call(Hash.FREEZE_ENTITY_POSITION, FollMissions.TargetCar, true);
                                 if (FollMissions.ShopFits.Count > 0)
                                     SearchFor.OpenDoors(FollMissions.ShopFits[0], 3f);
 
@@ -14017,16 +14193,19 @@ namespace New_Street_Phone_Missions
                             {
                                 JobSeq++;
                                 EntityClear.RemoveTargets();
-                                FollMissions.TargetCar.FreezePosition = false;
+                                Function.Call(Hash.FREEZE_ENTITY_POSITION, FollMissions.TargetCar, false);
                                 iWait4Sec = Game.GameTime + 5000;
                             }
                             else if (FollMissions.ShopFits.Count > 0)
                             {
                                 if (iWait4Sec < Game.GameTime)
                                 {
+                                    FollMissions.DoorIsJammed--;
                                     iWait4Sec = Game.GameTime + 1000;
                                     SearchFor.OpenDoors(FollMissions.ShopFits[0], 3f);
                                 }
+                                else if (FollMissions.DoorIsJammed < 0)
+                                    EntityBuild.WarptoAnyVeh(FollMissions.TargetCar, FollMissions.Passenger, 2);
                             }
                         }
                         else if (JobSeq == 40)
@@ -14038,10 +14217,6 @@ namespace New_Street_Phone_Missions
                         else if (JobSeq == 45)
                         {
                             GameOverFail(false);
-                        }
-                        else if (JobSeq == 101)
-                        {
-                            JobSeq = 45;
                         }
                         else if (FollMissions.Ending == 1)
                         {
@@ -14072,6 +14247,7 @@ namespace New_Street_Phone_Missions
                                     EntityBuild.DriveToDest(FollMissions.TargetCar, FollMissions.Endings[0], FollMissions.Driver, 45f, FollMissions.DriveStyle);
                                     EntityBuild.VehBlip(new BlipForm(1, DataStore.MyLang.Maptext[20]), FollMissions.TargetCar);
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[61];
+                                    EntityLog.PlayZeroTargets(FollMissions.Driver, MissionData.vFuMiss, false, true);
                                 }
                             }
                             else if (JobSeq == 8)
@@ -14145,8 +14321,8 @@ namespace New_Street_Phone_Missions
                                     UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[13], "", 0f, false));
                                     FollMissions.CountDown = true;
                                     MissionData.iTracking = Game.GameTime + 1000;
-                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, new VehMods("SCHAFTER3", 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
-                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, new VehMods("LIMO2", 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
+                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, Game.Player.Character.Position, new VehMods("SCHAFTER3", 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
+                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, Game.Player.Character.Position, new VehMods("LIMO2", 8, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
                                     FollMissions.Driver.RelationshipGroup = DataStore.GP_BNPCs;
                                     FollMissions.Passenger.RelationshipGroup = DataStore.GP_BNPCs;
                                     EntityBuild.DriveToDest(FollMissions.TargetCar, FollMissions.Endings[0], FollMissions.Driver, 30f, FollMissions.DriveStyle);
@@ -14235,7 +14411,8 @@ namespace New_Street_Phone_Missions
                                 JobSeq++;
                                 UiDisplay.MMDisplay01.MarkCol = Color.MediumTurquoise;
                                 iWait4Sec = Game.GameTime + RandomX.RandInt(2000, 4000);
-                                FollMissions.Driver.Task.CruiseWithVehicle(FollMissions.TargetCar, 20f, FollMissions.DriveStyle);
+                                EntityBuild.NpcVehicleTasks(FollMissions.Driver, FollMissions.TargetCar, 15);
+                                //FollMissions.Driver.Task.CruiseWithVehicle(FollMissions.TargetCar, 20f, FollMissions.DriveStyle);
                             }
                             else if (JobSeq == 7)
                             {
@@ -14267,6 +14444,7 @@ namespace New_Street_Phone_Missions
 
                                     FollMissions.NearTrig = false;
                                     CashNCrash(FollMissions.TargetCar, FollMissions.YourReward);
+                                    EntityLog.PlayZeroTargets(FollMissions.Driver, MissionData.vFuMiss, false, true);
                                     EntityBuild.VehBlip(new BlipForm(11, DataStore.MyLang.Maptext[14]), FollMissions.TargetCar);
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[63];
                                 }
@@ -14353,8 +14531,8 @@ namespace New_Street_Phone_Missions
                                     FollMissions.NearTrig = false;
                                     FollMissions.CountDown = true;
                                     UiDisplay.SideBars.Add(new SideBar(DataStore.MyLang.Othertext[13], "", 0f, false));
-                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, new VehMods("KURUMA2", 9, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
-                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, new VehMods("KURUMA2", 9, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
+                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, Game.Player.Character.Position, new VehMods("KURUMA2", 9, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
+                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, Game.Player.Character.Position, new VehMods("KURUMA2", 9, 1, false, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
                                     EntityBuild.DriveToDest(FollMissions.TargetCar, FollMissions.Endings[0], FollMissions.Driver, 45f, FollMissions.DriveStyle);
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[65];
                                 }
@@ -14367,7 +14545,8 @@ namespace New_Street_Phone_Missions
                                 {
                                     JobSeq++;
                                     UiDisplay.bMMDisplay01 = false;
-                                    FollMissions.Heli.FreezePosition = false;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, FollMissions.Heli, false);
+                                    
                                     FollMissions.Pilot = EntityBuild.NPCSpawn(new PedFeat(ReturnStuff.RandNPC(32), false, 180, 8, 1, FollMissions.Heli, 0, false, 0, ""), FollMissions.Heli.Position, FollMissions.Heli.Heading);
                                     EntityBuild.GetOutofVeh(FollMissions.Driver, 1);
                                     EntityBuild.GetOutofVeh(FollMissions.Passenger, 1);
@@ -14442,7 +14621,7 @@ namespace New_Street_Phone_Missions
                                 else if (iWait4Sec < Game.GameTime)
                                 {
                                     JobSeq++;
-                                    FollMissions.TargetCar.FreezePosition = true;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, FollMissions.TargetCar, true);
                                     FollMissions.TargetCar.CurrentBlip.Remove();
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[66];
                                     FollMissions.DistanceBar = false;
@@ -14504,9 +14683,16 @@ namespace New_Street_Phone_Missions
 
                                 if (!FireMissions.UniformOn)
                                 {
+                                    if (DataStore.MySettings.Auto_Outfit)
+                                    {
+                                        if (FireMissions.Uniform != null)
+                                            EntityBuild.PedDresser(Game.Player.Character, FireMissions.Uniform);
+
+                                    }
+                                    else
+                                        FireMissions.Uniform = null;
+
                                     FireMissions.UniformOn = true;
-                                    if (FireMissions.Uniform != null)
-                                        EntityBuild.PedDresser(Game.Player.Character, FireMissions.Uniform);
                                 }
 
                                 if (FireMissions.FireType == 1)
@@ -14886,7 +15072,7 @@ namespace New_Street_Phone_Missions
                                     JobSeq++;
                                     EntityClear.RemoveTargets();
                                     int iVe = RandomX.RandInt(1, 11);
-                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, new VehMods(ReturnStuff.AddRandomVeh(iVe), 11, 1, true, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
+                                    SearchFor.MakeCarz.Add(new FindVeh(35.00f, 125.00f, Game.Player.Character.Position, new VehMods(ReturnStuff.AddRandomVeh(iVe), 11, 1, true, DataStore.MyLang.Maptext[20], false, true, ReturnStuff.FunPlates()), true));
                                 }
                             }
                             else
@@ -14978,7 +15164,7 @@ namespace New_Street_Phone_Missions
                                 NSBanking.NSCoinInvestments(true, 27, 28, "Mors Mutual Shares");
 
                             if (FireMissions.Uniform != null)
-                                EntityBuild.PedDresser(Game.Player.Character, FireMissions.Oufit);
+                                EntityBuild.PedDresser(Game.Player.Character, FireMissions.Oufit.Cothing);
 
                             if (FireMissions.InFort)
                                 ZancudaClosed();
@@ -14993,7 +15179,7 @@ namespace New_Street_Phone_Missions
                                 ZancudaClosed();
 
                             if (FireMissions.Uniform != null)
-                                EntityBuild.PedDresser(Game.Player.Character, FireMissions.Oufit);
+                                EntityBuild.PedDresser(Game.Player.Character, FireMissions.Oufit.Cothing);
 
                             if (FireMissions.CatHat)
                                 FireMissions.FirePed.Detach();
@@ -15325,6 +15511,14 @@ namespace New_Street_Phone_Missions
                             if (!RacingMissions.DisableCapture)
                                 RacingMissions.RaceRecVec = Racist_SnapShot(RacingMissions.RaceVeh, RacingMissions.RaceRecVec);
 
+                            //Vector3 Push;
+                            //if (RacingMissions.SnowIsOn)
+                            //{
+                            //    float toX, toY, toZ, speedX, speedY, speedZ;
+                            //    BOOL collision;
+                            //    if (Function.Call<bool>(Hash.SLIDE_OBJECT, (object)RacingMissions.RaceVeh , toX, toY, toZ, speedX, speedY, speedZ, collision)
+                            //        Push = RacingMissions.RaceVeh.Position;
+                            //}
 
                             if (RacingMissions.StuntRace)
                             {
@@ -15369,8 +15563,15 @@ namespace New_Street_Phone_Missions
                             {
                                 JobSeq++;
                                 EntityClear.RemoveTargets();
-                                if (BombingMissions.Uniform != null)
-                                    EntityBuild.PedDresser(Game.Player.Character, BombingMissions.Uniform);
+
+                                if (DataStore.MySettings.Auto_Outfit)
+                                {
+                                    if (BombingMissions.Uniform != null)
+                                        EntityBuild.PedDresser(Game.Player.Character, BombingMissions.Uniform);
+                                }
+                                else
+                                    BombingMissions.Uniform = null;
+
                                 BombingMissions.MyBomb = EntityBuild.BuildProp("ex_prop_adv_case_sm_flash", BombingMissions.BombThis, false, false);
                                 EntityBuild.AddTarget(new BlipForm(BombingMissions.BlipCenter, false, 5, 60f, new BlipForm(BombingMissions.BlipCenter, true, 5, 486, DataStore.MyLang.Maptext[26])));
                                 int iNoPed = RandomX.RandInt(1, 4);
@@ -15400,6 +15601,7 @@ namespace New_Street_Phone_Missions
 
                                     EntityBuild.AddTarget(new BlipForm(BombingMissions.PoilceDrop[0], true, 5, 305, DataStore.MyLang.Maptext[57], 1f));
                                     MissionData.vFuMiss = BombingMissions.PoilceDrop[1];
+                                    EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[89];
                                     BbBomb_BombSquad(BombingMissions.PoilceDrop);
                                 }
@@ -15430,7 +15632,7 @@ namespace New_Street_Phone_Missions
                             {
                                 JobSeq++;
                                 if (BombingMissions.Uniform != null)
-                                    EntityBuild.PedDresser(Game.Player.Character, BombingMissions.Oufit);
+                                    EntityBuild.PedDresser(Game.Player.Character, BombingMissions.Oufit.Cothing);
                                 EntityBuild.BuildProp("ex_prop_adv_case_sm_flash", BombingMissions.PoilceDrop[0], Vector3.Zero, false, true);
                                 SearchFor.StreetFrenz.Add(new FindPed(0.1f, 45f, 99, true, BombingMissions.PoilceDrop[0], new PedFeat("", 2)));
                                 BombingMissions.Payment = RandomX.RandInt(4000, 5000);
@@ -15441,7 +15643,7 @@ namespace New_Street_Phone_Missions
                         else if (JobSeq == 45)
                         {
                             if (BombingMissions.Uniform != null)
-                                EntityBuild.PedDresser(Game.Player.Character, BombingMissions.Oufit);
+                                EntityBuild.PedDresser(Game.Player.Character, BombingMissions.Oufit.Cothing);
                             NSBanking.NSCoinInvestments(false, 7, 11, "Mors Mutual Shares");
                             GameOverFail(false);
                         }
@@ -15815,8 +16017,15 @@ namespace New_Street_Phone_Missions
                                 JobSeq++;
                                 MoneyMissions.Truck.CurrentBlip.Remove();
                                 Game.Player.Character.CanBeDraggedOutOfVehicle = true;
-                                if (MoneyMissions.Uniform != null)
-                                    EntityBuild.PedDresser(Game.Player.Character, MoneyMissions.Uniform); 
+
+                                if (DataStore.MySettings.Auto_Outfit)
+                                {
+                                    if (MoneyMissions.Uniform != null)
+                                        EntityBuild.PedDresser(Game.Player.Character, MoneyMissions.Uniform);
+                                }
+                                else
+                                    MoneyMissions.Uniform = null;
+
                                 EntityBuild.AddTarget(new BlipForm(MoneyMissions.Shops.ParkHere.V3, true, 5, 408, DataStore.MyLang.Maptext[58], 5f));
                                 UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[93];
                             }
@@ -16023,11 +16232,11 @@ namespace New_Street_Phone_Missions
                                     {
                                         JobSeq++;
                                         if (MoneyMissions.Uniform != null)
-                                            EntityBuild.PedDresser(Game.Player.Character, MoneyMissions.Oufit);
+                                            EntityBuild.PedDresser(Game.Player.Character, MoneyMissions.Oufit.Cothing);
                                         UiDisplay.sSubDisplay = "";
                                         EntityBuild.StopHere(MoneyMissions.Truck);
                                         SearchFor.SlowFastTravel(MoneyMissions.StandHere);
-                                        MoneyMissions.Truck.FreezePosition = true;
+                                        Function.Call(Hash.FREEZE_ENTITY_POSITION, MoneyMissions.Truck, true);
                                         MoneyMissions.Truck.Position = new Vector3(0.00f, 0.00f, 110.00f);
                                         EntityBuild.FreeSeat(MoneyMissions.Truck, 2, false);
                                         EntityBuild.FreeSeat(MoneyMissions.Truck, 3, false);
@@ -16065,7 +16274,7 @@ namespace New_Street_Phone_Missions
                         else if (JobSeq == 45)
                         {
                             if (MoneyMissions.Uniform != null)
-                                EntityBuild.PedDresser(Game.Player.Character, MoneyMissions.Oufit);
+                                EntityBuild.PedDresser(Game.Player.Character, MoneyMissions.Oufit.Cothing);
                             NSBanking.NSCoinInvestments(false, 6, 10, "Gruppe Sechs Shares");
                             GameOverFail(false);
                         }
@@ -16552,17 +16761,19 @@ namespace New_Street_Phone_Missions
                                 {
                                     if (MissionData.MishVeh.CurrentBlip.Exists())
                                         MissionData.MishVeh.CurrentBlip.Remove();
-                                    else if (MissionData.PropList_01.Count > 0)
+                                }
+                                else
+                                {
+                                    if (!MissionData.MishVeh.CurrentBlip.Exists())
+                                        EntityBuild.VehBlip(new BlipForm(5, DataStore.MyLang.Maptext[18]), MissionData.MishVeh);
+                                }
+                                
+                                if (MissionData.PropList_01.Count > 0)
+                                {
+                                    if (iWait4Sec > Game.GameTime)
                                     {
-                                        if (iWait4Sec > Game.GameTime)
-                                        {
-                                            UiDisplay.SideBars[1].Data = ReturnStuff.ShowComs(iWait4Sec - Game.GameTime, false, false);
-                                            Water04_TakeOutTrash();
-                                        }
-                                        else
-                                        {
-                                            JobSeq++;
-                                        }
+                                        UiDisplay.SideBars[1].Data = ReturnStuff.ShowComs(iWait4Sec - Game.GameTime, false, false);
+                                        Water04_TakeOutTrash();
                                     }
                                     else
                                     {
@@ -16571,8 +16782,7 @@ namespace New_Street_Phone_Missions
                                 }
                                 else
                                 {
-                                    if (!MissionData.MishVeh.CurrentBlip.Exists())
-                                        EntityBuild.VehBlip(new BlipForm(5, DataStore.MyLang.Maptext[18]), MissionData.MishVeh);
+                                    JobSeq++;
                                 }
                             }
                             else if (JobSeq == 3)
@@ -16610,7 +16820,7 @@ namespace New_Street_Phone_Missions
                                     JobSeq++;
                                     EntityClear.RemoveTargets();
                                     Water05_BlipTheBoats();
-                                    MissionData.MishVeh.FreezePosition = false;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, MissionData.MishVeh, false);
                                     UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[120];
                                 }
                             }
@@ -16891,6 +17101,15 @@ namespace New_Street_Phone_Missions
                             {
                                 JobSeq++;
                                 ImpExpMissions.VehX = MissionData.MishVeh;
+
+                                if (ImpExpMissions.Driver != null)
+                                {
+                                    ImpExpMissions.Driver.MaxSpeed = 15.0f;
+                                    EntityLog.PlayZeroTargets(ImpExpMissions.Driver, MissionData.vFuMiss, false, true);
+                                }
+                                else
+                                    EntityLog.PlayZeroTargets(null, MissionData.MishVeh.Position, false, false);
+
                                 MissionData.MishVeh = null;
                                 ImpExpMissions.MoveSub = true;
                                 ImpExpMissions.VehCash = ImpExpMissions.PayOut[ImpExpMissions.NoCars];
@@ -16943,7 +17162,7 @@ namespace New_Street_Phone_Missions
                                                     ImpExpMissions.CleanRun = true;
                                                 ImpExpMissions.Payments += ImpExpMissions.VehCash;
                                                 ImpExpMissions.NoCars++;
-                                                ImpExpMissions.VehX.FreezePosition = true;
+                                                Function.Call(Hash.FREEZE_ENTITY_POSITION, ImpExpMissions.VehX, true);
                                                 Water01_BargeCars(ImpExpMissions.VehX, ImpExpMissions.Bargie, ImpExpMissions.NoCars);
                                                 if (Game.Player.Character.IsInVehicle(ImpExpMissions.VehX))
                                                 {
@@ -17073,6 +17292,7 @@ namespace New_Street_Phone_Missions
                                 EntityClear.RemoveTargets();
                                 SearchFor.SlowFastTravel(DebtMissions.MyFlat.PedHere);
                                 MissionData.vFuMiss = DebtMissions.MyBank.ParkHere.V3;
+                                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                                 EntityBuild.AddTarget(new BlipForm(DebtMissions.Banks[0].V3, true, 5, 108, DataStore.MyLang.Maptext[40], 1f, -1f));
                                 EntityClear.CleanPedBlips();
                             }
@@ -17148,15 +17368,11 @@ namespace New_Street_Phone_Missions
                         else if (JobSeq == 10)
                         {
                             JobSeq++;
-                            BikerMissions.ExVeh = EntityBuild.VehicleSpawn(new VehMods("PBUS2", 0), BikerMissions.Buissness.ParkHere);
-                            BikerMissions.ExVeh.LockStatus = VehicleLockStatus.Locked;
                             UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[140];
                         }
                         else if (JobSeq == 11)
                         {
-                            if (BikerMissions.ExVeh.IsDead)
-                                JobSeq = 45;
-                            else if (ReturnStuff.AmINear(BikerMissions.Buissness.PedHere.V3, 1.5f) && !Game.Player.Character.IsInVehicle())
+                            if (ReturnStuff.AmINear(BikerMissions.Buissness.PedHere.V3, 1.5f) && !Game.Player.Character.IsInVehicle())
                             {
                                 JobSeq++;
                                 EntityClear.RemoveTargets();
@@ -17164,6 +17380,7 @@ namespace New_Street_Phone_Missions
                                 UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[141];
                                 BikerRaids_LoadHood(1);
                                 SearchFor.SlowFastTravel(BikerMissions.InBis[0]);
+                                BikerMissions.ExVeh = EntityBuild.VehicleSpawn(new VehMods("PBUS2", 0), BikerMissions.Buissness.ParkHere);
                             }
                         }
                         else if (JobSeq == 12)
@@ -17179,7 +17396,6 @@ namespace New_Street_Phone_Missions
                             {
                                 JobSeq++;
                                 UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[142];
-                                BikerMissions.ExVeh.LockStatus = VehicleLockStatus.Unlocked;
                                 EntityBuild.AddTarget(new BlipForm(BikerMissions.InBis[0].V3, false, 5, 0, "", 1f, -1f));
                             }
                             EntityClear.SimpleTracker();
@@ -17245,7 +17461,7 @@ namespace New_Street_Phone_Missions
                             if (iWait4Sec < Game.GameTime)
                             {
                                 JobSeq = 40;
-                                BikerMissions.ExVeh.FreezePosition = true;
+                                Function.Call(Hash.FREEZE_ENTITY_POSITION, BikerMissions.ExVeh, true);
                                 EntityBuild.GetOutofVeh(Game.Player.Character, 0);
                                 BikerMissions.CashPay += MissionData.iUltPed01 * 250;
                                 BikerMissions.CashPay += 5000;
@@ -17312,15 +17528,11 @@ namespace New_Street_Phone_Missions
                         else if (JobSeq == 30)
                         {
                             JobSeq++;
-                            BikerMissions.ExVeh = EntityBuild.VehicleSpawn(new VehMods("SLAMVAN2", 0), BikerMissions.Buissness.ParkHere);
-                            BikerMissions.ExVeh.LockStatus = VehicleLockStatus.Locked;
                             UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[140];
                         }
                         else if (JobSeq == 31)
                         {
-                            if (BikerMissions.ExVeh.IsDead)
-                                JobSeq = 45;
-                            else if (ReturnStuff.AmINear(BikerMissions.Buissness.PedHere.V3, 1.5f) && !Game.Player.Character.IsInVehicle())
+                            if (ReturnStuff.AmINear(BikerMissions.Buissness.PedHere.V3, 1.5f) && !Game.Player.Character.IsInVehicle())
                             {
                                 JobSeq++;
                                 EntityClear.RemoveTargets();
@@ -17328,6 +17540,7 @@ namespace New_Street_Phone_Missions
                                 BikerRaids_LoadHood(1);
                                 UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[146];
                                 SearchFor.SlowFastTravel(BikerMissions.InBis[0]);
+                                BikerMissions.ExVeh = EntityBuild.VehicleSpawn(new VehMods("SLAMVAN2", 0), BikerMissions.Buissness.ParkHere);
                             }
                         }
                         else if (JobSeq == 32)
@@ -17412,8 +17625,8 @@ namespace New_Street_Phone_Missions
                         {
                             if (iWait4Sec < Game.GameTime)
                             {
-                                JobSeq = 40; 
-                                BikerMissions.ExVeh.FreezePosition = true;
+                                JobSeq = 40;
+                                Function.Call(Hash.FREEZE_ENTITY_POSITION, BikerMissions.ExVeh, true);
                                 EntityBuild.GetOutofVeh(Game.Player.Character, 0);
                                 BikerMissions.ExVeh.LockStatus = VehicleLockStatus.Locked;
                                 BikerMissions.CashPay += MissionData.iUltPed01 * 250;
@@ -17466,7 +17679,9 @@ namespace New_Street_Phone_Missions
                             if (Game.Player.WantedLevel > 0)
                                 Game.Player.WantedLevel = 0;
 
-                            if (CargoMissions.ForkLift.IsDead || CargoMissions.Truck.IsDead)
+                            if (!CargoMissions.ForkLift.Exists() || !CargoMissions.Truck.Exists())
+                                JobSeq = 45;
+                            else if (CargoMissions.ForkLift.IsDead || CargoMissions.Truck.IsDead)
                                 JobSeq = 45;
                             else if (MissionData.iTracking < Game.GameTime)
                                 EntityClear.SimpleTracker();
@@ -17483,7 +17698,7 @@ namespace New_Street_Phone_Missions
                                 else if (ReturnStuff.AreUNear(Forks, CargoMissions.BluePallet.Position, 1.3f))
                                 {
                                     UiDisplay.bMMDisplay01 = false;
-                                    CargoMissions.BluePallet.FreezePosition = false;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, CargoMissions.BluePallet, false);
                                     CargoMissions.BluePallet.AttachTo(CargoMissions.ForkLift, Function.Call<int>(Hash.GET_ENTITY_BONE_INDEX_BY_NAME, CargoMissions.ForkLift.Handle, "forks_attach"), new Vector3(0.00f, 0.00f, 0.10f), new Vector3(0.00f, 0.00f, 90.00f));
                                     if (CargoMissions.Buissness.PedNum == 4)
                                     {
@@ -18052,6 +18267,8 @@ namespace New_Street_Phone_Missions
                                 else
                                 {
                                     MoresMissions.Stiff = EntityBuild.NPCSpawn(new PedFeat(ReturnStuff.RandNPC(12), false, 250, 17, 0, null, 0, true, 0, DataStore.MyLang.Maptext[105]), MoresMissions.ParkNRide.PedHere);
+                                    MoresMissions.GhostWhip.Position = Vector3.Zero;
+                                    UiDisplay.bUiDisplay = false;
                                     JobSeq = 45;
                                 }
                             }
@@ -18457,7 +18674,7 @@ namespace New_Street_Phone_Missions
                                     else if (Temp04Missions.IWalks == 2)
                                     {
                                         if (Temp04Missions.Uniform != null)
-                                            EntityBuild.PedDresser(Game.Player.Character, Temp04Missions.Uniform);
+                                            EntityBuild.PedDresser(Game.Player.Character, Temp04Missions.Uniform.Cothing);
                                         UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[211];
                                         EntityBuild.AddTarget(new BlipForm(Temp04Missions.WalkTo[Temp04Missions.IWalks], false, 5, 485, DataStore.MyLang.Maptext[83], 1f));
                                     }
@@ -18556,7 +18773,7 @@ namespace New_Street_Phone_Missions
                             }
                             else if (JobSeq == 6)
                             {
-                                if (Temp04Missions.Driver.IsDead)
+                                if (Temp04Missions.Driver.IsDead || Temp04Missions.Car.IsDead)
                                     JobSeq = 45;
                                 else if (ReturnStuff.AreUNear(Temp04Missions.Car.Position, Temp04Missions.ParkHere, 1.75f))
                                 {
@@ -18580,7 +18797,7 @@ namespace New_Street_Phone_Missions
                             }
                             else if (JobSeq == 7)
                             {
-                                if (Temp04Missions.Driver.IsDead)
+                                if (Temp04Missions.Driver.IsDead || Temp04Missions.Car.IsDead)
                                     JobSeq = 45;
                                 else if (ReturnStuff.AreUNear(Temp04Missions.Driver.Position, Temp04Missions.WalkTo[Temp04Missions.WalkTo.Count - 1], 1.5f))
                                 {
@@ -18597,7 +18814,9 @@ namespace New_Street_Phone_Missions
                             }
                             else if (JobSeq == 8)
                             {
-                                if (ReturnStuff.AreUNear(Temp04Missions.ExGarage.V3, Temp04Missions.Car.Position, 2.50f))
+                                if (Temp04Missions.Driver.IsDead || Temp04Missions.Car.IsDead)
+                                    JobSeq = 45;
+                                else if (ReturnStuff.AreUNear(Temp04Missions.ExGarage.V3, Temp04Missions.Car.Position, 2.50f))
                                 {
                                     JobSeq++;
                                     EntityClear.RemoveTargets();
@@ -18634,6 +18853,8 @@ namespace New_Street_Phone_Missions
                             }
                             else if (JobSeq == 9)
                             {
+                                if (Temp04Missions.Car.IsDead)
+                                    JobSeq = 45;
                                 if (!Game.Player.Character.IsInVehicle(Temp04Missions.Car))
                                 {
                                     JobSeq = 3;
@@ -18690,7 +18911,9 @@ namespace New_Street_Phone_Missions
                             }
                             else if (JobSeq == 13)
                             {
-                                if (ReturnStuff.AreUNear(Temp04Missions.OffRamp, Temp04Missions.Car.Position, 2.5f))
+                                if (Temp04Missions.Car.IsDead)
+                                    JobSeq = 45;
+                                else if (ReturnStuff.AreUNear(Temp04Missions.OffRamp, Temp04Missions.Car.Position, 2.5f))
                                 {
                                     JobSeq++;
                                     EntityClear.RemoveTargets();
@@ -18718,7 +18941,7 @@ namespace New_Street_Phone_Missions
                             }
                             else if (JobSeq == 14)
                             {
-                                if (Temp04Missions.Driver.IsDead)
+                                if (Temp04Missions.Driver.IsDead || Temp04Missions.Car.IsDead)
                                     JobSeq = 45;
                                 else if (ReturnStuff.AreUNear(Temp04Missions.Car.Position, Temp04Missions.ParkHere, 2.5f) && Temp04Missions.Car.IsStopped)
                                 {
@@ -18793,7 +19016,7 @@ namespace New_Street_Phone_Missions
                                     else if (Temp04Missions.IWalks == 5)
                                     {
                                         if (Temp04Missions.Uniform != null)
-                                            EntityBuild.PedDresser(Game.Player.Character, Temp04Missions.Outfit);
+                                            EntityBuild.PedDresser(Game.Player.Character, Temp04Missions.Outfit.Cothing);
                                         EntityBuild.AddTarget(new BlipForm(Temp04Missions.WalkTo[Temp04Missions.IWalks], false, 5, 110, DataStore.MyLang.Maptext[82], 1f));
                                         UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[232];
                                     }
@@ -18822,7 +19045,8 @@ namespace New_Street_Phone_Missions
                             else if (JobSeq == 45)
                             {
                                 if (Temp04Missions.Uniform != null)
-                                    EntityBuild.PedDresser(Game.Player.Character, Temp04Missions.Outfit);
+                                    EntityBuild.PedDresser(Game.Player.Character, Temp04Missions.Outfit.Cothing);
+                                SearchFor.SlowFastTravel(Temp04Missions.ExtDoor, 180.8543f);
                                 NSBanking.NSCoinInvestments(false, 9, 15, "Diamond Resort");
                                 GameOverFail(false);
                                 ReturnWeaps();
@@ -19051,7 +19275,7 @@ namespace New_Street_Phone_Missions
                             Game.FadeScreenOut(1000);
                             Script.Wait(1001);
                             Parra_Load();
-                            FreeFallMissions.Plane.FreezePosition = false;
+                            Function.Call(Hash.FREEZE_ENTITY_POSITION, FreeFallMissions.Plane, false);
                             Game.FadeScreenIn(1000);
                             Function.Call(Hash.SET_VEHICLE_POPULATION_BUDGET, 0);
                             Function.Call(Hash.SET_PED_POPULATION_BUDGET, 0);
@@ -19092,7 +19316,7 @@ namespace New_Street_Phone_Missions
                                 FreeFallMissions.Plane.HasCollision = false;
                                 Game.Player.Character.Task.ClearAnimation("amb@code_human_in_bus_passenger_idles@male@sit@base", "base");
                                 Game.Player.Character.Detach();
-                                Game.Player.Character.FreezePosition = false;
+                                Function.Call(Hash.FREEZE_ENTITY_POSITION, Game.Player.Character, false);           
                                 FreeFallMissions.PlaneTime = Game.GameTime + 5000;
                                 UiDisplay.sSubDisplay = DataStore.MyLang.Mistext[235];
                             }
@@ -19218,7 +19442,7 @@ namespace New_Street_Phone_Missions
                         else if (JobSeq == 45)
                         {
                             Parra_RemoveShit();
-                            Game.Player.Character.FreezePosition = false;
+                            Function.Call(Hash.FREEZE_ENTITY_POSITION, Game.Player.Character, false);
                             GameOverFail(false);
                         }
                     }       //ParaDisplay
@@ -19246,7 +19470,8 @@ namespace New_Street_Phone_Missions
                                     Deliverwho_Backpack();
                                 }
 
-                                MissionData.vFuMiss = (DellWhoMissions.End.ParkHere.V3);
+                                MissionData.vFuMiss = DellWhoMissions.End.ParkHere.V3;
+                                EntityLog.PlayZeroTargets(null, MissionData.vFuMiss, false, false);
                                 Game.Player.Character.Heading += 180.00f;
                                 Game.FadeScreenIn(1000);
                                 EntityBuild.AddTarget(new BlipForm(DellWhoMissions.End.PedHere.V3, true, 5, 480, DataStore.MyLang.Maptext[75]));
@@ -19637,7 +19862,7 @@ namespace New_Street_Phone_Missions
                                 if (Game.Player.Character.IsInVehicle(CayHeiMissions.Chopper))
                                 {
                                     JobSeq++;
-                                    CayHeiMissions.Chopper.FreezePosition = false;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, CayHeiMissions.Chopper, false);
                                     EntityBuild.AddTarget(new BlipForm(CayHeiMissions.ExcapeVeh.Position, false, 5, 75.00f, new BlipForm(CayHeiMissions.ExcapeVeh.Position, true, 5, 66, DataStore.MyLang.Maptext[26])));
                                     EntityBuild.FlyToRightHere(CayHeiMissions.Pilot, CayHeiMissions.Chopper, CayHeiMissions.TakeOff, 45.00f);
                                     UiDisplay.sSubDisplay = "";
@@ -19685,7 +19910,7 @@ namespace New_Street_Phone_Missions
                                 {
                                     JobSeq++;
                                     CayHeiMissions.Thief.Task.ClearAll();
-                                    CayHeiMissions.ExcapeVeh.FreezePosition = false;
+                                    Function.Call(Hash.FREEZE_ENTITY_POSITION, CayHeiMissions.ExcapeVeh, false);
                                     EntityBuild.WarptoAnyVeh(CayHeiMissions.ExcapeVeh, CayHeiMissions.Thief, 1);
                                     Script.Wait(500);
                                 }
@@ -19899,7 +20124,7 @@ namespace New_Street_Phone_Missions
                                         {
                                             iWait4Sec = Game.GameTime + 1000;
                                             bRingRing = true;
-                                            EntityBuild.PlaySoundFrom("SCRIPT/ASSASSINATION_MULTI", "ASS_PAYPHONE_RING_master", "", PhoneHome.Position, true);
+                                            DataStore.iSoundId = EntityBuild.PlaySoundFrom("SCRIPT/ASSASSINATION_MULTI", "ASS_PAYPHONE_RING_master", "", PhoneHome.Position, true);
                                         }
 
                                         if (ReturnStuff.AmINear(PhoneHome.Position, 2f) && Game.Player.Character.IsOnFoot)
@@ -19907,17 +20132,17 @@ namespace New_Street_Phone_Missions
                                             UiDisplay.ControlerUI(DataStore.MyLang.Context[35], 1);
                                             if (ReturnStuff.WhileButtonDown(21))
                                             {
-                                                float fphdirect = PhoneHome.Heading + 90.00f;
-                                                if (DataStore.MySettings.PhoneAnim)
-                                                    PickUpThePhone(fphdirect);
-
                                                 if (bRingRing)
                                                 {
                                                     bRingRing = false;
                                                     EntityLog.CleanUp(-1, DataStore.iSoundId, -1);
-                                                    DataStore.Chatter.Play();
                                                 }
 
+                                                float fphdirect = PhoneHome.Heading + 90.00f;
+                                                if (DataStore.MySettings.PhoneAnim)
+                                                    PickUpThePhone(fphdirect);
+
+                                                DataStore.Chatter.Play();
                                                 EntityClear.RemoveTargets();
 
                                                 if (!DataStore.OnCayoLand)
@@ -19960,13 +20185,14 @@ namespace New_Street_Phone_Missions
                     }
                 }
             }
+            else
+            {
+                if (!Game.IsLoading)
+                {
+                    Script.Wait(5000);
+                    DataStore.DataStoreLoad();
+                }
+            }
         }
-        //private void Main_KeyDown(object sender, KeyEventArgs e)
-        //{
-            //if (e.KeyCode == Keys.B)
-            //{
-
-            //}
-        //}
     }
 }

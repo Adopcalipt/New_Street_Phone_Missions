@@ -509,8 +509,9 @@ namespace New_Street_Phone_Missions
                 }
             }
         }
-        public static void SpookBarz(Vehicle Target, int iBar, bool TooClose)
+        public static bool SpookBarz(Vehicle Target, int iBar, bool TooClose)
         {
+            bool bSpooked = false;
             float fBarLine = World.GetDistance(Game.Player.Character.Position, Target.Position) / 100.00f;// Find the percent for Spookbar float 0.00 to 1.00
             fBarLine = 1.00f - fBarLine;
             if (fBarLine < 0.01f)
@@ -568,7 +569,7 @@ namespace New_Street_Phone_Missions
                 else if (SpookTime < Game.GameTime) // fail if timmer runs out
                 {
                     Target.CurrentBlip.Remove();
-                    NSPM.JobSeq = 101;
+                    bSpooked = true;
                 }
                 else if (FlashTime < Game.GameTime)
                 {
@@ -587,6 +588,8 @@ namespace New_Street_Phone_Missions
                 }
             }
             SideBars[iBar].Percent = fBarLine;
+
+            return bSpooked;
         }
         public static float SpookBarzPed(Ped Target)
         {

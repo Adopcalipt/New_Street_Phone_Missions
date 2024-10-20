@@ -34,11 +34,11 @@
   <ItemGroup>
     <Reference Include="NativeUI, Version=1.9.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>E:\Games\Gta5Open\Mods\EssentalMods\Scripts\NativeUI.dll</HintPath>
+      <HintPath>..\..\..\..\ProgramFiles\Grand Theft Auto V\scripts\NativeUI.dll</HintPath>
     </Reference>
-    <Reference Include="ScriptHookVDotNet2, Version=2.10.10.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="ScriptHookVDotNet2, Version=2.11.6.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>E:\Ado\Documents\My Projects\GtaMods\ScripptHookNet\ScriptHookVDotNet2.dll</HintPath>
+      <HintPath>..\..\..\..\MyProjects\GtaMods\ScripptHookNet\ScriptHookVDotNet2.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

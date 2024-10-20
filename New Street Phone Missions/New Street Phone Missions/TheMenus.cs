@@ -5,70 +5,11 @@ using System.Collections.Generic;
 
 namespace New_Street_Phone_Missions
 {
-    public class TheMenus
+    public class TheMenusLoc
     {
         public static MenuPool YtmenuPool = new MenuPool();
-        private static RacingMenu MyRaceSet = null;
-        private static bool SelectAll = false;
-        private static readonly List<string> RaceClassList = new List<string>
-        {
-            DataStore.MyLang.ContactLang[31],
-            DataStore.MyLang.ContactLang[32],
-            DataStore.MyLang.ContactLang[36],
-            DataStore.MyLang.ContactLang[34],
-            DataStore.MyLang.ContactLang[33],
-            DataStore.MyLang.ContactLang[39],
-            DataStore.MyLang.ContactLang[37],
-            DataStore.MyLang.ContactLang[38],
-            DataStore.MyLang.ContactLang[35],
-            DataStore.MyLang.ContactLang[77],
-            DataStore.MyLang.ContactLang[76],
-            DataStore.MyLang.ContactLang[78],
-            DataStore.MyLang.ContactLang[79],
-            DataStore.MyLang.ContactLang[80],
-            DataStore.MyLang.ContactLang[81],
-            DataStore.MyLang.ContactLang[82],
-            DataStore.MyLang.ContactLang[83],
-            DataStore.MyLang.ContactLang[84],
-            DataStore.MyLang.ContactLang[85],
-            DataStore.MyLang.ContactLang[86],
-            DataStore.MyLang.ContactLang[87],
-            DataStore.MyLang.ContactLang[52],
-            DataStore.MyLang.ContactLang[53],
-            DataStore.MyLang.ContactLang[50],
-            DataStore.MyLang.ContactLang[51],
-            DataStore.MyLang.ContactLang[54],
-            DataStore.MyLang.ContactLang[88],
-            DataStore.MyLang.ContactLang[90],
-            DataStore.MyLang.ContactLang[91],
-            DataStore.MyLang.ContactLang[92],
-            DataStore.MyLang.ContactLang[93]
-        };
-        private static readonly List<string> RaceTimeList = new List<string>
-        {
-            DataStore.MyLang.Othertext[158],
-            DataStore.MyLang.Othertext[159],
-            DataStore.MyLang.Othertext[160],
-            DataStore.MyLang.Othertext[161]
-        };
-        private static readonly List<string> RaceWeatherList = new List<string>
-        {            
-            "Clear",
-            "Extrasunny",
-            "Clouds",
-            "Overcast",
-            "Rain",
-            "Clearing",
-            "Thunder",
-            "Smog",
-            "Foggy",
-            "Snow"
-        };
-        private static readonly List<string> BoolSwitch = new List<string>
-        {
-            DataStore.MyLang.Othertext[162],
-            DataStore.MyLang.Othertext[163]
-        };
+        public static RacingMenu MyRaceSet = new RacingMenu(0);
+        public static bool SelectAll = false;
 
         public static void SettingsMenu()
         {
@@ -85,7 +26,7 @@ namespace New_Street_Phone_Missions
             DataStore.MenuOpen = true;
             mainMenu.Visible = !mainMenu.Visible;
         }
-        private static void AddCustomVehcis(UIMenu XMen)
+        public static void AddCustomVehcis(UIMenu XMen)
         {
             //bool JustCustoms
             //if (JustCustoms)
@@ -125,7 +66,7 @@ namespace New_Street_Phone_Missions
 
             XmlCustomVeh WCCustoms = new XmlCustomVeh();
 
-            var AddX01 = new UIMenuItem(DataStore.MyLang.ContactLang[89]+ DataStore.MyLang.ContactLang[31], "");
+            var AddX01 = new UIMenuItem(DataStore.MyLang.ContactLang[89] + DataStore.MyLang.ContactLang[31], "");
             Submenu_01.AddItem(AddX01);
             var AddX02 = new UIMenuItem(DataStore.MyLang.ContactLang[89] + DataStore.MyLang.ContactLang[32], "");
             Submenu_02.AddItem(AddX02);
@@ -180,7 +121,7 @@ namespace New_Street_Phone_Missions
             var AddX27 = new UIMenuItem(DataStore.MyLang.ContactLang[89] + DataStore.MyLang.ContactLang[88], "");
             Submenu_27.AddItem(AddX27);
 
-            for (int i = 0;i < DataStore.MyCustomVeh.CustomCars.Count; i++)
+            for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
                 if (DataStore.MyCustomVeh.CustomCars[i].VehList == 1)
                     Submenu_01.AddItem(new UIMenuItem(DataStore.MyCustomVeh.CustomCars[i].VehicleS, ""));
@@ -277,7 +218,7 @@ namespace New_Street_Phone_Missions
                 YtmenuPool.CloseAllMenus();
                 Script.Wait(3000);
                 //SettingsMenu(true);
-            }; 
+            };
             Submenu_03.OnItemSelect += (sender, item, index) =>
             {
                 if (item == AddX03)
@@ -779,7 +720,7 @@ namespace New_Street_Phone_Missions
                 //SettingsMenu(true);
             };
         }
-        private static void RemoveThisVic(string Vic)
+        public static void RemoveThisVic(string Vic)
         {
             int iAm = 0;
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
@@ -1090,7 +1031,7 @@ namespace New_Street_Phone_Missions
                 }
             }
         }
-        private static void MissionSelectSet(UIMenu XMen)
+        public static void MissionSelectSet(UIMenu XMen)
         {
             var Selectmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.Othertext[66]);
 
@@ -1152,7 +1093,7 @@ namespace New_Street_Phone_Missions
 
             var Rand_15 = new UIMenuItem(DataStore.MyLang.Jobtext[13], "");
             if (DataStore.MySettings.Gruppe6)
-                Rand_15.SetRightBadge(UIMenuItem.BadgeStyle.Tick); 
+                Rand_15.SetRightBadge(UIMenuItem.BadgeStyle.Tick);
 
             var Rand_16 = new UIMenuItem(DataStore.MyLang.Jobtext[14], "");
             if (DataStore.MySettings.Sailor)
@@ -1229,7 +1170,7 @@ namespace New_Street_Phone_Missions
             Selectmenu.AddItem(Rand_22);
             Selectmenu.AddItem(Rand_23);
             Selectmenu.AddItem(Rand_24);
-            Selectmenu.AddItem(Rand_25);           
+            Selectmenu.AddItem(Rand_25);
             Selectmenu.AddItem(Rand_26);
             Selectmenu.AddItem(Rand_27);
             Selectmenu.AddItem(Rand_28);
@@ -1238,7 +1179,7 @@ namespace New_Street_Phone_Missions
             {
                 DataStore.iDisplayAch = 1;
             };
-         
+
             Selectmenu.OnIndexChange += (sender, index) =>
             {
                 if (index == 0)
@@ -1684,8 +1625,8 @@ namespace New_Street_Phone_Missions
                         Rand_27.SetRightBadge(UIMenuItem.BadgeStyle.None);
 
                 }
-                
-                ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
+
+                EntityLog.Settings_Out();
             };
 
             Selectmenu.OnMenuClose += (sender) =>
@@ -1693,7 +1634,7 @@ namespace New_Street_Phone_Missions
                 DataStore.iDisplayAch = 0;
             };
         }
-        private static void SettingsSet(UIMenu XMen)
+        public static void SettingsSet(UIMenu XMen)
         {
             var Selectmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.Othertext[67]);
 
@@ -1745,6 +1686,10 @@ namespace New_Street_Phone_Missions
             if (DataStore.MySettings.Debug)
                 Rand_13.SetRightBadge(UIMenuItem.BadgeStyle.Tick);
 
+            var Rand_14 = new UIMenuItem(DataStore.MyLang.Othertext[393], DataStore.MyLang.Othertext[394]);
+            if (DataStore.MySettings.Auto_Outfit)
+                Rand_14.SetRightBadge(UIMenuItem.BadgeStyle.Tick);
+
             Selectmenu.AddItem(Rand_01);
             Selectmenu.AddItem(Rand_02);
             Selectmenu.AddItem(Rand_03);
@@ -1762,6 +1707,7 @@ namespace New_Street_Phone_Missions
 
             Selectmenu.AddItem(Rand_12);
             Selectmenu.AddItem(Rand_13);
+            Selectmenu.AddItem(Rand_14);
 
             //AddCustomVehcis(Selectmenu);
 
@@ -1884,7 +1830,15 @@ namespace New_Street_Phone_Missions
                     else
                         Rand_13.SetRightBadge(UIMenuItem.BadgeStyle.None);
                 }
-                ReadWriteXML.SaveXmlSets(DataStore.MySettings, DataStore.sNSPMSet);
+                else if (item == Rand_14)
+                {
+                    DataStore.MySettings.Auto_Outfit = !DataStore.MySettings.Auto_Outfit;
+                    if (DataStore.MySettings.Auto_Outfit)
+                        Rand_14.SetRightBadge(UIMenuItem.BadgeStyle.Tick);
+                    else
+                        Rand_14.SetRightBadge(UIMenuItem.BadgeStyle.None);
+                }
+                EntityLog.Settings_Out();
             };
         }
         public static void Ambulance_Menu(int iConditions, bool CovidInf, Ped VicTim)
@@ -1974,7 +1928,7 @@ namespace New_Street_Phone_Missions
             DataStore.MenuOpen = true;
             mainMenu.Visible = !mainMenu.Visible;
         }
-        private static void Ambulance_Diagnosis(UIMenu XMen, Ped VicTim, int Condition)
+        public static void Ambulance_Diagnosis(UIMenu XMen, Ped VicTim, int Condition)
         {
             LoggerLight.LogThis("Ambulance_Diagnosis");
 
@@ -2176,7 +2130,7 @@ namespace New_Street_Phone_Missions
                         Game.Player.Character.Task.TurnTo(VicTim);
                     }
                 }
-                
+
                 NSPM.iWait4Sec = Game.GameTime + iAniTime;
                 DataStore.MenuOpen = false;
                 XMen.Visible = !XMen.Visible;
@@ -2193,7 +2147,7 @@ namespace New_Street_Phone_Missions
             DataStore.MenuOpen = true;
             mainMenu.Visible = !mainMenu.Visible;
         }
-        private static void Racist_SelectRace(UIMenu XMen)
+        public static void Racist_SelectRace(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_SelectRace");
 
@@ -2276,7 +2230,7 @@ namespace New_Street_Phone_Missions
                 NSPM.Raceist(MyRaceSet);
             }
         }
-        private static void Racist_SelectClass(UIMenu XMen)
+        public static void Racist_SelectClass(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_SelectClass, MyRaceSet.Race == " + MyRaceSet.Race);
 
@@ -2286,7 +2240,7 @@ namespace New_Street_Phone_Missions
             List<dynamic> RaceList = new List<dynamic>();
 
             for (int i = 0; i < Racisms.Count; i++)
-                RaceList.Add(RaceClassList[Racisms[i] - 1]);
+                RaceList.Add(DataStore.RaceClassList[Racisms[i] - 1]);
 
             var ThisShizle = new UIMenuListItem(DataStore.MyLang.Context[42], RaceList, 0);
 
@@ -2297,14 +2251,14 @@ namespace New_Street_Phone_Missions
                     MyRaceSet.VehClass = Racisms[index];
             };
         }
-        private static void Racist_SelectTime(UIMenu XMen)
+        public static void Racist_SelectTime(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_SelectTime");
 
             List<dynamic> RaceList = new List<dynamic>();
 
-            for (int i = 0; i < RaceTimeList.Count; i++)
-                RaceList.Add(RaceTimeList[i]);
+            for (int i = 0; i < DataStore.RaceTimeList.Count; i++)
+                RaceList.Add(DataStore.RaceTimeList[i]);
 
             var ThisShizle = new UIMenuListItem(DataStore.MyLang.Context[41], RaceList, 0);
 
@@ -2319,19 +2273,19 @@ namespace New_Street_Phone_Missions
                         MyRaceSet.Time = 12;
                     else if (index == 2)
                         MyRaceSet.Time = 18;
-                    else 
+                    else
                         MyRaceSet.Time = 21;
                 }
             };
         }
-        private static void Racist_SelectTraffic(UIMenu XMen)
+        public static void Racist_SelectTraffic(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_SelectTraffic");
 
             List<dynamic> RaceList = new List<dynamic>();
 
-            for (int i = 0; i < BoolSwitch.Count; i++)
-                RaceList.Add(BoolSwitch[i]);
+            for (int i = 0; i < DataStore.BoolSwitch.Count; i++)
+                RaceList.Add(DataStore.BoolSwitch[i]);
 
             var ThisShizle = new UIMenuListItem(DataStore.MyLang.Context[40], RaceList, 0);
 
@@ -2347,7 +2301,7 @@ namespace New_Street_Phone_Missions
                 }
             };
         }
-        private static void Racist_SelectLaps(UIMenu XMen)
+        public static void Racist_SelectLaps(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_SelectLaps");
             List<int> Racisms = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
@@ -2368,14 +2322,14 @@ namespace New_Street_Phone_Missions
                 }
             };
         }
-        private static void Racist_SelectWeather(UIMenu XMen)
+        public static void Racist_SelectWeather(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_SelectWeather");
 
             List<dynamic> RaceList = new List<dynamic>();
 
-            for (int i = 0; i < RaceWeatherList.Count; i++)
-                RaceList.Add(RaceWeatherList[i]);
+            for (int i = 0; i < DataStore.RaceWeatherList.Count; i++)
+                RaceList.Add(DataStore.RaceWeatherList[i]);
 
             var ThisShizle = new UIMenuListItem(DataStore.MyLang.Context[38], RaceList, 0);
 
@@ -2384,18 +2338,18 @@ namespace New_Street_Phone_Missions
             {
                 if (item == ThisShizle)
                 {
-                    MyRaceSet.Weather = RaceWeatherList[index];
+                    MyRaceSet.Weather = DataStore.RaceWeatherList[index];
                 }
             };
         }
-        private static void Racist_SelectSolo(UIMenu XMen)
+        public static void Racist_SelectSolo(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_SelectSolo");
 
             List<dynamic> RaceList = new List<dynamic>();
 
-            for (int i = 0; i < BoolSwitch.Count; i++)
-                RaceList.Add(BoolSwitch[i]);
+            for (int i = 0; i < DataStore.BoolSwitch.Count; i++)
+                RaceList.Add(DataStore.BoolSwitch[i]);
 
             var ThisShizle = new UIMenuListItem(DataStore.MyLang.Context[6], RaceList, 0);
 
@@ -2411,14 +2365,14 @@ namespace New_Street_Phone_Missions
                 }
             };
         }
-        private static void Racist_SelectPasive(UIMenu XMen)
+        public static void Racist_SelectPasive(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_SelectPasive");
 
             List<dynamic> RaceList = new List<dynamic>();
 
-            for (int i = 0; i < BoolSwitch.Count; i++)
-                RaceList.Add(BoolSwitch[i]);
+            for (int i = 0; i < DataStore.BoolSwitch.Count; i++)
+                RaceList.Add(DataStore.BoolSwitch[i]);
 
             var ThisShizle = new UIMenuListItem(DataStore.MyLang.Context[37], RaceList, 0);
 
@@ -2434,7 +2388,7 @@ namespace New_Street_Phone_Missions
                 }
             };
         }
-        private static void Racist_SelectAnimation(UIMenu XMen)
+        public static void Racist_SelectAnimation(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_SelectAnimation");
 
@@ -2456,14 +2410,14 @@ namespace New_Street_Phone_Missions
                 }
             };
         }
-        private static void Racist_Launch(UIMenu XMen)
+        public static void Racist_Launch(UIMenu XMen)
         {
             LoggerLight.LogThis("Racist_Launch");
 
             List<dynamic> RaceList = new List<dynamic>();
 
-            for (int i = 0; i < BoolSwitch.Count; i++)
-                RaceList.Add(BoolSwitch[i]);
+            for (int i = 0; i < DataStore.BoolSwitch.Count; i++)
+                RaceList.Add(DataStore.BoolSwitch[i]);
 
             var ThisShizle = new UIMenuItem(DataStore.MyLang.Context[7]);
 

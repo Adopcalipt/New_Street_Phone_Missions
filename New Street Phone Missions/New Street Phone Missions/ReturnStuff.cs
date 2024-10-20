@@ -6,11 +6,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace New_Street_Phone_Missions
 {
     public class ReturnStuff 
     {
+        /*
+        [DllImport("MobileNetwork.asi", ExactSpelling = true, EntryPoint = "SnowFall")]
+        [return: MarshalAs(UnmanagedType.I1)]
+        public static extern unsafe bool SnowFall();
+        [DllImport("MobileNetwork.asi", ExactSpelling = true, EntryPoint = "LetItSnow")]
+        public static extern unsafe void LetItSnow();
+
+        [DllImport("MobileNetwork.asi", ExactSpelling = true, EntryPoint = "BringSunshine")]
+        public static extern unsafe void BringSunshine();
+        */
         private readonly static List<DanceMoves> MaleDance01 = new List<DanceMoves>
         {
             new DanceMoves("anim@amb@nightclub@dancers@crowddance_facedj@low_intesnsity", "li_dance_facedj_09_v1_male^1"),
@@ -1014,7 +1025,9 @@ namespace New_Street_Phone_Missions
             "ZENTORNO",//
             "ZORRUSSO",//
             //"entity3",//Overflod Entity MT - 0x6838FC1D 
-            "virtue"//Ocelot Virtue - 0x27E34161 
+            "virtue",//Ocelot Virtue - 0x27E34161 
+            "turismo3",     //0xF8AB457B"     //Super
+            "pipistrello"     //0xF2AE3F81 "     //Super
         };
         public static List<string> SportList = new List<string>
         {
@@ -1111,7 +1124,21 @@ namespace New_Street_Phone_Missions
             "ZR350",//
             "everon2",//Karin Hotring Everon -  - 0xF82BC92E 
             "panthere",//Toundra Panthere -  - 0x7D326F04 
-            "r300"//Annis 300R -  - 0x402586F8 
+            "r300",//Annis 300R -  - 0x402586F8 
+            "coureur",     //0x24626C26"     //Sports
+            "gauntlet6",     //0x4FA9970B"     //Sports
+            "stingertt",     //0x5649FF41"     //Sports
+            "drifteuros",     //0x30F15228",     //Sports
+            "driftfuto",     //0xF52D92EE",     //Sports
+            "driftjester",     //0x96E6932D",     //Sports
+            "driftremus",     //0x9F3273F4",     //Sports
+            "drifttampa",     //0x9AE43988"     //Sports
+            "driftzr350",     //0x72A6CEBE"     //Sports
+            "paragon3",
+            "niobe",
+            "envisage",
+            "driftsentinel",
+            "driftcypher"
         };
         public static List<string> CoupeList = new List<string>
         {
@@ -1131,7 +1158,10 @@ namespace New_Street_Phone_Missions
             "WINDSOR",//
             "WINDSOR2",//<!-- Windsor Drop -->
             "ZION",//
-            "ZION2"//<!-- Zion Cabrio -->
+            "ZION2",//<!-- Zion Cabrio -->
+            "driftfr36",     //0xA7C9F9A7"     //Coupes
+            "fr36",     //0xE43C11E5"     //Coupes
+            "eurosX32"
         };
         public static List<string> MuscleList = new List<string>
         {
@@ -1201,7 +1231,15 @@ namespace New_Street_Phone_Missions
             "broadway",//Classique Broadway -  - 0x8CC51028 
             "eudora",//Willard Eudora -  - 0xB581BF9A 
             "tahoma",//Declasse Tahoma Coupe -  - 0xE478B977 
-            "tulip2"//Declasse Tulip M-100 -  - 0x1004EDA4 
+            "tulip2",//Declasse Tulip M-100 -  - 0x1004EDA4 
+            "brigham",     //0xD8FD24D1"     //Muscle
+            "buffalo5",     //0x9E478B3"     //Muscle
+            "clique2",     //0xC5A12E61"     //Muscle
+            "dominator9",     //0xE5B3ACA1"     //Muscle
+            "driftyosemite",     //0x9BC400EF"     //Muscle
+            "impaler6",     //0xF55D2F7A"     //Muscle
+            "Vigero3",     //0x1635C007"     //Muscle
+            "dominator10"
         };
         public static List<string> SportClassList = new List<string>
         {
@@ -1246,7 +1284,9 @@ namespace New_Street_Phone_Missions
             "TURISMO2",//<!-- Turismo Classic -->
             "VISERIS",//
             "ZTYPE",//
-            "ZION3"//<!-- Zion Classic -->
+            "ZION3",//<!-- Zion Classic -->
+            "driftnebula",
+            "coquette5"
         };
         public static List<string> SedanList = new List<string>
         {
@@ -1280,7 +1320,11 @@ namespace New_Street_Phone_Missions
             "TAILGATER2",//<!-- Tailgater S -->
             "WARRENER",//
             "WARRENER2",//<!-- Warrener HKR -->
-            "WASHINGTON"//
+            "WASHINGTON",//
+            "asterope2",     //0xD3D366B1"     //Sedans
+            "impaler5",     //0xE3788BB1"     //Sedans
+            "driftvorschlag",
+            "vorschlaghammer"
         };
         public static List<string> SUVList = new List<string>
         {
@@ -1324,6 +1368,12 @@ namespace New_Street_Phone_Missions
             "XLS2",//<!-- XLS (Armored) -->
             "MINIVAN",//
             "MINIVAN2",//<!-- Minivan Custom -->
+            "aleutian",     //0xFDAEBF27"     //SUVs
+            "baller8",     //0xCC8A305C"     //SUVs
+            "cavalcade3",     //0xC29F8F4E"     //SUVs
+            "dorado",     //0xD2389392"     //SUVs
+            "vivanite",     //0xAE2CC02A"     //SUVs
+            "castigator"
             //"issi8"//Weeny Issi Rally -  - 0x5C6C00B4 
         };
         public static List<string> CompactList = new List<string>
@@ -1381,7 +1431,12 @@ namespace New_Street_Phone_Missions
             "VAGRANT",//
             "WINKY",//
             "YOSEMITE3",//<!-- Yosemite Rancher -->
-            "boor"//Karin Boor - 0x3B639C8D 
+            "boor",//Karin Boor - 0x3B639C8D 
+            "l35",     //0x96E0736B"     //Off-Road
+            "monstrociti",     //0x2FDA9E05"     //Off-Road
+            "ratel",     //0xE00BADAB"     //Off-Road
+            "terminus",     //0x9FC300D"     //Off-Road
+            "yosemite1500"
         };
         public static List<string> BennysVeh = new List<string>
         {
@@ -1476,7 +1531,8 @@ namespace New_Street_Phone_Missions
             "BLAZER4",//<!-- Street Blazer -->
             "VERUS",//
             "manchez3",//Maibatsu Manchez Scout C -  - 0x5285D628 
-            "powersurge"//Western Powersurge -  - 0xAD5E30D7 
+            "powersurge",//Western Powersurge -  - 0xAD5E30D7 
+            "pizzaboy"
         };
         public static List<string> BusList = new List<string>
         {
@@ -1677,7 +1733,9 @@ namespace New_Street_Phone_Missions
             "FIXTER",//
             "SCORCHER",//
             "TRIBIKE3",//<!-- Tri-Cycles Race Bike -->
-            "TRIBIKE"//<!-- Whippet Race Bike -->
+            "TRIBIKE",//<!-- Whippet Race Bike -->
+            "inductor",     //0xCA7C4AE9"     //Cycles
+            "inductor2"     //0x89C45478"     //Cycles
         };
         public static List<string> PlaneComList = new List<string>
         {
@@ -1699,7 +1757,9 @@ namespace New_Street_Phone_Missions
             "MICROLIGHT",//<!-- Ultralight -->
             "VELUM",//
             "VELUM2",//<!-- Velum 5-Seater -->
-            "VESTRA"//
+            "VESTRA",//
+            "raiju",     //0xE4C8C4D"     //Planes
+            "streamer216"     //0xB706A72"     //Planes
         };
         public static List<string> PlaneFightList = new List<string>
         {
@@ -1740,7 +1800,8 @@ namespace New_Street_Phone_Missions
             "HUNTER",//<!-- FH-1 Hunter -->
             "SAVAGE",//
             "VALKYRIE",//
-            "VALKYRIE2"//<!-- Valkyrie MOD.0 -->
+            "VALKYRIE2",//<!-- Valkyrie MOD.0 -->
+            "conada2"     //0x9D1D9872"     //Helicopters
         };
         public static List<string> BoatList = new List<string>
         {
@@ -1811,6 +1872,31 @@ namespace New_Street_Phone_Missions
             "TULA"//
         };
         public static List<string> CustomList = new List<string>();
+        public static List<string> MCBikeList = new List<string>
+        {
+            "DEATHBIKE",//<!-- Apocalypse Deathbike -->
+            "AVARUS",//
+            "BAGGER",//
+            "CHIMERA",//
+            "CLIFFHANGER",//
+            "DAEMON",//<!-- Daemon Lost MC variant -->
+            "DAEMON2",//<!-- Daemon Bikers DLC variant -->
+            "DEATHBIKE2",//<!-- Future Shock Deathbike -->
+            "GARGOYLE",//
+            "HEXER",//
+            "INNOVATION",//
+            "NIGHTBLADE",//
+            "DEATHBIKE3",//<!-- Nightmare Deathbike -->
+            "RROCKET",//<!-- Rampant Rocket -->
+            "RATBIKE",//
+            "REEVER",//
+            "RUFFIAN",//
+            "SANCTUS",//
+            "SOVEREIGN",//
+            "WOLFSBANE",//
+            "ZOMBIEA",//<!-- Zombie Bobber -->
+            "ZOMBIEB",//<!-- Zombie Chopper -->
+        };
         public static Crash4Cash DamageControl { get; set; }
 
         private static readonly List<string> CiggsAch = new List<string>
@@ -2087,6 +2173,24 @@ namespace New_Street_Phone_Missions
         public static string VehName = "";
         private static string LastVeh = "New";
 
+        public static string WhatpedType()
+        {
+            string Pt = "";
+            if (Game.Player.Character.Model == PedHash.Franklin)
+                Pt = "Franklin";
+            else if (Game.Player.Character.Model == PedHash.Michael)
+                Pt = "Michael";
+            else if (Game.Player.Character.Model == PedHash.Trevor)
+                Pt = "Trevor";
+            else if (Game.Player.Character.Model == PedHash.FreemodeFemale01)
+                Pt = "FreeFemale";
+            else if (Game.Player.Character.Model == PedHash.FreemodeMale01)
+                Pt = "FreeMale";
+            else
+                Pt = "" + Game.Player.Character.Model.Hash;
+            return Pt;
+
+        }
         public static bool HittingTheBottle(int BottleHash)
         {
             bool B = false;
@@ -3301,6 +3405,8 @@ namespace New_Street_Phone_Missions
                 myVehicle = JetSkiList[RandomX.FindRandom("RanVeh31", 0, JetSkiList.Count - 1)];    //JetSki
             else if (iVechList == 31)
                 myVehicle = CustomList[RandomX.RandInt(0, CustomList.Count - 1)];    //Custom
+            else if (iVechList == 32)
+                myVehicle = MCBikeList[RandomX.FindRandom("RanVeh32", 0, MCBikeList.Count - 1)];    //Mc
 
             return myVehicle;
         }
@@ -3551,6 +3657,7 @@ namespace New_Street_Phone_Missions
         public static bool ButtonDown(int CButt)
         {
             ButtonDisabler(CButt);
+
             return Function.Call<bool>(Hash.IS_DISABLED_CONTROL_PRESSED, 0, CButt);
         }
         public static bool ButtonDownNoDis(int CButt)
@@ -3933,13 +4040,18 @@ namespace New_Street_Phone_Missions
             else
                 iApt = Function.Call<int>(Hash.GET_INTERIOR_AT_COORDS, MyAppy.X, MyAppy.Y, MyAppy.Z);
 
+            bool bDisabled = Function.Call<bool>(Hash.IS_INTERIOR_DISABLED, iApt);
+            bool bCapped = Function.Call<bool>(Hash.IS_INTERIOR_CAPPED, iApt);
+
             if (Function.Call<bool>(Hash.IS_VALID_INTERIOR, iApt))
+            {
                 Function.Call((Hash)0x2CA429C029CCF247, iApt);
-
-            if (Function.Call<bool>(Hash.IS_INTERIOR_DISABLED, iApt))
                 Function.Call(Hash.SET_INTERIOR_ACTIVE, iApt, true);
-
-            Function.Call(Hash.DISABLE_INTERIOR, iApt, false);
+                if (bDisabled)
+                    Function.Call(Hash.DISABLE_INTERIOR, iApt, false);
+                if (bCapped)
+                    Function.Call(Hash.CAP_INTERIOR, iApt, false);
+            }
 
             return iApt;
         }
@@ -4011,7 +4123,7 @@ namespace New_Street_Phone_Missions
             }//carware--new Vector3(994.5925, -3002.594, -39.64699)
             else if (lod == 6)
             {
-                ReturnDoor.Add(new Vector4(151.3308f, -1007.744f, -99f, 348.2809f));
+                ReturnDoor.Add(new Vector4(152.2600f, -1004.4700f, -99.00f, 348.2809f));
                 ReturnDoor.Add(new Vector4(154.063f, -1004.887f, -98.41931f, 84.49715f));
                 ReturnDoor.Add(new Vector4(154.1099f, -1001.027f, -99.00001f, 107.7697f));
             }//motel
@@ -5127,23 +5239,51 @@ namespace New_Street_Phone_Missions
                 return bDead;
             }
         }
-        public static ClothX DoesThisExist(string sTitle, string sPed)
+        public static void FindFriends()
         {
-            LoggerLight.LogThis("DoesThisExist");
 
-            List<ClothX> MyWardrobe = ReadWriteXML.LoadWards(sPed);
-            ClothX ThisCloth = new ClothX("Temp", Game.Player.Character);
+        }
 
-            for (int i = 0; i < MyWardrobe.Count(); i++)
+        public static ClothX PickAnOutfit(int pedHash)
+        {
+            string LoadInDir = "";
+            if (pedHash == PedHash.Michael.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Michael";
+            else if (pedHash == PedHash.Franklin.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Franklin";
+            else if (pedHash == PedHash.Michael.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Trevor";
+            else if (pedHash == PedHash.FreemodeFemale01.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Female";
+            else if (pedHash == PedHash.FreemodeMale01.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Male";
+
+            if (Directory.Exists(LoadInDir))
             {
-                if (MyWardrobe[i].Title == sTitle)
-                {
-                    ThisCloth = MyWardrobe[i];
-                    break;
-                }
-            }
+                string[] findOuts = Directory.GetFiles(LoadInDir);
 
-            return ThisCloth;
+                if ((int)findOuts.Count() > 0)
+                {
+                    int iRando = 0;
+
+                    if (pedHash == PedHash.Michael.GetHashCode())
+                        iRando = RandomX.FindRandom("PickOut_01", 0, (int)findOuts.Count() - 1);
+                    else if (pedHash == PedHash.Franklin.GetHashCode())
+                        iRando = RandomX.FindRandom("PickOut_02", 0, (int)findOuts.Count() - 1);
+                    else if (pedHash == PedHash.Michael.GetHashCode())
+                        iRando = RandomX.FindRandom("PickOut_03", 0, (int)findOuts.Count() - 1);
+                    else if (pedHash == PedHash.FreemodeFemale01.GetHashCode())
+                        iRando = RandomX.FindRandom("PickOut_04", 0, (int)findOuts.Count() - 1);
+                    else if (pedHash == PedHash.FreemodeMale01.GetHashCode())
+                        iRando = RandomX.FindRandom("PickOut_05", 0, (int)findOuts.Count() - 1);
+
+                    return EntityLog.LoadIniOutfit(findOuts[iRando]);
+                }
+                else
+                    return new ClothX();
+            }
+            else
+                return new ClothX();
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using GTA;
 using New_Street_Phone_Missions;
-using New_Street_Phone_Missions.Classes;
 
 using System;
 
@@ -8,18 +7,12 @@ namespace NSPM_Contacts
 {
     public class Main : Script
     {
+        bool NewLoad = true;
         public Main()
         {
-            while (!DataStore.bHasLoaded)
-                Script.Wait(10);
-
             Yacht.DipDar.Load();
             Tick += OnTick;
             Interval = 1;
-            if (DataStore.MyAssets.OwnaYacht)
-                Yacht.YouHaveAYacht();
-
-            Contacts.ContactLoadUp();
         }
         public static void LogThis(string sLog)
         {
@@ -30,17 +23,33 @@ namespace NSPM_Contacts
         }
         private void OnTick(object sender, EventArgs e)
         {
-            Contacts.Contacting();
+            if (!Game.IsLoading)
+            {
+                if (DataStore.bHasLoaded)
+                {
+                    if (NewLoad)
+                    {
+                        if (DataStore.MyAssets.OwnaYacht)
+                            Yacht.YouHaveAYacht();
 
-            if (!DataStore.OnTheJob)
-            {
-                if (DataStore.MyAssets.OwnaYacht)
-                    Yacht.Yachting();
-            }
-            else
-            {
-                if (Yacht.YachtBlip != null)
-                    Yacht.YachtStuff_TheBlip(false);
+                        Contacts.ContactLoadUp();
+                        NewLoad = false;
+                    }
+                    else
+                    {
+                        Contacts.Contacting();
+                        if (!DataStore.OnTheJob)
+                        {
+                            if (DataStore.MyAssets.OwnaYacht)
+                                Yacht.Yachting();
+                        }
+                        else
+                        {
+                            if (Yacht.YachtBlip != null)
+                                Yacht.YachtStuff_TheBlip(false);
+                        }
+                    }
+                }
             }
         }
     }

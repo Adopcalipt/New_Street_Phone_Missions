@@ -5,8 +5,7 @@ namespace New_Street_Phone_Missions
 {
     public static class MemoryAccess
     {
-        private static readonly IntPtr CRenderPhaseDeferredLighting_Patch1,
-            CRenderPhaseDeferredLighting_Patch2;
+        private static readonly IntPtr CRenderPhaseDeferredLighting_Patch1, CRenderPhaseDeferredLighting_Patch2;
 
         static MemoryAccess()
         {

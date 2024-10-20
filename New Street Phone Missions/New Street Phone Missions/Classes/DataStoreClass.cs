@@ -34,6 +34,7 @@ namespace New_Street_Phone_Missions.Classes
         public bool Thief { get; set; }
 
         public bool Debug { get; set; }
+        public bool Auto_Outfit { get; set; }
         public bool ShowRoute { get; set; }
         public bool Subtitles { get; set; }
         public bool PhoneCone { get; set; }
@@ -53,6 +54,7 @@ namespace New_Street_Phone_Missions.Classes
 
         public int ModVersion { get; set; }
         public int SPDelayTime { get; set; }
+        public int YachtRadio { get; set; }
 
         public List<Vector3> PhoneBlock { get; set; }
 
@@ -87,6 +89,7 @@ namespace New_Street_Phone_Missions.Classes
             Thief = true;
 
             Debug = false;
+            Auto_Outfit = true;
             ShowRoute = true;
             Subtitles = true;
             PhoneCone = true;
@@ -106,6 +109,8 @@ namespace New_Street_Phone_Missions.Classes
 
             ModVersion = 401;
             SPDelayTime = 2000;
+
+            YachtRadio = 30;
 
             PhoneBlock = new List<Vector3>();
         }
@@ -148,11 +153,47 @@ namespace New_Street_Phone_Missions.Classes
     }
     public class RandX
     {
+        public int Low;
+        public int High;
         public List<int> RandNumbers { get; set; }
+        int GetHighLow(List<int> NewList, bool High)
+        {
+            int iAM = 0;
+            if (NewList.Count > 0)
+            {
+                if (High)
+                    iAM = NewList[NewList.Count -1];
+                else
+                    iAM = NewList[0];
+            }
+            return iAM;
+        }
+        List<int> BuildList(int low, int high)
+        {
+            List<int> output = new List<int>();
 
+            for (int i = low; i < high + 1; i++)
+                output.Add(i);
+
+            return output;
+        }
+        public RandX(int low, int high)
+        {
+            RandNumbers = BuildList(low, high);
+            Low = low;
+            High = high;
+        }
+        public RandX(List<int> NewList)
+        {
+            RandNumbers = NewList;
+            Low = GetHighLow(NewList, false);
+            High = GetHighLow(NewList, true);
+        }
         public RandX()
         {
             RandNumbers = new List<int>();
+            Low = 0;
+            High = 0;
         }
     }
     public class Lingoo

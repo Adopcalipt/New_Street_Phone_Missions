@@ -8,3 +8,25 @@ C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\ob
 C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.xml
 C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.pdb
 C:\Users\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.csproj.AssemblyReference.cache
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\New Street Phone Missions.dll
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\New Street Phone Missions.pdb
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.dll
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.pdb
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.xml
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.csproj.AssemblyReference.cache
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.csproj.CoreCompileInputs.cache
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.csproj.CopyComplete
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.dll
+E:\Ado\source\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.pdb
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\New Street Phone Missions.dll
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\New Street Phone Missions.pdb
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.csproj.AssemblyReference.cache
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.csproj.CoreCompileInputs.cache
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Stre.FF01C6E9.Up2Date
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.dll
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\obj\Debug\New Street Phone Missions.pdb
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.dll
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.pdb
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\ScriptHookVDotNet2.xml
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\NativeUI.dll
+D:\Visual Studio\repos\New Street Phone Missions\New Street Phone Missions\bin\Debug\NativeUI.xml

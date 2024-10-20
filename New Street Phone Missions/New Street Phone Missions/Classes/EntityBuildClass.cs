@@ -1,10 +1,8 @@
 ﻿using GTA;
 using GTA.Math;
 using GTA.Native;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 
 namespace New_Street_Phone_Missions.Classes
 {
@@ -184,6 +182,7 @@ namespace New_Street_Phone_Missions.Classes
     public class BlipForm
     {
         public Vector3 V3local { get; set; }
+        public string Blip_Tag { get; set; }
         public bool Flasher { get; set; }
         public bool Route { get; set; }
         public int Colour { get; set; }
@@ -196,6 +195,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(int colour, string nameTag)
         {
             V3local = new Vector3();
+            Blip_Tag = "Blip=";
             Flasher = false;
             Route = false;
             Colour = colour;
@@ -208,6 +208,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(int colour, string nameTag, float radius)
         {
             V3local = new Vector3();
+            Blip_Tag = "Blip=";
             Flasher = false;
             Route = false;
             Colour = colour;
@@ -220,6 +221,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(int colour, string nameTag, bool route)
         {
             V3local = new Vector3();
+            Blip_Tag = "Blip=";
             Flasher = false;
             Route = route;
             Colour = colour;
@@ -232,6 +234,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(Vector3 v3local)
         {
             V3local = v3local;
+            Blip_Tag = "Blip=";
             Flasher = false;
             Route = true;
             Colour = 5;
@@ -244,6 +247,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(Vector3 v3local, bool route, int colour, float radius)
         {
             V3local = v3local;
+            Blip_Tag = "Blip=";
             Flasher = false;
             Route = route;
             Colour = colour;
@@ -256,6 +260,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(Vector3 v3local, bool route, int colour, float radius, BlipForm addDot)
         {
             V3local = v3local;
+            Blip_Tag = "Blip=";
             Flasher = false;
             Route = route;
             Colour = colour;
@@ -268,6 +273,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(Vector3 v3local, bool route, bool flash, float radius)
         {
             V3local = v3local;
+            Blip_Tag = "Blip=";
             Flasher = flash;
             Route = route;
             Colour = 5;
@@ -280,6 +286,20 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(Vector3 v3local, bool route, int colour, int icon, string nameTag)
         {
             V3local = v3local;
+            Blip_Tag = "Blip=";
+            Flasher = false;
+            Route = route;
+            Colour = colour;
+            Icon = icon;
+            Radius = 1.0f;
+            NameTag = nameTag;
+            MyCorrona = null;
+            AddDot = null;
+        }
+        public BlipForm(Vector3 v3local, bool route, int colour, int icon, string nameTag, string blip_tag)
+        {
+            V3local = v3local;
+            Blip_Tag = blip_tag;
             Flasher = false;
             Route = route;
             Colour = colour;
@@ -292,6 +312,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(Vector3 v3local, bool route, int colour, int icon, string nameTag, float corRadius)
         {
             V3local = v3local;
+            Blip_Tag = "Blip=";
             Flasher = false;
             Route = route;
             Colour = colour;
@@ -304,6 +325,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(Vector3 v3local, bool route, int colour, int icon, string nameTag, float corRadius, float changeZ)
         {
             V3local = new Vector3(v3local.X, v3local.Y, v3local.Z + changeZ);
+            Blip_Tag = "Blip=";
             Flasher = false;
             Route = route;
             Colour = colour;
@@ -316,6 +338,7 @@ namespace New_Street_Phone_Missions.Classes
         public BlipForm(Vector3 v3local, bool route, int colour, int icon, string nameTag, CorronaForm myCorrona)
         {
             V3local = v3local;
+            Blip_Tag = "Blip=";
             Flasher = false;
             Route = route;
             Colour = colour;
@@ -329,37 +352,21 @@ namespace New_Street_Phone_Missions.Classes
     public class ClothBank
     {
         public string Name { get; set; }
-
         public int ModelX { get; set; }
-
-        public int CothInt { get; set; }
-
-        public List<ClothX> Cothing { get; set; }
-
+        public ClothX Cothing { get; set; }
         public bool Male { get; set; }
-
         public bool FreeMode { get; set; }
-
         public bool BodySuit { get; set; }
-
         public FaceBank MyFaces { get; set; }
-
         public HairSets MyHair { get; set; }
-
         public int HairColour { get; set; }
         public int HairStreaks { get; set; }
         public int EyeColour { get; set; }
-
         public TShirt MyTag { get; set; }
-
         public List<FreeOverLay> MyOverlay { get; set; }
-
         public List<Tattoo> MyTattoo { get; set; }
-
         public List<float> FaceScale { get; set; }
-
         public string PedVoice { get; set; }
-
         private List<FreeOverLay> BuildOverlay(bool male)
         {
             List<FreeOverLay> MyOvers = new List<FreeOverLay>();
@@ -516,22 +523,16 @@ namespace New_Street_Phone_Missions.Classes
         }      
         private string MaleOrFemale()
         {
-            string sAm;
+            string sAm = "mp_f_freemode_01";
             if (RandomX.FindRandom("PedFeatMF", 1, 10) < 5)
-            {
                 sAm = "mp_m_freemode_01";
-            }
-            else
-            {
-                sAm = "mp_f_freemode_01";
-            }
+
             return sAm;
         }
         public ClothBank()
         {
             ModelX = 0;
-            CothInt = 0;
-            Cothing = new List<ClothX>();
+            Cothing = new ClothX();
             FreeMode = false;
             BodySuit = false;
             MyFaces = new FaceBank(Male);
@@ -548,28 +549,14 @@ namespace New_Street_Phone_Missions.Classes
         public ClothBank(Ped ThisPed)
         {
             ModelX = ThisPed.Model.Hash;
-            CothInt = 0;
             FreeMode = false;
-            if (ThisPed.Model == PedHash.Franklin)
-                Name = "Franklin";
-            else if (ThisPed.Model == PedHash.Michael)
-                Name = "Michael";
-            else if (ThisPed.Model == PedHash.Trevor)
-                Name = "Trevor";
-            else if (ThisPed.Model == PedHash.FreemodeFemale01)
-            {
+            Name = ReturnStuff.WhatpedType();
+            if (Name == "FreeFemale")
                 FreeMode = true;
-                Name = "FreeFemale";
-            }
-            else if (ThisPed.Model == PedHash.FreemodeMale01)
-            {
+            else if (Name == "FreeMale")
                 FreeMode = true;
-                Name = "FreeMale";
-            }
-            else
-                Name = "" + ModelX;
 
-            Cothing = new List<ClothX> { new ClothX(Name, ThisPed) };
+            Cothing = new ClothX(Name, ThisPed);
             Male = ThisPed.Gender == Gender.Male;
             BodySuit = false;
             if (FreeMode)
@@ -602,14 +589,13 @@ namespace New_Street_Phone_Missions.Classes
         {
             if (name == "")
                 name = MaleOrFemale();
-            if (name == "mp_m_freemode_01")
+            else if (name == "mp_m_freemode_01")
                 Male = true;
             else if (name == "mp_f_freemode_01")
                 Male = false;
 
             ModelX = 0;
-            CothInt = 0;
-            Cothing = new List<ClothX> { new ClothX(Preset, Male) };
+            Cothing = new ClothX(Preset, Male);
             FreeMode = freemode;
 
             if (Preset == 2)
@@ -647,8 +633,7 @@ namespace New_Street_Phone_Missions.Classes
         {
             Name = title;
             ModelX = 0;
-            CothInt = 0;
-            Cothing = new List<ClothX> { cloths };
+            Cothing = cloths;
             Male = male;
             FreeMode = freeMode;
             BodySuit = bodySuit;
@@ -689,31 +674,62 @@ namespace New_Street_Phone_Missions.Classes
         public List<int> ExtraA { get; set; }
         public List<int> ExtraB { get; set; }
 
-        private ClothX RandomCloth(bool male)
+        private ClothX SavedCloths(int pedHash)
         {
-            ClothX YourCloth = new ClothX();
-            string sPed = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe/FreeFemale.Xml";
-
-            if (male)
-            {
-                sPed = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe/FreeMale.Xml";
-                List<ClothX> MyWardrobe = ReadWriteXML.LoadWards(sPed);
-                if (MyWardrobe.Count > 0)
-                    YourCloth = MyWardrobe[RandomX.RandInt(0, MyWardrobe.Count - 1)];
-                else
-                    YourCloth = DataStore.RandOutM[RandomX.RandInt(0, DataStore.RandOutM.Count - 1)];
-            }
-            else
-            {
-                List<ClothX> MyWardrobe = ReadWriteXML.LoadWards(sPed);
-                if (MyWardrobe.Count > 0)
-                    YourCloth = MyWardrobe[RandomX.RandInt(0, MyWardrobe.Count - 1)];
-                else
-                    YourCloth = DataStore.RandOutF[RandomX.RandInt(0, DataStore.RandOutF.Count - 1)];
-            }
-
-            return YourCloth;
+            return ReturnStuff.PickAnOutfit(pedHash);
         }
+        private ClothX RandomCloths()
+        {
+            int Torso = 15;
+            int Legs = 15;
+            int LegsText = 0;
+            int Top = -1;
+            int TopText = 0;
+
+            int iAcc = RandomX.RandInt(0, DataStore.FeAcc.Count - 1);
+            Oufiter AddAcc = DataStore.FeAcc[iAcc];
+            int Acc = AddAcc.Cloth;
+            int AccText = AddAcc.Textures[RandomX.RandInt(0, DataStore.FeAcc[iAcc].Textures.Count - 1)];
+
+            int Feet = 35;
+            int FeetText = 0;
+            int RandNumFeet = RandomX.FindRandom("RandomCloths01", 1, 30);
+            if (RandNumFeet < 15)
+            {
+                int iShoe = RandomX.RandInt(0, DataStore.FeShoeHigh.Count - 1);
+                Oufiter NewShoes = DataStore.FeShoeHigh[iShoe];
+                Feet = NewShoes.Cloth;
+                FeetText = NewShoes.Textures[RandomX.RandInt(0, DataStore.FeShoeHigh[iShoe].Textures.Count - 1)];
+            }
+            else if (RandNumFeet < 20)
+            {
+                int iShoe = RandomX.RandInt(0, DataStore.FeShoeFlat.Count - 1);
+                Oufiter NewShoes = DataStore.FeShoeFlat[iShoe];
+                Feet = NewShoes.Cloth;
+                FeetText = NewShoes.Textures[RandomX.RandInt(0, DataStore.FeShoeFlat[iShoe].Textures.Count - 1)];
+            }
+
+
+            int RandNum = RandomX.FindRandom("RandomCloths02", 1, 20);
+            if (RandNum < 5)
+            {
+                int iPick = RandomX.RandInt(0, DataStore.FeTops.Count - 1);
+                OufiterTop ThisSet = DataStore.FeTops[iPick];
+                Torso = ThisSet.Torso;
+                Top = ThisSet.Cloth;
+                TopText = ThisSet.Textures[RandomX.RandInt(0, DataStore.FeTops[iPick].Textures.Count - 1)];
+            }
+            else if (RandNum < 10)
+            {
+                int iPick = RandomX.RandInt(0, DataStore.FeTrousers.Count - 1);
+                Oufiter ThisSet = DataStore.FeTrousers[iPick];
+                Legs = ThisSet.Cloth;
+                LegsText = ThisSet.Textures[RandomX.RandInt(0, DataStore.FeTrousers[iPick].Textures.Count - 1)];
+            }
+
+            return new ClothX("MyOuts", new List<int> { 0, 0, 0, Torso, Legs, 0, Feet, Acc, -1, 0, 0, Top }, new List<int> { 0, 0, 0, 0, LegsText, 0, FeetText, AccText, 0, 0, 0, TopText }, new List<int>(), new List<int>());
+        }
+
 
         public ClothX()
         {
@@ -785,7 +801,7 @@ namespace New_Street_Phone_Missions.Classes
                 }
                 else
                 {
-                    ClothX YourCloth = RandomCloth(male);
+                    ClothX YourCloth = SavedCloths(PedHash.FreemodeMale01.GetHashCode());
                     Title = YourCloth.Title;
                     ClothA = YourCloth.ClothA;
                     ClothB = YourCloth.ClothB;
@@ -831,7 +847,7 @@ namespace New_Street_Phone_Missions.Classes
                 }
                 else
                 {
-                    ClothX YourCloth = RandomCloth(male);
+                    ClothX YourCloth = SavedCloths(PedHash.FreemodeFemale01.GetHashCode());
                     Title = YourCloth.Title;
                     ClothA = YourCloth.ClothA;
                     ClothB = YourCloth.ClothB;
@@ -1010,30 +1026,34 @@ namespace New_Street_Phone_Missions.Classes
     {
         public float MinRadi { get; set; }
         public float MaxRadi { get; set; }
+        public Vector3 Area { get; set; }
         public VehMods VehModel { get; set; }
         public bool Driver { get; set; }
         public bool Near { get; set; }
 
-        public FindVeh(float minRadi, float maxRadi, VehMods vehModel)
+        public FindVeh(float minRadi, float maxRadi, Vector3 area, VehMods vehModel)
         {
             MinRadi = minRadi;
             MaxRadi = maxRadi;
+            Area = area;
             VehModel = vehModel;
             Driver = true;
             Near = false;
         }
-        public FindVeh(float minRadi, float maxRadi, VehMods vehModel, bool driver)
+        public FindVeh(float minRadi, float maxRadi, Vector3 area, VehMods vehModel, bool driver)
         {
             MinRadi = minRadi;
             MaxRadi = maxRadi;
+            Area= area;
             VehModel = vehModel;
             Driver = driver;
             Near = false;
         }
-        public FindVeh(float minRadi, float maxRadi, VehMods vehModel, bool driver, bool near)
+        public FindVeh(float minRadi, float maxRadi, Vector3 area, VehMods vehModel, bool driver, bool near)
         {
             MinRadi = minRadi;
             MaxRadi = maxRadi;
+            Area = area;
             VehModel = vehModel;
             Driver = driver;
             Near = near;
@@ -1071,6 +1091,7 @@ namespace New_Street_Phone_Missions.Classes
     public class PedFeat
     {
         public string MyPed { get; set; }
+        public string PedTag { get; set; }
         public int ImyPed { get; set; }
         public bool Armor { get; set; }
         public int Health { get; set; }
@@ -1083,21 +1104,16 @@ namespace New_Street_Phone_Missions.Classes
 
         private string MaleOrFemale()
         {
-            string sAm;
+            string sAm = "mp_f_freemode_01"; ;
             if (RandomX.FindRandom("PedFeatMF", 1, 10) < 5)
-            {
-                sAm = "mp_m_freemode_01";
-            }
-            else
-            {
-                sAm = "mp_f_freemode_01";
-            }
+                sAm = "mp_m_freemode_01";     
             return sAm;
         }
 
         public PedFeat(bool addBlip, int blipCol, string blipName)
         {
             MyPed = MaleOrFemale();
+            PedTag = "PedX=";
             ImyPed = -1;
             MyWard = new ClothBank(0, true, MyPed);
             Armor = true;
@@ -1125,6 +1141,7 @@ namespace New_Street_Phone_Missions.Classes
                 MyPed = myPed;
                 MyWard = null;
             }
+            PedTag = "PedX-";
             ImyPed = -1;
             Armor = false;
             Health = 200;
@@ -1147,6 +1164,7 @@ namespace New_Street_Phone_Missions.Classes
                 MyPed = myPed;
                 MyWard = null;
             }
+            PedTag = "PedX-";
             ImyPed = -1;
             Armor = false;
             Health = 200;
@@ -1169,6 +1187,7 @@ namespace New_Street_Phone_Missions.Classes
                 MyPed = myPed;
                 MyWard = null;
             }
+            PedTag = "PedX-";
             ImyPed = -1;
             Armor = armor;
             Health = health;
@@ -1191,6 +1210,7 @@ namespace New_Street_Phone_Missions.Classes
                 MyPed = myPed;
                 MyWard = null;
             }
+            PedTag = "PedX-";
             ImyPed = -1;
             Armor = armor;
             Health = health;
@@ -1213,6 +1233,7 @@ namespace New_Street_Phone_Missions.Classes
                 MyPed = myPed;
                 MyWard = new ClothBank(preset, false, MyPed);
             }
+            PedTag = "PedX-";
             ImyPed = -1;
             Armor = armor;
             Health = health;
@@ -1225,6 +1246,7 @@ namespace New_Street_Phone_Missions.Classes
         public PedFeat(string myPed, bool armor, int health, int task, int myGun, ClothBank ward)
         {
             MyPed = myPed;
+            PedTag = "PedX-";
             ImyPed = -1;
             Armor = armor;
             Health = health;
@@ -1238,6 +1260,7 @@ namespace New_Street_Phone_Missions.Classes
         public PedFeat(int iMyPed, bool armor, int health, int task, int myGun, ClothBank ward)
         {
             MyPed = "";
+            PedTag = "PedX-";
             ImyPed = iMyPed;
             Armor = armor;
             Health = health;
@@ -1261,6 +1284,7 @@ namespace New_Street_Phone_Missions.Classes
                 MyPed = myPed;
                 MyWard = null;
             }
+            PedTag = "PedX-";
             ImyPed = -1;
             MyPed = myPed;
             Armor = armor;
@@ -1284,6 +1308,7 @@ namespace New_Street_Phone_Missions.Classes
                 MyPed = myPed;
                 MyWard = null;
             }
+            PedTag = "PedX-";
             ImyPed = -1;
             Armor = armor;
             Health = health;
@@ -1309,6 +1334,7 @@ namespace New_Street_Phone_Missions.Classes
                 MyPed = myPed;
                 MyWard = new ClothBank(preset, false, MyPed);
             }
+            PedTag = "PedX-";
             ImyPed = -1;
             Armor = armor;
             Health = health;
@@ -1324,6 +1350,7 @@ namespace New_Street_Phone_Missions.Classes
         public PedFeat(string myPed, bool armor, int health, int task, int seat, Vehicle myCar, int myGun, bool addblip, int blipCol, string blipName, ClothBank myWard)
         {
             MyPed = myPed;
+            PedTag = "PedX-";
             ImyPed = -1;
             Armor = armor;
             Health = health;
@@ -1444,6 +1471,30 @@ namespace New_Street_Phone_Missions.Classes
             MyVectorList = new List<Vector3>();
             MySpots = null;
         }
+        public PedMultiTask(Ped myped, bool mySwitch_01)
+        {
+            MyPed = myped;
+            MyVehicle = null;
+            MyBlip = myped.CurrentBlip;
+            RaceLineInt = 0;
+            MyTask_01 = 0;
+            MyTask_02 = -1;
+            MyTask_03 = -1;
+            MyTimer_01 = -1;
+            MyTimer_02 = -1;
+            MyFloat_01 = 0f;
+            MyFloat_02 = 0f;
+            MyFloat_03 = 0f;
+            MySwitch_01 = mySwitch_01;
+            MySwitch_02 = false;
+            MySwitch_03 = false;
+            MyName = "";
+
+            MyTarget_01 = Vector3.Zero;
+            MyTarget_02 = Vector3.Zero;
+            MyVectorList = new List<Vector3>();
+            MySpots = null;
+        }
     }
     public class PropLists
     {
@@ -1497,6 +1548,7 @@ namespace New_Street_Phone_Missions.Classes
     public class VehMods
     {
         public string MyVehicle { get; set; }
+        public string VehTag { get; set; }
         public int Task { get; set; }
         public int Paint1 { get; set; }
         public int Paint2 { get; set; }
@@ -1528,6 +1580,7 @@ namespace New_Street_Phone_Missions.Classes
                 iLv = -10;
             VehCol MyCol = ReturnStuff.VehColorCatch(cloneVeh);
             MyVehicle = "GetPlayersVeh";
+            VehTag = "Vehs=";
             Task = functions;
             Paint1 = MyCol.Col01;
             Paint2 = MyCol.Col02;
@@ -1544,6 +1597,7 @@ namespace New_Street_Phone_Missions.Classes
         public VehMods(string myVehicle)
         {
             MyVehicle = myVehicle;
+            VehTag = "Vehs-";
             Task = 0;
             Paint1 = -10;
             Paint2 = -10;
@@ -1560,6 +1614,7 @@ namespace New_Street_Phone_Missions.Classes
         public VehMods(string myVehicle, int functions)
         {
             MyVehicle = myVehicle;
+            VehTag = "Vehs-";
             Task = functions;
             Paint1 = -10;
             Paint2 = -10;
@@ -1576,6 +1631,7 @@ namespace New_Street_Phone_Missions.Classes
         public VehMods(string myVehicle, int functions, bool frozen)
         {
             MyVehicle = myVehicle;
+            VehTag = "Vehs-";
             Task = functions;
             Paint1 = -10;
             Paint2 = -10;
@@ -1592,6 +1648,7 @@ namespace New_Street_Phone_Missions.Classes
         public VehMods(string myVehicle, int functions, bool frozen, bool addMods, string numberPlate)
         {
             List<int> myVehMods = new List<int>();
+            VehTag = "Vehs-";
             Paint1 = -10;
             Paint2 = -10;
             Livery = -10;
@@ -1631,6 +1688,7 @@ namespace New_Street_Phone_Missions.Classes
         public VehMods(string myVehicle, int functions, int blipCol, bool route, string mapName)
         {
             MyVehicle = myVehicle;
+            VehTag = "Vehs-";
             Task = functions;
             Paint1 = -10;
             Paint2 = -10;
@@ -1650,6 +1708,7 @@ namespace New_Street_Phone_Missions.Classes
         public VehMods(string myVehicle, int functions, int blipCol, bool route, string mapName, bool frozen)
         {
             MyVehicle = myVehicle;
+            VehTag = "Vehs-";
             Task = functions;
             Paint1 = -10;
             Paint2 = -10;
@@ -1697,6 +1756,7 @@ namespace New_Street_Phone_Missions.Classes
                 Neons = RandomNeon();
             }
             MyVehicle = myVehicle;
+            VehTag = "Vehs-";
             Task = functions;
             NumberPlate = numberPlate;
             ModelHash = -1;
@@ -1737,6 +1797,7 @@ namespace New_Street_Phone_Missions.Classes
                 myVehMods = ReturnStuff.VehPaint(paint1, paint2, livery);
 
             MyVehicle = myVehicle;
+            VehTag = "Vehs-";
             Paint1 = paint1;
             Paint2 = paint2;
             Livery = livery;
@@ -1780,6 +1841,7 @@ namespace New_Street_Phone_Missions.Classes
                 myVehMods = ReturnStuff.VehPaint(paint1, paint2, livery);
 
             MyVehicle = myVehicle;
+            VehTag = "Vehs-";
             Paint1 = paint1;
             Paint2 = paint2;
             Livery = livery;
@@ -1799,6 +1861,7 @@ namespace New_Street_Phone_Missions.Classes
         {
             Neons = RandomNeon();
             MyVehicle = myVehicle;
+            VehTag = "Vehs-";
             Task = functions;
             NumberPlate = numberPlate;
             ModelHash = -1;

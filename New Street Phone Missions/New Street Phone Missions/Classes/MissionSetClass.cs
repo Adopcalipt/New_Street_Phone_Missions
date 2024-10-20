@@ -273,5 +273,4 @@ namespace New_Street_Phone_Missions.Classes
             ConMarch = conMarch;
         }
     }
-
 }

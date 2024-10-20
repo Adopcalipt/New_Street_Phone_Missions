@@ -16,10 +16,10 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("ReturnRandList, id == " + id);
 
             List<int> MyNums = new List<int>();
-            RandX THisNum = LoadXmlRand(sRanStore + "/" + id + ".xml");
+            RandX THisNum = LoadXmlRand(sRanStore + "/" + id + ".xml", iMin, iMax);
 
             if (THisNum.RandNumbers.Count == 0)
-                THisNum.RandNumbers = NewList(iMin, iMax);
+                THisNum = new RandX(iMin, iMax);
 
             MyNums = THisNum.RandNumbers;
 
@@ -27,13 +27,15 @@ namespace New_Street_Phone_Missions
         }
         public static void ReWiteXml(string id, List<int> MyNums)
         {
-            RandX MyNumbers = new RandX();
-            MyNumbers.RandNumbers = MyNums;
-            SaveXmlRand(MyNumbers, sRanStore + "/" + id + ".xml");
+            RandX MyRando = new RandX(MyNums);
+            SaveXmlRand(MyRando, sRanStore + "/" + id + ".xml");
         }
         public static int RandInt(int iMin, int iMax)
         {
-            return Function.Call<int>(Hash.GET_RANDOM_INT_IN_RANGE, iMin, iMax);
+            int iRet = iMin;
+            if (iMin != iMax)
+                iRet = Function.Call<int>(Hash.GET_RANDOM_INT_IN_RANGE, iMin, iMax);
+            return iRet;
         }
         public static float RandFloat(float fMin, float fMax)
         {
@@ -46,9 +48,9 @@ namespace New_Street_Phone_Missions
             if (!Directory.Exists(sRanStore))
                 Directory.CreateDirectory(sRanStore);
 
-            List<int> MyNums = new List<int>();
-
             int iRandX;
+
+            RandX THisNum = null;
 
             if (iMin == iMax)
                 iRandX = iMin;
@@ -56,36 +58,31 @@ namespace New_Street_Phone_Missions
             {
                 if (File.Exists(sRanStore + "/" + id + ".xml"))
                 {
-                    RandX THisNum = LoadXmlRand(sRanStore + "/" + id + ".xml");
+                    THisNum = LoadXmlRand(sRanStore + "/" + id + ".xml", iMin, iMax);
 
-                    bool newList = false;
-                    for (int i = 0; i < THisNum.RandNumbers.Count; i++)
+                    if (THisNum.RandNumbers.Count > 0)
                     {
-                        if (THisNum.RandNumbers[i] > iMax)
+                        if (THisNum.RandNumbers[0] < iMin)
+                            THisNum = new RandX(iMin, iMax);
+                        else if (THisNum.RandNumbers.Count > 1)
                         {
-                            newList = true;
-                            break;
-                        }
-                        else if (THisNum.RandNumbers[i] < iMin)
-                        {
-                            newList = true;
-                            break;
+                            if (THisNum.RandNumbers[THisNum.RandNumbers.Count - 1] > iMax)
+                                THisNum = new RandX(iMin, iMax);
                         }
                     }
-
-                    if (THisNum.RandNumbers.Count > 0 && !newList)
-                        MyNums = THisNum.RandNumbers;
                     else
-                        MyNums = NewList(iMin, iMax);
+                        THisNum = new RandX(iMin, iMax);
                 }
                 else
-                    MyNums = NewList(iMin, iMax);
+                    THisNum = new RandX(iMin, iMax);
 
-                int iRem = RandInt(0, MyNums.Count - 1);
-                iRandX = MyNums[iRem];
-                MyNums.RemoveAt(iRem);
 
-                ReWiteXml(id, MyNums);
+
+                int iRem = RandInt(0, THisNum.RandNumbers.Count - 1);
+                iRandX = THisNum.RandNumbers[iRem];
+                THisNum.RandNumbers.RemoveAt(iRem);
+
+                SaveXmlRand(THisNum, sRanStore + "/" + id + ".xml");
             }
             return iRandX;
         }
@@ -97,43 +94,43 @@ namespace New_Street_Phone_Missions
                 Directory.CreateDirectory(sRanStore);
 
             int iRandX;
+            RandX THisNum = null;
 
             if (File.Exists(sRanStore + "/" + id + ".xml"))
             {
-                bool newList = false;
-                RandX THisNum = LoadXmlRand(sRanStore + "/" + id + ".xml");
-
-                for (int i = 0; i < THisNum.RandNumbers.Count; i++)
+                THisNum = LoadXmlRand(sRanStore + "/" + id + ".xml", -17, 33);
+                if (THisNum.Low == -17 && THisNum.High == 33)
+                    THisNum = new RandX(MyNums);
+                else
                 {
-                    if (MyNums.Contains(THisNum.RandNumbers[i]))
+                    if (THisNum.RandNumbers.Count > 0)
                     {
+                        for (int i = 0; i < THisNum.RandNumbers.Count; i++)
+                        {
+                            if (MyNums.Contains(THisNum.RandNumbers[i]))
+                            {
 
+                            }
+                            else
+                            {
+                                THisNum = new RandX(MyNums);
+                                break;
+                            }
+                        }
                     }
                     else
-                    {
-                        newList = true;
-                        break;
-                    }
+                        THisNum = new RandX(MyNums);
                 }
-
-                if (THisNum.RandNumbers.Count > 0 && !newList)
-                    MyNums = THisNum.RandNumbers;
             }
+            else
+                THisNum = new RandX(MyNums);
 
-            int iRem = RandInt(0, MyNums.Count - 1);
-            iRandX = MyNums[iRem];
-            MyNums.RemoveAt(iRem);
+            int iRem = RandInt(0, THisNum.RandNumbers.Count - 1);
+            iRandX = THisNum.RandNumbers[iRem];
+            THisNum.RandNumbers.RemoveAt(iRem);
 
-            ReWiteXml(id, MyNums);
+            SaveXmlRand(THisNum, sRanStore + "/" + id + ".xml");
             return iRandX;
-        }
-        private static List<int> NewList(int iMin, int iMax)
-        {
-            LoggerLight.LogThis("NewList, iMin == " + iMin + ", iMax == " + iMax);
-            List<int> MyNums = new List<int>();
-            for (int i = iMin; i < iMax + 1; i++)
-                MyNums.Add(i);
-            return MyNums;
         }
         private static void SaveXmlRand(RandX config, string fileName)
         {
@@ -145,7 +142,7 @@ namespace New_Street_Phone_Missions
                 xml.Serialize(sw, config);
             }
         }
-        private static RandX LoadXmlRand(string fileName)
+        private static RandX LoadXmlRand(string fileName, int low, int high)
         {
             LoggerLight.LogThis("LoadXmlRand : " + fileName);
 
@@ -160,7 +157,7 @@ namespace New_Street_Phone_Missions
             catch
             {
                 LoggerLight.LogThis("Catch ; Corupt File ; ~r~" + fileName);
-                return new RandX();
+                return new RandX(low, high);
             }
         }
     }

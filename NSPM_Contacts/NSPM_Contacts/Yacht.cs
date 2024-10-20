@@ -28,6 +28,8 @@ namespace NSPM_Contacts
         private static bool bYachtParty = false;
         private static bool bDrunkMove = false;
         private static bool bPartyPoop = false;
+        private static bool bGuestList = true;
+        private static bool bYtStart = false;
 
         private static int iMyBed = 0;
         private static int iAmHash = 0;
@@ -39,17 +41,16 @@ namespace NSPM_Contacts
         private static int iYachtDrink = 0;
         private static int iDancing = 0;
         private static int iSlowDown = 0;
-        private static int iStationTuned = 0;
 
         public static Blip YachtBlip = null;
 
         private static readonly int iProcessForYacht = System.Environment.ProcessorCount * 15;
-        public static readonly System.Media.SoundPlayer DipDar = new System.Media.SoundPlayer("" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Audio/dipdar.wav");
+        public static readonly System.Media.SoundPlayer DipDar = new System.Media.SoundPlayer("" + Directory.GetCurrentDirectory() + "/scripts/NSPM/Audio/dipdar.wav");
 
-        public static readonly string sSavedFile = "" + Directory.GetCurrentDirectory() + "/Scripts/RandomStart/PedSaver.xml";
-        public static readonly string sCurrentPed = "" + Directory.GetCurrentDirectory() + "/Scripts/RandomStart/CurrentPed.txt";
-
-        private static readonly string sOutDir = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe/";
+        public static readonly string PlayZeroInst = "" + Directory.GetCurrentDirectory() + "/PlayerZero++.asi";
+        public static readonly string PlayZeroList = "" + Directory.GetCurrentDirectory() + "/PlayerZero/Contacts";
+        public static readonly string PlayZeroBy = "" + Directory.GetCurrentDirectory() + "/PlayerZero/YachtParty.ini";
+        public static readonly string PlayZeroGests = "" + Directory.GetCurrentDirectory() + "/PlayerZero/YachtParters.ini";
 
         private static readonly List<Vector3> YachtTriggers = new List<Vector3>
         {
@@ -114,43 +115,91 @@ namespace NSPM_Contacts
             "fidget_09",
             "fidget_10"
         };
+        private static readonly List<string> RadioTuner = new List<string>
+        {
+             "RADIO_01_CLASS_ROCK",
+             "RADIO_02_POP",
+             "RADIO_03_HIPHOP_NEW",
+             "RADIO_04_PUNK",
+             "RADIO_05_TALK_01",
+             "RADIO_06_COUNTRY",
+             "RADIO_07_DANCE_01",
+             "RADIO_08_MEXICAN",
+             "RADIO_09_HIPHOP_OLD",
+             "RADIO_11_TALK_02",
+             "RADIO_12_REGGAE",
+             "RADIO_13_JAZZ",
+             "RADIO_14_DANCE_02",
+             "RADIO_15_MOTOWN",
+             "RADIO_16_SILVERLAKE",
+             "RADIO_17_FUNK",
+             "RADIO_18_90s_ROCK",
+             "RADIO_19_USER",
+             "RADIO_20_THELAB",
+             "RADIO_21_DLC_XM17",
+             "RADIO_22_DLC_BATTLE_MIX1_RADIO",
+             "RADIO_23_DLC_XM19_RADIO",
+             "RADIO_27_DLC_PRHEI4",
+             "RADIO_34_DLC_HEI4_KULT",
+             "RADIO_35_DLC_HEI4_MLR",
+             "RADIO_36_AUDIOPLAYER",
+             "RADIO_37_MOTOMAMI",
+             "RADIO_22_DLC_BATTLE_MIX1_CLUB",
+             "RADIO_23_DLC_BATTLE_MIX2_CLUB",
+             "RADIO_24_DLC_BATTLE_MIX3_CLUB",
+             "RADIO_25_DLC_BATTLE_MIX4_CLUB",
+             "RADIO_26_DLC_BATTLE_CLUB_WARMUP",
+             "RADIO_30_DLC_HEI4_MIX1_REVERB",
+             "RADIO_31_DLC_HEI4_KM_CLUB",
+             "RADIO_32_DLC_HEI4_MM_CLUB",
+             "RADIO_33_DLC_HEI4_PT_CLUB",
+             "DLC_BATTLE_MIX1_CLUB_PRIV",
+             "DLC_BATTLE_MIX2_CLUB_PRIV",
+             "DLC_BATTLE_MIX3_CLUB_PRIV",
+             "DLC_BATTLE_MIX4_CLUB_PRIV"
+        };
         private static readonly List<string> Stations = new List<string>
         {
-            "The Blue Ark", //0 
-            "WorldWide FM",//1 
-            "FlyLo FM",//2 
-            "The Lowdown 91.1",//3
-            "The Lab",//4 
-            "Radio Mirror Park",//5 
-            "Space 103.2",//6 
-            "Vinewood Boulevard Radio",//7 
-            "Blonded Los Santos 97.8 FM",//8 
-            "Los Santos Underground Radio",//9 
-            "iFruit Radio",//10
-            "Los Santos Rock Radio",//11 
-            "Non-Stop-Pop FM",//12
-            "Radio Los Santos",//13 
-            "Channel X",//14 
-            "WCTR",//15
-            "Rebel Radio",//16 
-            "Soulwax FM",//17
-            "East Los FM",//18 
-            "West Coast Classics",//19
-            "Media Player",//20 
-            "Music Locker Radio",//21
-            "MOTOMAMI Los Santos",//22 
-            "Kult FM 99.1",//23
-            "Still Slipping Los Santos",//24 
-            "Blane County Radio",//25 
-            "Self Radio",//26 
-            "Weasle News",//27 
-            "Silence",//28 
-            "Misc -Studio Rec",//29
-            "Misc -Tuner ",//30
-            "Misc -HipHop",//31 
-            "Misc -Studio HipHop",//32 
-            "Misc -Studio HipHop2",//33 
-            "Misc -Studio"//34
+             "Los Santos Rock Radio",
+             "Non-Stop-Pop FM",
+             "Radio Los Santos",
+             "Channel X",
+             "West Coast Talk Radio",
+             "Rebel Radio",
+             "Soulwax FM",
+             "East Los FM",
+             "West Coast Classics",
+             "Blaine County Radio",
+             "Blue Ark",
+             "Worldwide FM",
+             "FlyLo FM",
+             "The Lowdown 91.1",
+             "Radio Mirror Park",
+             "Space 103.2",
+             "Vinewood Boulevard Radio",
+             "Self Radio",
+             "The Lab",
+             "Blonded Los Santos 97.8 FM",
+             "Los Santos Underground Radio",
+             "iFruit Radio",
+             "Still Slipping Los Santos",
+             "Kult FM",
+             "The Music Locker",
+             "Media Player",
+             "MOTOMAMI Los Santos",
+             "Club01",
+             "Club02",
+             "Club03",
+             "Club04",
+             "Club05",
+             "Club06",
+             "Club07",
+             "Club08",
+             "Club09",
+             "Club10",
+             "Club11",
+             "Club12",
+             "Club13"
         };
 
         public static Vector3 vYachtBlip = new Vector3(-2062.635f, -1025.35f, 14.90f);
@@ -177,10 +226,10 @@ namespace NSPM_Contacts
 
         private static List<Vector3> VectorList_01 = new List<Vector3>();
 
-        private static List<ClothX> MyWardrobe;
+        private static List<string> MyWardrobe = new List<string>();
         private static ClothBank Current;
 
-        private static MenuPool YtmenuPool;
+        private static MenuPool menuPoolX;
 
         public static void Yachting()
         {
@@ -190,8 +239,8 @@ namespace NSPM_Contacts
                     AddHeistYacht();
                 else if (bMenuOpen)
                 {
-                    if (YtmenuPool.IsAnyMenuOpen())
-                        YtmenuPool.ProcessMenus();
+                    if (menuPoolX.IsAnyMenuOpen())
+                        menuPoolX.ProcessMenus();
                     else
                     {
                         Game.Player.Character.FreezePosition = false;
@@ -232,6 +281,9 @@ namespace NSPM_Contacts
         {
             Main.LogThis("YachtStuff_YachtLoader");
 
+            if (!Function.Call<bool>(Hash.IS_IPL_ACTIVE, "hei_yacht_heist"))
+                DataStore.AddHeistYacht(true);
+
             YachtStuff_TheBlip(false);
 
             Vector3 Vpos = new Vector3(-2095.131f, -1016.018f, 9.0805f);
@@ -262,6 +314,10 @@ namespace NSPM_Contacts
             Choppers = VehicleSpawn("SUPERVOLITO", Vpos, fHead, false, 0);
 
             YachtStuff_YachtProps();
+
+
+            if (bYtStart)
+                YachtStuff_StartOnYacht();
         }
         private static void YachtStuff_YachtProps()
         {
@@ -354,6 +410,7 @@ namespace NSPM_Contacts
         }
         private static void CleanUp()
         {
+            Main.LogThis("CleanUp");
             DancingPed.Clear();
 
             for (int i = 0; i < MissionData.PedList_01.Count; i++)
@@ -455,47 +512,84 @@ namespace NSPM_Contacts
                 cCams = null;
             }
         }
-        private static void WriteMyWard(ClothX ThisWard, string sPed)
+        private static void WriteMyWard(ClothX ThisWard, int iModel)
         {
             Main.LogThis("WriteMyWard");
 
-            ThisWard.Title = Game.GetUserInput(255);
             if (ThisWard.Title != "")
             {
-                ClothX MyC = ReturnStuff.DoesThisExist(ThisWard.Title, sPed);
-
-                if (MyC.Title == "Temp")
-                    MyWardrobe.Add(ThisWard);
+                string OutPutFolder = "";
+                if (iModel == PedHash.Michael.GetHashCode())
+                    OutPutFolder = Directory.GetCurrentDirectory() + "/Outfits/Michael";
+                else if (iModel == PedHash.Franklin.GetHashCode())
+                    OutPutFolder = Directory.GetCurrentDirectory() + "/Outfits/Franklin";
+                else if (iModel == PedHash.Trevor.GetHashCode())
+                    OutPutFolder = Directory.GetCurrentDirectory() + "/Outfits/Trevor";
+                else if (iModel == PedHash.FreemodeFemale01.GetHashCode())
+                    OutPutFolder = Directory.GetCurrentDirectory() + "/Outfits/Female";
+                else if (iModel == PedHash.FreemodeMale01.GetHashCode())
+                    OutPutFolder = Directory.GetCurrentDirectory() + "/Outfits/Male";
                 else
-                {
-                    MyWardrobe.Remove(MyC);
-                    MyWardrobe.Add(ThisWard);
-                }
+                    OutPutFolder = Directory.GetCurrentDirectory() + "/Outfits/ModHash" + iModel;
 
-                ReadWriteXML.SaveXmlWards(MyWardrobe, sOutDir + sPed + ".Xml");
+                if (!Directory.Exists(OutPutFolder))
+                    Directory.CreateDirectory(OutPutFolder);
+
+                EntityLog.WriteClothIni(OutPutFolder + "/" + ThisWard.Title + ".ini", ThisWard);
             }
+        }
+        private static string ReBuildWards()
+        {
+            Main.LogThis("ReBuildWards");
+            MyWardrobe.Clear();
+
+            string LoadInDir = "";
+            if (Current.ModelX == PedHash.Michael.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Michael";
+            else if (Current.ModelX == PedHash.Franklin.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Franklin";
+            else if (Current.ModelX == PedHash.Trevor.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Trevor";
+            else if (Current.ModelX == PedHash.FreemodeFemale01.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Female";
+            else if (Current.ModelX == PedHash.FreemodeMale01.GetHashCode())
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/Male";
+            else
+                LoadInDir = "" + Directory.GetCurrentDirectory() + "/Outfits/ModHash" + Current.ModelX;
+
+            if (Directory.Exists(LoadInDir))
+            {
+                string[] findOuts = Directory.GetFiles(LoadInDir);
+
+                for (int i = 0; i < findOuts.Count(); i++)
+                    MyWardrobe.Add(findOuts[i]);
+            }
+
+            return LoadInDir;
         }
         private static void LauchWardrobe()
         {
             Main.LogThis("LauchWardrobe");
 
             Current = new ClothBank(Game.Player.Character);
-            MyWardrobe = ReadWriteXML.LoadWards(sOutDir + Current.Name + ".xml");
-            WardMenuMain();
+
+            string LoadInDir = ReBuildWards();
+
+            WardMenuMain(LoadInDir + "/");
         }
-        private static void WardMenuMain()
+        private static void WardMenuMain(string sFolder)
         {
             Main.LogThis("WardMenuMain");
 
-            YtmenuPool = new MenuPool();
+            menuPoolX = new MenuPool();
             var mainMenu = new UIMenu("", "--" + Current.Name + "--");
             var banner = new Sprite("shopui_title_highendfashion", "shopui_title_highendfashion", new Point(0, 0), new Size(0, 0));
             mainMenu.SetBannerType(banner);
-            YtmenuPool.Add(mainMenu);
+            menuPoolX.Add(mainMenu);
             SetComponents(mainMenu);
             WardMenu(mainMenu); //Here we add the  Sub Menus
-            MakeMenuForXMl(mainMenu);
-            YtmenuPool.RefreshIndex();
+            MakeMenuForXMl(mainMenu, sFolder);
+            menuPoolX.RefreshIndex();
             bMenuOpen = true;
             mainMenu.Visible = !mainMenu.Visible;
         }
@@ -513,7 +607,7 @@ namespace NSPM_Contacts
         {
             Main.LogThis("SetComponents");
 
-            var playermodelmenu = YtmenuPool.AddSubMenu(XMen, "Set Outfits");
+            var playermodelmenu = menuPoolX.AddSubMenu(XMen, "Set Outfits");
 
             if (Current.Name == "Franklin" || Current.Name == "Michael" || Current.Name == "Trevor")
             {
@@ -636,14 +730,17 @@ namespace NSPM_Contacts
                 }
             };
         }
-        private static void MakeMenuForXMl(UIMenu XMen)
+        private static void MakeMenuForXMl(UIMenu XMen, string sInDir)
         {
             List<dynamic> dCloths = new List<dynamic>();
 
             dCloths.Add("DefaultOut.XML");
 
             for (int i = 0; i < MyWardrobe.Count; i++)
-                dCloths.Add(MyWardrobe[i].Title);
+            {
+                string sName = Path.GetFileName(MyWardrobe[i]);
+                dCloths.Add(sName.Substring(0, sName.Length - 4));
+            }
 
             var newitem = new UIMenuListItem(DataStore.MyLang.YachtLang[1], dCloths, 0);
             XMen.AddItem(newitem);
@@ -659,19 +756,22 @@ namespace NSPM_Contacts
             if (iNdex == 0)
                 EntityBuild.PedDresser(Game.Player.Character, Current);
             else if (iNdex <= MyWardrobe.Count)
-                EntityBuild.PedDresser(Game.Player.Character, MyWardrobe[iNdex - 1], new List<int> { 2 });
+                EntityBuild.PedDresser(Game.Player.Character, EntityLog.LoadIniOutfit(MyWardrobe[iNdex - 1]), new List<int> { 2 });
         }
         private static void WardMenu(UIMenu XMen)
         {
-            var playermodelmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.YachtLang[3]);
+            var playermodelmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.YachtLang[3]);
 
             var captureWardrobe = new UIMenuItem(DataStore.MyLang.YachtLang[2], "");
             playermodelmenu.AddItem(captureWardrobe);
             playermodelmenu.OnItemSelect += (sender, item, index) =>
             {
                 if (item == captureWardrobe)
-                    WriteMyWard(Current.Cothing[Current.CothInt], Current.Name);
-                YtmenuPool.CloseAllMenus();
+                {
+                    string title = Game.GetUserInput(255);
+                    WriteMyWard(new ClothX(title, Game.Player.Character), Current.ModelX);
+                }
+                menuPoolX.CloseAllMenus();
             };
         }
         private static void ClearPedProps(Ped Peddy)
@@ -749,7 +849,7 @@ namespace NSPM_Contacts
         private static void YachtStuff_StartOnYacht()
         {
             Main.LogThis("YachtStuff_StartOnYacht");
-
+            bYtStart = false;
             Ped Peddy = Game.Player.Character;
 
             int iStart = RandomX.FindRandom("Yacht_Start01", 1, 5);
@@ -1424,7 +1524,7 @@ namespace NSPM_Contacts
                 {
                     if (bSwimSuit)
                     {
-                        EntityBuild.PedDresser(Peddy, Current.Cothing[Current.CothInt]);
+                        EntityBuild.PedDresser(Peddy, Current.Cothing);
                         bSwimSuit = false;
                         bWetness = false;
 
@@ -1690,12 +1790,17 @@ namespace NSPM_Contacts
 
             Ped Peddy = Game.Player.Character;
 
-            ClothX Cb = ReturnStuff.DoesThisExist("Swim", sOutDir + Current.Name + ".xml");
+            ReBuildWards();
 
-            if (Cb.Title != "Temp")
+            string ThisOut = "Blank";
+            for (int i = 0; i < MyWardrobe.Count; i++)
             {
-                EntityBuild.PedDresser(Peddy, Cb, new List<int> { 2 });
+                if (MyWardrobe[i].Contains("Swim"))
+                    ThisOut = MyWardrobe[i];
             }
+
+            if (ThisOut != "Blank")
+                EntityBuild.PedDresser(Game.Player.Character, EntityLog.LoadIniOutfit(ThisOut), new List<int> { 2 });
             else if (sPed == "Franklin")
             {
                 Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy, 3, 26, 0, 2);     //3 Torso
@@ -2165,42 +2270,99 @@ namespace NSPM_Contacts
             }
             bASleap = true;
         }
+        private static bool YachtStuff_PlayerZTest()
+        {
+            bool b = false;
+
+            if (File.Exists(PlayZeroInst))
+            {
+                if (Directory.Exists(PlayZeroList))
+                {
+                    string[] files = Directory.GetFiles(PlayZeroList);
+                    if (files.Count() > 0)
+                        b = true;
+                }
+            }
+
+            return b;
+        }
         private static void YachtStuff_YachtParty()
         {
             Main.LogThis("YachtStuff_YachtParty");
 
-            List<Prop> ThisPop = SearchFor.GetAllProps(vYachtBlip, 75.00f); ;
-            List<ClothBank> OldFriends = new List<ClothBank>();
-            bool oldParty = false;
+            List<Prop> ThisPop = SearchFor.GetAllProps(vYachtBlip, 75.00f);
 
+            DancingPed.Clear();
 
-            if (File.Exists(sSavedFile))
+            if (YachtStuff_PlayerZTest())
             {
-                OldFriends = ReadWriteXML.LoadCloths(sSavedFile);
-                string sNotYou = "";
-                OldFriends.RemoveAt(0);
-
-                if (OldFriends.Count > 0)
-                    oldParty = true;
-
-                if (File.Exists(sCurrentPed))
+                bGuestList = true;
+                EntityLog.CreateIni(PlayZeroBy, new List<string> { "Blank" });
+            }
+            else
+            {
+                bGuestList = false;
+                List<Vector3> Pos_01 = new List<Vector3>
                 {
-                    string[] readNote = File.ReadAllLines(sCurrentPed);
-                    if (readNote.Count() > 0)
-                        sNotYou = readNote[0];
-                }
+                    new Vector3(-2041.087f, -1032.308f, 11.98071f),
+                    new Vector3(-2101.375f, -1012.525f, 8.969614f),
+                    new Vector3(-2118.985f, -1006.77f, 7.920915f),
+                    new Vector3(-2088.573f, -1016.668f, 8.971194f),
+                    new Vector3(-2031.578f, -1040.083f, 5.882085f),
+                    new Vector3(-2029.057f, -1032.141f, 5.88269f),
+                    new Vector3(-2046.618f, -1030.548f, 11.98071f),
+                    new Vector3(-2059.485f, -1026.207f, 11.90751f),
+                    new Vector3(-2067.97f, -1023.662f, 11.90972f),
+                    new Vector3(-2039.228f, -1033.173f, 8.971494f)
+                };
 
-                for (int i = 0; i < OldFriends.Count; i++)
+                for (int i = 1; i < Pos_01.Count; i++)
                 {
-                    if (OldFriends[i].Name == sNotYou)
+                    int iThisOne = RandomX.FindRandomList("PartyPeds", new List<int> { 16, 29, 31, 36, 37 });
+                    if (i < 6)
                     {
-                        OldFriends.RemoveAt(i);
-                        break;
+                        int iRanPeds = RandomX.RandInt(2, 3);
+                        for (int ii = 0; ii < iRanPeds; ii++)
+                        {
+                            Vector3 VPedPos = Pos_01[i].Around(2.50f);
+                            VPedPos.Z = Pos_01[i].Z;
+                            Ped Psit;
+                            Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), VPedPos, RandomX.RandInt(0, 360), 0); ;
+                            EntityBuild.PedScenario(Psit, "WORLD_HUMAN_PARTYING", Psit.Position, Psit.Heading, false);
+                            PedMultiTask Dil = new PedMultiTask(Psit, null, 0);
+                            DancingPed.Add(Dil);
+                        }
+                    }
+                    else
+                    {
+                        if (i == Pos_01.Count - 1)
+                        {
+                            for (int ii = 0; ii < 9; ii++)
+                            {
+                                Vector3 VPedPos = Pos_01[i].Around(3.55f);
+                                VPedPos.Z = Pos_01[i].Z;
+                                Ped DancinF;
+                                DancinF = NPCSpawn(ReturnStuff.RandNPC(iThisOne), VPedPos, RandomX.RandInt(0, 360), 0);
+                                PedMultiTask Dil = new PedMultiTask(DancinF, true);
+                                DancingPed.Add(Dil);
+                            }
+                        }
+                        else
+                        {
+                            int iRanPeds = RandomX.RandInt(4, 9);
+                            for (int ii = 0; ii < iRanPeds; ii++)
+                            {
+                                Vector3 VPedPos = Pos_01[i].Around(3.75f);
+                                VPedPos.Z = Pos_01[i].Z;
+                                Ped Psit;
+                                Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), VPedPos, RandomX.RandInt(0, 360), 0); ;
+                                PedMultiTask Dil = new PedMultiTask(Psit, true);
+                                DancingPed.Add(Dil);
+                            }
+                        }
                     }
                 }
             }
-
-            DancingPed.Clear();
 
             for (int i = 0; i < ThisPop.Count; i++)
             {
@@ -2213,15 +2375,8 @@ namespace NSPM_Contacts
                         if (RandomX.RandInt(0, 20) < 10)
                         {
                             Ped Psit;
-                            if (oldParty && OldFriends.Count > 0)
-                            {
-                                int iFrend = RandomX.RandInt(0, OldFriends.Count - 1);
-                                Psit = EntityBuild.NPCSpawn(new PedFeat(OldFriends[iFrend].ModelX, false, 150, 0, 0, OldFriends[iFrend]), ThisProp.Position, ThisProp.Heading - 180f);
-                                OldFriends.RemoveAt(iFrend);
-                            }
-                            else
-                                Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), ThisProp.Position, ThisProp.Heading - 180f, 0);
-                            EntityBuild.PedSitHere(Psit, ThisProp, 1); 
+                            Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), ThisProp.Position, ThisProp.Heading - 180f, 0);
+                            EntityBuild.PedSitHere(Psit, ThisProp, 1);
                             PedMultiTask Dil = new PedMultiTask(Psit, null, 0);
                             DancingPed.Add(Dil);
                         }
@@ -2231,14 +2386,7 @@ namespace NSPM_Contacts
                         if (RandomX.RandInt(0, 20) < 10)
                         {
                             Ped Psit;
-                            if (oldParty && OldFriends.Count > 0)
-                            {
-                                int iFrend = RandomX.RandInt(0, OldFriends.Count - 1);
-                                Psit = EntityBuild.NPCSpawn(new PedFeat(OldFriends[iFrend].ModelX, false, 150, 0, 0, OldFriends[iFrend]), ThisProp.Position, ThisProp.Heading - 180f);
-                                OldFriends.RemoveAt(iFrend);
-                            }
-                            else
-                                Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), ThisProp.Position, ThisProp.Heading - 180f, 0);
+                            Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), ThisProp.Position, ThisProp.Heading - 180f, 0);
                             EntityBuild.PedSitHere(Psit, ThisProp, 2);
                             PedMultiTask Dil = new PedMultiTask(Psit, null, 0);
                             DancingPed.Add(Dil);
@@ -2249,14 +2397,7 @@ namespace NSPM_Contacts
                         if (RandomX.RandInt(0, 20) < 10)
                         {
                             Ped Psit;
-                            if (oldParty && OldFriends.Count > 0)
-                            {
-                                int iFrend = RandomX.RandInt(0, OldFriends.Count - 1);
-                                Psit = EntityBuild.NPCSpawn(new PedFeat(OldFriends[iFrend].ModelX, false, 150, 0, 0, OldFriends[iFrend]), ThisProp.Position, ThisProp.Heading - 180f);
-                                OldFriends.RemoveAt(iFrend);
-                            }
-                            else
-                                Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), ThisProp.Position, ThisProp.Heading - 180f, 0);
+                            Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), ThisProp.Position, ThisProp.Heading - 180f, 0);
                             EntityBuild.PedSitHere(Psit, ThisProp, 8);
                             PedMultiTask Dil = new PedMultiTask(Psit, null, 0);
                             DancingPed.Add(Dil);
@@ -2265,96 +2406,9 @@ namespace NSPM_Contacts
                 }
             }
 
-            List<Vector3> Pos_01 = new List<Vector3>
-            {
-                new Vector3(-2041.087f, -1032.308f, 11.98071f),
-                new Vector3(-2101.375f, -1012.525f, 8.969614f),
-                new Vector3(-2118.985f, -1006.77f, 7.920915f),
-                new Vector3(-2088.573f, -1016.668f, 8.971194f),
-                new Vector3(-2031.578f, -1040.083f, 5.882085f),
-                new Vector3(-2029.057f, -1032.141f, 5.88269f),
-                new Vector3(-2046.618f, -1030.548f, 11.98071f),
-                new Vector3(-2059.485f, -1026.207f, 11.90751f),
-                new Vector3(-2067.97f, -1023.662f, 11.90972f),
-                new Vector3(-2039.228f, -1033.173f, 8.971494f)
-            };
-
-            for (int i = 1; i < Pos_01.Count; i++)
-            {
-                int iThisOne = RandomX.FindRandomList("PartyPeds", new List<int> { 16, 29, 31, 36, 37 });
-                if (i < 6)
-                {
-                    int iRanPeds = RandomX.RandInt(2, 3);
-                    for (int ii = 0; ii < iRanPeds; ii++)
-                    {
-                        Vector3 VPedPos = Pos_01[i].Around(2.50f);
-                        VPedPos.Z = Pos_01[i].Z;
-                        Ped Psit;
-                        if (oldParty && OldFriends.Count > 0)
-                        {
-                            int iFrend = RandomX.RandInt(0, OldFriends.Count - 1);
-                            Psit = EntityBuild.NPCSpawn(new PedFeat(OldFriends[iFrend].ModelX, false, 150, 0, 0, OldFriends[iFrend]), VPedPos, RandomX.RandInt(0, 360));
-                            OldFriends.RemoveAt(iFrend);
-                        }
-                        else
-                            Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), VPedPos, RandomX.RandInt(0, 360), 0);
-
-                        EntityBuild.PedScenario(Psit, "WORLD_HUMAN_PARTYING", Psit.Position, Psit.Heading, false);
-                        PedMultiTask Dil = new PedMultiTask(Psit, null, 0);
-                        DancingPed.Add(Dil);
-                    }
-                }
-                else
-                {
-                    if (i == Pos_01.Count - 1)
-                    {
-                        for (int ii = 0; ii < 9; ii++)
-                        {
-                            Vector3 VPedPos = Pos_01[i].Around(3.55f);
-                            VPedPos.Z = Pos_01[i].Z;
-                            Ped DancinF;
-                            if (oldParty && OldFriends.Count > 0)
-                            {
-                                int iFrend = RandomX.RandInt(0, OldFriends.Count - 1);
-                                DancinF = EntityBuild.NPCSpawn(new PedFeat(OldFriends[iFrend].ModelX, false, 150, 0, 0, OldFriends[iFrend]), VPedPos, RandomX.RandInt(0, 360));
-                                OldFriends.RemoveAt(iFrend);
-                            }
-                            else
-                                DancinF = NPCSpawn(ReturnStuff.RandNPC(iThisOne), VPedPos, RandomX.RandInt(0, 360), 0);
-                            PedMultiTask Dil = new PedMultiTask(DancinF, null, 0);
-                            Dil.MySwitch_01 = true;
-                            DancingPed.Add(Dil);
-                        }
-                        Ped DJ = NPCSpawn("ig_djsolmike", Pos_01[0], 243.1566f, 0);
-                        PedMultiTask Dil2 = new PedMultiTask(DJ, null, 0);
-                        Dil2.MySwitch_01 = true;
-                        DancingPed.Add(Dil2);
-                    }
-                    else
-                    {
-                        int iRanPeds = RandomX.RandInt(4, 9);
-                        for (int ii = 0; ii < iRanPeds; ii++)
-                        {
-                            Vector3 VPedPos = Pos_01[i].Around(3.75f);
-                            VPedPos.Z = Pos_01[i].Z;
-
-                            Ped Psit;
-                            if (oldParty && OldFriends.Count > 0)
-                            {
-                                int iFrend = RandomX.RandInt(0, OldFriends.Count - 1);
-                                Psit = EntityBuild.NPCSpawn(new PedFeat(OldFriends[iFrend].ModelX, false, 150, 0, 0, OldFriends[iFrend]), VPedPos, RandomX.RandInt(0, 360));
-                                OldFriends.RemoveAt(iFrend);
-                            }
-                            else
-                                Psit = NPCSpawn(ReturnStuff.RandNPC(iThisOne), VPedPos, RandomX.RandInt(0, 360), 0);
-
-                            PedMultiTask Dil = new PedMultiTask(Psit, null, 0);
-                            Dil.MySwitch_01 = true;
-                            DancingPed.Add(Dil);
-                        }
-                    }
-                }
-            }
+            Ped DJ = NPCSpawn("ig_djsolmike", new Vector3(-2041.087f, -1032.308f, 11.98071f), 243.1566f, 0);
+            PedMultiTask Dil2 = new PedMultiTask(DJ, true);
+            DancingPed.Add(Dil2);
 
             if (Choppers != null)
             {
@@ -2399,103 +2453,124 @@ namespace NSPM_Contacts
         }
         private static void YachtStuff_DancePedDance()
         {
-            if (iKeepDance < Game.GameTime && !bPartyPoop)
+            if (bGuestList)
+            {
+                if (File.Exists(PlayZeroGests))
+                {
+                    bGuestList = false;
+                    List<string> MyOuts = EntityLog.FileOutPut(PlayZeroGests);
+
+                    for (int i = 0; i < MyOuts.Count; i++)
+                    {
+                        int intOut = 0;
+                        if (int.TryParse(MyOuts[i], out intOut))
+                        {
+                            // Conversion succeeded, 'number' contains the integer value
+                        }
+                        else
+                        {
+                            intOut = 0;
+                        }
+                        Ped MyPee = new Ped(intOut);
+                        if (MyPee.Exists())
+                            DancingPed.Add(new PedMultiTask(MyPee, true));
+                    }
+                    File.Delete(PlayZeroGests);
+                }
+            }
+
+            if (iKeepDance < Game.GameTime)
             {
                 for (int i = 0; i < DancingPed.Count; i++)
                 {
-                    if (DancingPed[i].MyPed.IsFleeing || DancingPed[i].MyPed.IsDead)
+                    if (DancingPed[i].MyPed.Exists())
                     {
-                        bPartyPoop = true;
-                        break;
-                    }
-                    else if (DancingPed[i].MySwitch_01)
-                    {
-                        bool bMale = false;
-                        int iRan = RandomX.RandInt(1, 3);
-
-                        if (!Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, DancingPed[i].MyPed, 134))
+                        if (bPartyPoop)
                         {
-                            DanceMoves ThisDance;
-                            if (DancingPed[i].MyPed.Gender == Gender.Male)
-                                bMale = true;
+                            if (DancingPed[i].MyTask_01 == 0)
+                            {
+                                DancingPed[i].MyTask_01 = 1;
+                                RunPedRun(DancingPed[i].MyPed);
+                            }
+                            else if (DancingPed[i].MyTask_01 == 1)
+                            {
+                                if (DancingPed[i].MyPed.IsDead)
+                                {
 
-                            ThisDance = ReturnStuff.DanceList(bMale, iRan);
+                                }
+                                else if (!DancingPed[i].MyPed.IsInWater)
+                                {
+                                    if (DancingPed[i].MySwitch_02)
+                                    {
+                                        if (DancingPed[i].MyTask_01 < Game.GameTime)
+                                        {
+                                            if (ReturnStuff.AreUNear(DancingPed[i].MyPed.Position, DancingPed[i].MyTarget_01, 2.5f))
+                                            {
+                                                Function.Call(Hash.TASK_CLIMB, DancingPed[i].MyPed.Handle);
+                                                DancingPed[i].MyTarget_01 = DancingPed[i].MyPed.Position;
+                                                DancingPed[i].MySwitch_02 = false;
+                                                DancingPed[i].MyTask_01 = Game.GameTime + RandomX.RandInt(400, 1000);
+                                                DancingPed[i].MyPed.Task.RunTo(new Vector3(-1791.05f, -859.4266f, 6.572317f), true, -1);
+                                            }
+                                            else
+                                            {
+                                                DancingPed[i].MyTarget_01 = DancingPed[i].MyPed.Position;
+                                                DancingPed[i].MySwitch_02 = false;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (DancingPed[i].MyTask_01 < Game.GameTime)
+                                        {
+                                            DancingPed[i].MySwitch_02 = true;
+                                            DancingPed[i].MyTarget_01 = DancingPed[i].MyPed.Position;
+                                            DancingPed[i].MyTask_01 = Game.GameTime + RandomX.RandInt(400, 1000);
+                                            DancingPed[i].MyPed.Task.RunTo(new Vector3(-1791.05f, -859.4266f, 6.572317f), true, -1);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (!DancingPed[i].MySwitch_03)
+                                    {
+                                        DancingPed[i].MySwitch_03 = true;
+                                        DancingPed[i].MyPed.Task.RunTo(new Vector3(-1791.05f, -859.4266f, 6.572317f), true, -1);
+                                    }
+                                }
+                            }
+                        }
+                        else if (DancingPed[i].MyPed.IsFleeing || DancingPed[i].MyPed.IsDead)
+                        {
+                            bPartyPoop = true;
+                            i = 0;
+                        }
+                        else if (DancingPed[i].MySwitch_01)
+                        {
+                            bool bMale = false;
+                            int iRan = RandomX.RandInt(1, 3);
 
-                            EntityBuild.ForceAnim(DancingPed[i].MyPed, ThisDance.DanceType, ThisDance.Dance, DancingPed[i].MyPed.Position, DancingPed[i].MyPed.Rotation);
+                            if (!Function.Call<bool>(Hash.GET_IS_TASK_ACTIVE, DancingPed[i].MyPed, 134))
+                            {
+                                DanceMoves ThisDance;
+                                if (DancingPed[i].MyPed.Gender == Gender.Male)
+                                    bMale = true;
+
+                                ThisDance = ReturnStuff.DanceList(bMale, iRan);
+
+                                EntityBuild.ForceAnim(DancingPed[i].MyPed, ThisDance.DanceType, ThisDance.Dance, DancingPed[i].MyPed.Position, DancingPed[i].MyPed.Rotation);
+                            }
                         }
                     }
-                }
-
-                if (bPartyPoop)
-                {
-                    for (int i = 0; i < MissionData.PedList_01.Count; i++)
-                        RunPedRun(MissionData.PedList_01[i]);
+                    else
+                        DancingPed.RemoveAt(i);
                 }
                 iKeepDance = Game.GameTime + 1000;
             }
 
             if (Game.Player.Character.Position.DistanceTo(vDjSet) < 3f && Game.Player.Character.Position.Z > 9.5f)
                 SelectStation();
-            else if (bPartyPoop)
-            {
-                if (iKeepDance < Game.GameTime)
-                {
-                    for (int i = 0; i < DancingPed.Count; i++)
-                    {   
-                        if (DancingPed[i].MyPed.IsDead)
-                        {
-                            EntityLog.CleanUp(DancingPed[i].MyPed, false);
-                            MissionData.PedList_01.Remove(DancingPed[i].MyPed);
-                            DancingPed.RemoveAt(i);
-                        }
-                        else if(!DancingPed[i].MyPed.IsInWater)
-                        {
-                            if (DancingPed[i].MySwitch_02)
-                            {
-                                if (DancingPed[i].MyTask_01 < Game.GameTime)
-                                {
-                                    if (ReturnStuff.AreUNear(DancingPed[i].MyPed.Position, DancingPed[i].MyTarget_01, 2.5f))
-                                    {
-                                        Function.Call(Hash.TASK_CLIMB, DancingPed[i].MyPed.Handle);
-                                        DancingPed[i].MyTarget_01 = DancingPed[i].MyPed.Position;
-                                        DancingPed[i].MySwitch_02 = false;
-                                    }
-                                    else
-                                    {
-                                        DancingPed[i].MyTarget_01 = DancingPed[i].MyPed.Position;
-                                        DancingPed[i].MySwitch_02 = false;
-                                    }
-                                }
-                            }
-                            else 
-                            {
-                                if (ReturnStuff.AreUFar(DancingPed[i].MyPed.Position, DancingPed[i].MyTarget_01, 2.5f))
-                                {
-                                    DancingPed[i].MySwitch_02 = true;
-                                    DancingPed[i].MyTarget_01 = DancingPed[i].MyPed.Position;
-                                    DancingPed[i].MyTask_01 = Game.GameTime + RandomX.RandInt(400, 1000);
-                                }
-                            } 
-                        }
-                        else if (DancingPed[i].MyPed.Position.DistanceTo(new Vector3(-1791.05f, -859.4266f, 6.572317f)) < 90f)
-                        {
-                            EntityLog.CleanUp(DancingPed[i].MyPed, false);
-                            MissionData.PedList_01.Remove(DancingPed[i].MyPed);
-                            DancingPed.RemoveAt(i);
-                        }
-                        else
-                        {
-                            if (!DancingPed[i].MySwitch_03)
-                            {
-                                DancingPed[i].MySwitch_03 = true;
-                                MissionData.PedList_01[i].Task.RunTo(new Vector3(-1791.05f, -859.4266f, 6.572317f), true, -1);
-                            }
-                        }
-                    }
-                    iKeepDance = Game.GameTime + 1000;
-                }
-            }
-            else if (PlayerNear())
+            else if (PlayerNear() && !bPartyPoop)
                 PlayerDance();
         }
         private static bool PlayerNear()
@@ -2548,27 +2623,29 @@ namespace NSPM_Contacts
         }
         private static void SelectStation()
         {
-            UiDisplay.ControlerUI(DataStore.MyLang.Context[0] + " - " + Stations[iStationTuned] + " - ", 1);
+            UiDisplay.ControlerUI(DataStore.MyLang.Context[0] + "~n~ - " + Stations[DataStore.MySettings.YachtRadio] + " - ", 1);
 
             if (ReturnStuff.WhileButtonDown(47))
             {
-                iStationTuned--;
-                if (iStationTuned < 0)
-                    iStationTuned = Stations.Count - 1;
-                YachtStuff_RadioTuner(iStationTuned);
+                DataStore.MySettings.YachtRadio--;
+                if (DataStore.MySettings.YachtRadio < 0)
+                    DataStore.MySettings.YachtRadio = Stations.Count - 1;
+                YachtStuff_RadioTuner(DataStore.MySettings.YachtRadio);
+                EntityLog.Settings_Out();
             }
             else if (ReturnStuff.WhileButtonDown(51))
             {
-                iStationTuned++;
-                if (iStationTuned > Stations.Count - 1)
-                    iStationTuned = 0;
-                YachtStuff_RadioTuner(iStationTuned);
+                DataStore.MySettings.YachtRadio++;
+                if (DataStore.MySettings.YachtRadio > Stations.Count - 1)
+                    DataStore.MySettings.YachtRadio = 0;
+                YachtStuff_RadioTuner(DataStore.MySettings.YachtRadio);
+                EntityLog.Settings_Out();
             }
         }
         private static void YachtStuff_RadioTuner(int iStation)
         {
             Main.LogThis("YachtStuff_RadioTuner, iStation == " + iStation);
-            string sTation = Function.Call<string>(Hash.GET_RADIO_STATION_NAME, iStation);
+            string sTation = RadioTuner[iStation];
 
             Function.Call(Hash.SET_EMITTER_RADIO_STATION, "SE_DLC_BTL_Yacht_Exterior_01", sTation);
             Function.Call(Hash.SET_STATIC_EMITTER_ENABLED, "SE_DLC_BTL_Yacht_Exterior_01", true);
@@ -2582,7 +2659,6 @@ namespace NSPM_Contacts
 
             if (bOn)
             {
-                iStationTuned = RandomX.FindRandomList("YachtRadioSel", new List<int> { 9, 20, 22, 24, 30, });
                 BoomBox01 = BuildProp("prop_boombox_01", new Vector3(-2039.91492f, -1032.71106f, 9.50f), new Vector3(0.00f, 0.00f, 71.5197449f), true, true);
                 while (BoomBox01 == null)
                     BoomBox01 = BuildProp("prop_boombox_01", new Vector3(-2039.91492f, -1032.71106f, 9.50f), new Vector3(0.00f, 0.00f, 71.5197449f), true, true);
@@ -2596,7 +2672,7 @@ namespace NSPM_Contacts
                 BoomBox02.IsVisible = false;
                 BoomBox02.HasCollision = false;
                 Function.Call((Hash)0x651D3228960D08AF, "SE_DLC_APT_Yacht_Bar", BoomBox02);
-                YachtStuff_RadioTuner(iStationTuned);
+                YachtStuff_RadioTuner(DataStore.MySettings.YachtRadio);
             }
             else
             {
@@ -2611,6 +2687,13 @@ namespace NSPM_Contacts
             Main.LogThis("YachtStuff_YachtRmovals");
 
             YachtStuff_DanceFloor(false);
+
+            if (File.Exists(PlayZeroBy))
+                File.Delete(PlayZeroBy);
+
+            if (File.Exists(PlayZeroGests))
+                File.Delete(PlayZeroGests);
+
             CleanUp();
             bYachtParty = false;
             YachtSit.Clear();
@@ -2627,11 +2710,9 @@ namespace NSPM_Contacts
             AddHeistYacht();
             if (DataStore.MySettings.StartOnYAcht)
             {
+                bYtStart = true; 
                 Game.FadeScreenOut(1);
                 Game.Player.Character.Position = vYachtBlip;
-                YachtStuff_YachtLoader();
-                bYachIsOn = true;
-                YachtStuff_StartOnYacht();
             }
         }
     }

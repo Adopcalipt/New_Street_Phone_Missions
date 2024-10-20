@@ -3,7 +3,6 @@ using GTA.Math;
 using GTA.Native;
 using New_Street_Phone_Missions.Classes;
 using System.Collections.Generic;
-using System.IO;
 
 namespace New_Street_Phone_Missions
 {
@@ -84,12 +83,10 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("NPCSpawn");
             Script.Wait(100);
             Ped BuildPed;
-            var model = new Model(MyPedBuild.MyPed);
 
-            if (MyPedBuild.ImyPed != -1)
-                model = new Model(MyPedBuild.ImyPed);
+            Model model =  MyPedBuild.MyPed;
+            model.Request(500);    // Check if the model is valid
 
-            model.Request();    // Check if the model is valid
             if (model.IsInCdImage && model.IsValid)
             {
                 while (!model.IsLoaded)
@@ -100,10 +97,10 @@ namespace New_Street_Phone_Missions
 
                 if (BuildPed.Exists())
                 {
-                    EntityLog.BackUpAss("PedX-" + BuildPed.Handle);
+                    EntityLog.BackUpAss(MyPedBuild.PedTag + BuildPed.Handle);
                     Function.Call(Hash.SET_PED_ACCURACY, BuildPed.Handle, RandomX.RandInt(DataStore.MySettings.LowerAim, DataStore.MySettings.UpperAim));
-                    BuildPed.MaxHealth = MyPedBuild.Health;
-                    BuildPed.Health = MyPedBuild.Health;
+                    Function.Call(Hash.SET_ENTITY_HEALTH, BuildPed, MyPedBuild.Health);
+                    Function.Call(Hash.SET_ENTITY_MAX_HEALTH, BuildPed, MyPedBuild.Health);
                     BuildPed.Weapons.RemoveAll();
 
                     Function.Call(Hash.SET_PED_PATH_CAN_USE_CLIMBOVERS, BuildPed.Handle, true);
@@ -123,8 +120,11 @@ namespace New_Street_Phone_Missions
 
                     if (MyPedBuild.MyVeh != null)
                     {
-                        WarptoAnyVeh(MyPedBuild.MyVeh, BuildPed, MyPedBuild.MySeat);
-                        NpcVehicleTasks(BuildPed, MyPedBuild.MyVeh, MyPedBuild.Task);
+                        if (Function.Call<bool>(Hash.IS_VEHICLE_SEAT_FREE, MyPedBuild.MyVeh, MyPedBuild.MySeat - 2))
+                        {
+                            WarptoAnyVeh(MyPedBuild.MyVeh, BuildPed, MyPedBuild.MySeat);
+                            NpcVehicleTasks(BuildPed, MyPedBuild.MyVeh, MyPedBuild.Task);
+                        }
                     }
                     else
                     {
@@ -151,7 +151,7 @@ namespace New_Street_Phone_Missions
 
             if (BuildPed == null)
             {
-                MyPedBuild.MyPed = "A_C_Chimp_02";
+                MyPedBuild.MyPed = "a_m_o_tramp_01";
                 BuildPed = NPCSpawn(MyPedBuild, postion, facing);
             }
             return BuildPed;
@@ -165,6 +165,7 @@ namespace New_Street_Phone_Missions
         public static void NpcTasks(Ped Peddy, int iTask)
         {
             LoggerLight.LogThis("NpcTasks, iTask == " + iTask);
+
 
             if (iTask == 1)
             {
@@ -378,7 +379,7 @@ namespace New_Street_Phone_Missions
             }       //Drive RandDest
             else if (iTask == 3)
             {
-                Peddy.Health = 0;
+                Function.Call(Hash.SET_ENTITY_HEALTH, Peddy, 0);
             }       //Dead Ped
             else if (iTask == 4)
             {
@@ -484,8 +485,20 @@ namespace New_Street_Phone_Missions
             {
                 NSPM.ImportsExpo_Driver(Peddy);
                 Peddy.Task.ClearAll();
-                Peddy.Task.CruiseWithVehicle(Vehic, 35.00f, 262972);
+                FubarVectors GoHere = MissionData.PickUpApartmentBlocks(RandomX.RandInt(1, 6), 7, false);
+                Peddy.Task.ParkVehicle(Vehic, GoHere.ParkHere.V3, GoHere.ParkHere.R);
+                Peddy.DrivingSpeed = 35.0f;
+                Peddy.DrivingStyle = DrivingStyle.Rushed;
+                    //(Vehic, 35.00f, 262972);
             }       //ImportDriver
+            else if (iTask == 15)
+            {
+                Peddy.Task.ClearAll();
+                FubarVectors GoHere = MissionData.PickUpApartmentBlocks(RandomX.RandInt(1, 6), 7, false);
+                Peddy.Task.ParkVehicle(Vehic, GoHere.ParkHere.V3, GoHere.ParkHere.R);
+                Peddy.DrivingSpeed = 35.0f;
+                Peddy.DrivingStyle = DrivingStyle.Rushed;
+            }       //FollowDriver
         }
         public static void ForceAnimOnce(Ped peddy, string sAnimDict, string sAnimName, Vector3 AnPos, Vector3 AnRot)
         {
@@ -598,29 +611,9 @@ namespace New_Street_Phone_Missions
 
             Function.Call(Hash.TASK_FOLLOW_TO_OFFSET_OF_ENTITY, Peddy.Handle, Leader.Handle, fXpos, fYpos, 0.0f, fSpeed, -1, 2.5f, true);
         }
-        public static void LoadPlayerOut()
-        {
-            LoggerLight.LogThis("LoadPlayerOut");
-
-            string sDir = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe";
-            if (Directory.Exists(sDir))
-            {
-                string sFreeM = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe/FreemodeMale.Xml";
-                string sFreeF = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Wardrobe/FreemodeFemale.Xml";
-
-                if (File.Exists(sFreeF))
-                    DataStore.FemaleCloth = ReadWriteXML.LoadCloths(sFreeF);
-
-                if (File.Exists(sFreeM))
-                    DataStore.MaleCloth = ReadWriteXML.LoadCloths(sFreeM);
-            }
-        }
         public static void PedDresser(Ped Peddy, ClothBank MyCloth)
         {
-            if (MyCloth.CothInt < MyCloth.Cothing.Count)
-                PedDresser(Peddy, MyCloth.Cothing[MyCloth.CothInt]);
-            else
-                PedDresser(Peddy, MyCloth.Cothing[0]);
+            PedDresser(Peddy, MyCloth.Cothing);
         }
         public static void PedDresser(Ped Peddy, ClothX MyCloth)
         {
@@ -629,8 +622,10 @@ namespace New_Street_Phone_Missions
             Function.Call(Hash.CLEAR_ALL_PED_PROPS, Peddy.Handle);
 
             for (int i = 0; i < MyCloth.ClothA.Count; i++)
-                Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, i, MyCloth.ClothA[i], MyCloth.ClothB[i], 2);
-
+            {
+                if (MyCloth.ClothA[i] != -10)
+                    Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, i, MyCloth.ClothA[i], MyCloth.ClothB[i], 2);
+            }
             for (int i = 0; i < MyCloth.ExtraA.Count; i++)
                 Function.Call(Hash.SET_PED_PROP_INDEX, Peddy.Handle, i, MyCloth.ExtraA[i], MyCloth.ExtraB[i], false);
         }
@@ -642,7 +637,7 @@ namespace New_Street_Phone_Missions
 
             for (int i = 0; i < MyCloth.ClothA.Count; i++)
             {
-                if (!LeaveOut.Contains(i))
+                if (!LeaveOut.Contains(i) || MyCloth.ClothA[i] != -10)
                     Function.Call(Hash.SET_PED_COMPONENT_VARIATION, Peddy.Handle, i, MyCloth.ClothA[i], MyCloth.ClothB[i], 2);
             }
 
@@ -678,19 +673,24 @@ namespace New_Street_Phone_Missions
         }
         public static void PlayerEnemy(Ped Pedd, bool VehicleCombat)
         {
-            LoggerLight.LogThis("AttackThePlayer");
+            LoggerLight.LogThis("PlayerEnemy");
 
-            Pedd.RelationshipGroup = DataStore.GP_Attack;
-            Pedd.IsEnemy = true;
-            Pedd.CanBeTargette﻿d﻿ = true;
-            Game.Player.Character.CanBeTargetted = true;
+            Function.Call(Hash.SET_PED_RELATIONSHIP_GROUP_HASH, Pedd, DataStore.GP_Attack);
+            //Pedd.RelationshipGroup = DataStore.GP_Attack;
+            Function.Call(Hash.SET_PED_AS_ENEMY, Pedd, true);
+            //Pedd.IsEnemy = true;
+            //Pedd.CanBeTargette﻿d﻿ = true;
+            //Game.Player.Character.CanBeTargetted = true;
             if (VehicleCombat)
-                Function.Call(Hash.SET_PED_COMBAT_ATTRIBUTES, Pedd.Handle, 1442, true);
+            {
+                // Function.Call(Hash.SET_PED_COMBAT_ATTRIBUTES, Pedd.Handle, 1442, true);
+            }
             else
                 Function.Call(Hash.SET_PED_COMBAT_ATTRIBUTES, Pedd.Handle, 5, true);
             //Function.Call(Hash.SET_PED_FLEE_ATTRIBUTES, Pedd.Handle, 2, false);//steal a Vehicle?
             Function.Call(Hash.SET_PED_COMBAT_ATTRIBUTES, Pedd.Handle, 46, true);
-            Pedd.Task.FightAgainst(Game.Player.Character);
+            Function.Call((Hash)0xF166E48407BAC484, Pedd, Game.Player.Character, 0, 16);
+            //Pedd.Task.FightAgainst(Game.Player.Character);
 
         }
         public static void AttackThePlayer(Ped Pedd, bool InVehicle, bool bWeaps, bool bLippy)
@@ -1053,7 +1053,7 @@ namespace New_Street_Phone_Missions
         {
             LoggerLight.LogThis("PedActions.FlyHeli");
 
-            Vhick.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, Vhick, false);
 
             float HeliDesX = vHeliDest.X;
             float HeliDesY = vHeliDest.Y;
@@ -1096,7 +1096,7 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("FlyAway");
 
             Vehicle vHeli = Pedd.CurrentVehicle;
-            vHeli.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, vHeli, false);
 
             float HeliDesX = vHeliDest.X;
             float HeliDesY = vHeliDest.Y;
@@ -1264,10 +1264,10 @@ namespace New_Street_Phone_Missions
                     Function.Call(Hash.SET_MODEL_AS_NO_LONGER_NEEDED, iVehHash);
                     if (BuildVehicle != null)
                     {
-                        EntityLog.BackUpAss("Vehs-" + BuildVehicle.Handle);
+                        EntityLog.BackUpAss(VehModel.VehTag + BuildVehicle.Handle);
 
                         BuildVehicle.IsPersistent = true;
-                        BuildVehicle.FreezePosition = VehModel.Frozen;
+                        Function.Call(Hash.FREEZE_ENTITY_POSITION, BuildVehicle, VehModel.Frozen);
 
                         if (VehModel.NumberPlate != "")
                             SetPlate(BuildVehicle, VehModel.NumberPlate);
@@ -1426,22 +1426,24 @@ namespace New_Street_Phone_Missions
             }       // LockTheDoors
             else if (iMod == 8)
             {
-                int iNoSeats = Vehic.PassengerSeats + 1;
+                int iNoSeats = Function.Call<int>(Hash.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS, Vehic) + 1;
                 int iRando = RandomX.RandInt(1, 10);
                 while (iNoSeats > 0)
                 {
                     NPCSpawn(new PedFeat(ReturnStuff.RandNPC(iRando), false, 180, 7, iNoSeats, Vehic, 2, false, 1, ""), Vehic.Position, Vehic.Heading);
                     iNoSeats --;
+                    Script.Wait(1);
                 }
             }       // rando att fill seats+Add to Mulltiped
             else if (iMod == 9)
             {
-                int iNoSeats = Vehic.PassengerSeats + 1;
+                int iNoSeats = Function.Call<int>(Hash.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS, Vehic) + 1;
                 int iRando = RandomX.RandInt(1, 10);
                 while (iNoSeats > 0)
                 {
                     NPCSpawn(new PedFeat(ReturnStuff.RandNPC(iRando), false, 180, 6, iNoSeats, Vehic, 2, false, 1, ""), Vehic.Position, Vehic.Heading);
                     iNoSeats --;
+                    Script.Wait(1);
                 }
             }       // Groupb attack + fill seats Add to Mulltiped
             else if (iMod == 10)
@@ -1477,21 +1479,23 @@ namespace New_Street_Phone_Missions
             }       // Boat Anckor
             else if (iMod == 16)
             {
-                int iNoSeats = Vehic.PassengerSeats + 1;
+                int iNoSeats = Function.Call<int>(Hash.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS, Vehic) + 1;
                 while (iNoSeats > 0)
                 {
                     NPCSpawn(new PedFeat(ReturnStuff.RandNPC(4), false, 150, 7, iNoSeats, Vehic, 2, false, 0, ""), Vehic.Position, Vehic.Heading);
                     iNoSeats --;
+                    Script.Wait(1);
                 }
             }       // LostMcAttack
             else if (iMod == 17)
             {
                 NPCSpawn(new PedFeat("", false, 170, 11, 1, Vehic, 0, false, 0, ""), Vehic.Position, 0.00f);
-                int iNoSeats = Vehic.PassengerSeats + 1;
+                int iNoSeats = Function.Call<int>(Hash.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS, Vehic) + 1;
                 while (iNoSeats > 1)
                 {
                     NPCSpawn(new PedFeat("", false, 180, 7, iNoSeats, Vehic, 2, false, 0, ""), Vehic.Position, Vehic.Heading);
                     iNoSeats --;
+                    Script.Wait(1);
                 }
             }       // Helli Att
             else if (iMod == 18)
@@ -1500,7 +1504,7 @@ namespace New_Street_Phone_Missions
             }       // Ghost car
             else if (iMod == 19)
             {
-                Vehic.FreezePosition = true;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, Vehic, true);
                 Function.Call(Hash._SET_VEHICLE_LANDING_GEAR, Vehic.Handle, 3);
 
                 Prop Bench1 = BuildProp("prop_fib_3b_bench", Vehic.Position, Vector3.Zero, false, false);
@@ -1524,7 +1528,7 @@ namespace New_Street_Phone_Missions
             {
                 Vehic.EngineRunning = true;
                 NPCSpawn(new PedFeat(ReturnStuff.RandNPC(46), false, 220, 1, 1, Vehic, 0, true, 3, DataStore.MyLang.Maptext[109]), Vehic.Position, 0.00f);
-                Vehic.FreezePosition = false;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, Vehic, false);
                 Vehic.IsDriveable = false;
                 Function.Call(Hash.SET_BOAT_ANCHOR, Vehic.Handle, true);
             }       // Raceing Boat
@@ -1542,7 +1546,7 @@ namespace New_Street_Phone_Missions
                 Vehic.IsDriveable = true;
                 Vehic.EngineRunning = true;
                 EntityBuild.FlyPlane(Pilot, Vehic, VTarg, null);
-                Vehic.FreezePosition = false;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, Vehic, false);
                 Vehic.Speed = 35f;
             }       // Raceing plane
             else if (iMod == 24)
@@ -1583,7 +1587,7 @@ namespace New_Street_Phone_Missions
 
             if (iFailed > 0)
             {
-                Vhick.FreezePosition = true;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, Vhick, true);
                 Vhick.HasCollision = false;
                 Vhick.Alpha = 120;
                 Vhick.Heading = Vpos.R;
@@ -1622,7 +1626,7 @@ namespace New_Street_Phone_Missions
                 BuildPop.Rotation = Rotation;
                 BuildPop.IsPersistent = true;
                 BuildPop.HasCollision = true;
-                BuildPop.FreezePosition = bFreeze;
+                Function.Call(Hash.FREEZE_ENTITY_POSITION, BuildPop, bFreeze);
 
                 if (bSetLOD)
                     Function.Call(Hash.SET_ENTITY_LOD_DIST, BuildPop.Handle, 1500);
@@ -1733,7 +1737,7 @@ namespace New_Street_Phone_Missions
                 AddBlips(thisBlip.AddDot);
 
             MissionData.BlipList_01.Add(new Blip(blipps.Handle));
-            EntityLog.BackUpAss("Blip-" + blipps.Handle);
+            EntityLog.BackUpAss(thisBlip.Blip_Tag + blipps.Handle);
             return blipps;
         }
         public static Blip PedBlimp(BlipForm thisBlip, Ped peddy)
@@ -1760,8 +1764,6 @@ namespace New_Street_Phone_Missions
             if (thisBlip.NameTag != "")
                 BlipNames(Blipy, thisBlip.NameTag);
 
-            EntityLog.BackUpAss("Blip-" + Blipy.Handle);
-
             return Blipy;
         }
         public static Blip VehBlip(BlipForm thisBlip, Vehicle vhick)
@@ -1769,7 +1771,7 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("VehBlip");
             Blip MyBlip = null;
 
-            if (vhick.CurrentBlip.Exists())
+            if (Function.Call<bool>(Hash.DOES_BLIP_EXIST, vhick.CurrentBlip))
                 MyBlip = vhick.CurrentBlip;
             else
                 MyBlip = Function.Call<Blip>(Hash.ADD_BLIP_FOR_ENTITY, vhick.Handle);
@@ -1811,9 +1813,9 @@ namespace New_Street_Phone_Missions
 
             while (Vic.IsInAir)
                 Script.Wait(10);
-            Vic.FreezePosition = true;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, Vic, true);
             Script.Wait(1000);
-            Vic.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, Vic, false);
         }
         public static int MyCorona(CorronaForm cform, bool AddToList)
         {
@@ -1831,19 +1833,31 @@ namespace New_Street_Phone_Missions
             EntityLog.BackUpAss("Cora-" + iCheck);
             return iCheck;
         }
-        public static void PlaySoundFrom(string sAudioBank, string sSound, string sSoundSet, Vector3 Vposy, bool bPhone)
+        public static int PlaySoundFrom(string sAudioBank, string sSound, string sSoundSet, Vector3 Vposy, bool bPhone)
         {
             LoggerLight.LogThis("PlaySoundFrom, bPhone == " + bPhone);
 
+            int iSoundId = Function.Call<int>(Hash.GET_SOUND_ID);
+            Function.Call(Hash.RELEASE_SOUND_ID, iSoundId);
+
             while (!Function.Call<bool>(Hash.REQUEST_SCRIPT_AUDIO_BANK, sAudioBank, false))
                 Script.Wait(1);
-            DataStore.iSoundId = Function.Call<int>(Hash.GET_SOUND_ID);
             if (bPhone)
-                Function.Call(Hash.PLAY_SOUND_FROM_COORD, DataStore.iSoundId, sSound, Vposy.X, Vposy.Y, Vposy.Z, 0, 0, 50, 0);
+                Function.Call(Hash.PLAY_SOUND_FROM_COORD, iSoundId, sSound, Vposy.X, Vposy.Y, Vposy.Z, 0, 0, 50, 0);
             else
-                Function.Call(Hash.PLAY_SOUND_FROM_COORD, DataStore.iSoundId, sSound, Vposy.X, Vposy.Y, Vposy.Z, sSoundSet, 0, 0, 0);
+                Function.Call(Hash.PLAY_SOUND_FROM_COORD, iSoundId, sSound, Vposy.X, Vposy.Y, Vposy.Z, sSoundSet, 0, 0, 0);
+            //Function.Call(Hash.RELEASE_NAMED_SCRIPT_AUDIO_BANK, sAudioBank);
+            return iSoundId;
+        }
+        public static void PlaySoundDirect(string sAudioBank, string sSound, string sSoundSet)
+        {
+            DataStore.iSoundId = Function.Call<int>(Hash.GET_SOUND_ID);
+            Function.Call(Hash.RELEASE_SOUND_ID, DataStore.iSoundId);
+            while (!Function.Call<bool>(Hash.REQUEST_SCRIPT_AUDIO_BANK, sAudioBank, false))
+                Script.Wait(1);
+            Function.Call(Hash.PLAY_SOUND_FRONTEND, DataStore.iSoundId, sSound, sSoundSet, 0);
 
-            EntityLog.BackUpAss("Soun-" + DataStore.iSoundId);
+            //Function.Call(Hash.RELEASE_NAMED_SCRIPT_AUDIO_BANK, sAudioBank);
         }
         public static void SetWeather(string weather)
         {

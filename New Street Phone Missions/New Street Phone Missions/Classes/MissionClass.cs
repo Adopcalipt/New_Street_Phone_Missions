@@ -70,8 +70,6 @@ namespace New_Street_Phone_Missions.Classes
 
             Trail = EntityBuild.VehicleSpawn(new VehMods(Start.Trailer), Start.TrailStop);
             Trail2 = EntityBuild.VehicleSpawn(new VehMods(Start.Trailer), Finish.TrailStop);
-
-            MissionData.vFuMiss = Start.FuStop;
         }
     }
     public class GetDriver
@@ -83,6 +81,7 @@ namespace New_Street_Phone_Missions.Classes
         public int CashEarning { get; set; }
         public int DropShip { get; set; }
         public int ModShopInt { get; set; }
+        public int AlarmId { get; set; }
         public bool ModShops { get; set; }
         public bool AlowAir { get; set; }
         public bool PickyDriver { get; set; }
@@ -100,7 +99,9 @@ namespace New_Street_Phone_Missions.Classes
         public Vehicle GetAwayVeh { get; set; }
         public Vehicle EndVeh { get; set; }
 
-        public ClothBank Oufit { get; }
+        public string YourPedMod { get; set; }
+        public int OufitMask01 { get; set; }
+        public int OufitMask02 { get; set; }
 
         public List<int> Pennys { get; set; }
         public List<Vector3> ModShopsEnt { get; }
@@ -114,6 +115,7 @@ namespace New_Street_Phone_Missions.Classes
             DropShip = 0;
             LoseCops = 0;
             ModShopInt = 0;
+            AlarmId = -1;
             ModShops = true;
             AlowAir = false;
             MoveYourV = true;
@@ -144,7 +146,17 @@ namespace New_Street_Phone_Missions.Classes
                 new Vector3(1182.611f, 2639.019f, 37.2223f),
                 new Vector3(104.2167f, 6622.179f, 31.25587f)
             };
-            Oufit = new ClothBank(Game.Player.Character);
+            YourPedMod = ReturnStuff.WhatpedType();
+            if (YourPedMod == "FreeFemale" || YourPedMod == "FreeMale")
+            {
+                OufitMask01 = Function.Call<int>(Hash.GET_PED_DRAWABLE_VARIATION, Game.Player.Character.Handle, 1);
+                OufitMask02 = Function.Call<int>(Hash.GET_PED_TEXTURE_VARIATION, Game.Player.Character.Handle, 1);
+            }
+            else
+            {
+                OufitMask01 = Function.Call<int>(Hash.GET_PED_PROP_INDEX, Game.Player.Character.Handle, 0);
+                OufitMask02 = Function.Call<int>(Hash.GET_PED_PROP_TEXTURE_INDEX, Game.Player.Character.Handle, 0);
+            }
         }
     }
     public class Packaging
@@ -346,7 +358,7 @@ namespace New_Street_Phone_Missions.Classes
         public ConsOnParade Parade { get; set; }
 
         public ClothBank Oufit { get; }
-        public ClothBank Uniform { get; }
+        public ClothBank Uniform { get; set; }
 
         private ClothBank UniformCheck(string sName)
         {
@@ -399,11 +411,13 @@ namespace New_Street_Phone_Missions.Classes
         public int Passengers { get; set; }
         public int RepMish { get; set; }
         public int SlideBarPos { get; set; }
+        public int HornBlasts { get; set; }
         public bool Attacks { get; set; }
         public bool Radio { get; set; }
         public bool MoveIt { get; set; }
         public bool AirprtRun { get; set; }
         public bool FollowThatCar { get; set; }
+        public bool NewDriver { get; set; }
         public Vector3 SpTarg { get; set; }
         public Vector3 PlayerPos { get; set; }
         public Vehicle FubVeh { get; set; }
@@ -416,21 +430,27 @@ namespace New_Street_Phone_Missions.Classes
         public Ped ThatDriver { get; set; }
         public Ped StartDriver { get; set; }
 
-        public FubarCars(int totalPay, int repMish, Vehicle fubVeh)
+        public FubarCars(int totalPay, int repMish, Vehicle fubesVeh)
         {
+            if (fubesVeh != null)
+                NewDriver = false;
+            else
+                NewDriver = true;
+
             TotalPay = totalPay;
             FuMeter = 0;
             FuFare = 5;
             Passengers = 0;
             RepMish = repMish;
             SlideBarPos = 0;
+            HornBlasts = 0;
             Attacks = false;
             Radio = false;
             MoveIt = true;
             FollowThatCar = false;
             SpTarg = Vector3.Zero;
             PlayerPos = Vector3.Zero;
-            FubVeh = fubVeh;
+            FubVeh = fubesVeh;
             Start = null;
             End = null;
             Passenger01 = null;
@@ -696,7 +716,7 @@ namespace New_Street_Phone_Missions.Classes
         public List<string> PatentVFx { get; set; }
 
         public ClothBank Oufit { get; }
-        public ClothBank Uniform { get; }
+        public ClothBank Uniform { get; set; }
 
         private readonly List<int> FubPick = new List<int> { 1, 2, 4, 5, 6, 7, 8, 9, 10, 11 };
         private readonly List<Vector3> HospDrop = new List<Vector3>
@@ -902,6 +922,7 @@ namespace New_Street_Phone_Missions.Classes
         public int Attackers { get; set; }
         public int YourReward { get; set; }
         public int TrigeredWar { get; set; }
+        public int DoorIsJammed { get; set; }
         public float SpookBar { get; set; }
         public bool Rollover { get; set; }
         public bool DistanceBar { get; set; }
@@ -936,6 +957,7 @@ namespace New_Street_Phone_Missions.Classes
             DriveStyle = 1073742652;
             ExitVeh = true;
             Attackers = 0;
+            DoorIsJammed = 10;
 
             Driver = null;
             Passenger = null;
@@ -1465,7 +1487,7 @@ namespace New_Street_Phone_Missions.Classes
         public Vehicle TestVehk { get; set; }
         public BlipForm TkBlip = new BlipForm(5, DataStore.MyLang.Maptext[8]); 
         public ClothBank Oufit { get; }
-        public ClothBank Uniform { get; }
+        public ClothBank Uniform { get; set; }
 
         private readonly List<ClothBank> FreeFOut = new List<ClothBank>
         {
@@ -1632,7 +1654,7 @@ namespace New_Street_Phone_Missions.Classes
         public Vector4 BombThis { get; }
         public List<Vector3> PoilceDrop { get; }
         public ClothBank Oufit { get; }
-        public ClothBank Uniform { get; }
+        public ClothBank Uniform { get; set; }
 
         private readonly List<Vector3> PigPark = new List<Vector3>
         {
@@ -1940,7 +1962,7 @@ namespace New_Street_Phone_Missions.Classes
         public FubarVectors Shops { get; }
         public List<Vector4> IntheShops { get; set; }
         public ClothBank Oufit { get; }
-        public ClothBank Uniform { get; }
+        public ClothBank Uniform { get; set; }
 
         private readonly List<ClothBank> FreeFOut = new List<ClothBank>
         {
@@ -2001,9 +2023,9 @@ namespace New_Street_Phone_Missions.Classes
             }
             else if (zone == 2)
             {
-                FuStops = new Vector3(-279.1794f, 272.047f, 88.99425f);
-                TruckStart = new Vector4(-270.6081f, 285.802f, 90.00076f, 178.6714f);
-                StandHere = new Vector4(-277.6512f, 282.4237f, 89.88692f, 174.0191f);
+                FuStops = new Vector3(-405.35f, -63.32f, 44.1f);
+                TruckStart = new Vector4(-360.54f, -78.33f, 45.27f, 160.8f);
+                StandHere = new Vector4(-348.6f, -46.84f, 54.5f, -12.5f);
             }
             else if (zone == 3)
             {
@@ -2080,8 +2102,8 @@ namespace New_Street_Phone_Missions.Classes
             FloatBoat.IsVisible = false;
             Function.Call(Hash.SET_BOAT_ANCHOR, FloatBoat.Handle, true);
             BargeMv.AttachTo(FloatBoat, FloatBoat.GetBoneIndex("bodyshell"), new Vector3(0.00f, 0.00f, 0.00f), new Vector3(0.00f, 0.00f, -180.00f));
-            BargeMv.FreezePosition = false;
-            FloatBoat.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, BargeMv, false);
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, FloatBoat, false);
 
             Mark01 = EntityBuild.BuildProp("zprop_bin_01a_old", new Vector4(-467.467f, -2421.15f, -4.36f, 140.04f), false, true);
             Mark01.AttachTo(Tuger, 0, new Vector3(0.00f, -16.90f, 1.20f), new Vector3(0.00f, 0.00f, 90.00f));
@@ -2594,7 +2616,7 @@ namespace New_Street_Phone_Missions.Classes
             }//lg ware
             else
             {
-                ReturnPallet = new List<int> { 0, 1, 2, 3, 4, 5, };
+                ReturnPallet = new List<int> { 0, 1, 2, 3, 4, 5 };
             }//bunker
 
             return ReturnPallet;
@@ -2699,36 +2721,26 @@ namespace New_Street_Phone_Missions.Classes
         public FubarVectors Buissness { get; }
         public List<Vector4> Indoors { get; }
         public SideBar ShopBar { get; set; }
-
-        private List<int> QuickyM01 = new List<int> { 3, 4, };
-        private List<int> QuickyM02 = new List<int> { 6, 13, 14, 19 };
-        private List<int> QuickyM03 = new List<int> { 6, 7, 8, 9 };
-        private List<int> QuickyM04 = new List<int> { 1, 3, 5 };
-        private List<int> QuickyM05 = new List<int> { 1, 2, 3, 4, 5, 9 };
-
-        private int QuickyM06 = 1;
-        
-
-        public MiniMart(int iArea)
+        public MiniMart(int area)
         {
             iTimes = 0;
             iDamage = 0;
             iSBroke = new List<int>();
             int iBis = 0;
-            if (iArea == 1)
-                iBis = RandomX.FindRandomList("MiniMart01", QuickyM01);
-            else if (iArea == 2)
-                iBis = RandomX.FindRandomList("MiniMart02", QuickyM02);
-            else if (iArea == 3)
-                iBis = RandomX.FindRandomList("MiniMart03", QuickyM03);
-            else if (iArea == 4)
-                iBis = RandomX.FindRandomList("MiniMart04", QuickyM04);
-            else if (iArea == 5)
-                iBis = RandomX.FindRandomList("MiniMart05", QuickyM05);
+            if (area == 1)
+                iBis = RandomX.FindRandomList("MMart01", new List<int> { 3, 4 });
+            else if (area == 2)
+                iBis = RandomX.FindRandomList("MMart02", new List<int> { 6, 13, 14, 19 });
+            else if (area == 3)
+                iBis = RandomX.FindRandomList("MMart03", new List<int> { 6, 7, 8, 9 });
+            else if (area == 4)
+                iBis = RandomX.FindRandomList("MMart04", new List<int> { 1, 3, 5 });
+            else if (area == 5)
+                iBis = RandomX.FindRandomList("MMart05", new List<int> { 1, 2, 3, 4, 5, 9 });
             else
-                iBis = QuickyM06;
+                iBis = 1;
 
-            Buissness = MissionData.AppartmentBlocks(iArea, 3, iBis, -1, true);
+            Buissness = MissionData.AppartmentBlocks(area, 3, iBis, -1, true);
             Indoors = ReturnStuff.IndoorPed(Buissness.PedNum);
             ShopBar = new SideBar(DataStore.MyLang.Othertext[148], "", 0f, true);
             ShopBar.SlideBar = new RGBA(1);
@@ -2977,15 +2989,15 @@ namespace New_Street_Phone_Missions.Classes
         {
             ClothBank Uniform; 
             if (sName == "Franklin")
-                Uniform = new ClothBank("Valay", false, false, true, new ClothX("FrankValay", new List<int> { 0, 0, 0, 18, 6, 0, 6, 0, 0, 0, 0, 3 }, new List<int> { 0, 0, 0, 10, 7, 0, 2, 0, 0, 0, 0, 15 }, new List<int> { }, new List<int> { }));
+                Uniform = new ClothBank("Valay", false, false, true, new ClothX("FrankValay", new List<int> { 0, 0, -10, 18, 6, 0, 6, 0, 0, 0, 0, 3 }, new List<int> { 0, 0, 0, 10, 7, 0, 2, 0, 0, 0, 0, 15 }, new List<int> { }, new List<int> { }));
             else if (sName == "Michael")
-                Uniform = new ClothBank("Valay", false, false, true, new ClothX("MickValay", new List<int> { 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 5 }, new List<int> { 0, 0, 0, 7, 3, 0, 2, 0, 0, 0, 0, 8 }, new List<int> { }, new List<int> { }));
+                Uniform = new ClothBank("Valay", false, false, true, new ClothX("MickValay", new List<int> { 0, 0, -10, 23, 0, 0, 0, 0, 0, 0, 0, 5 }, new List<int> { 0, 0, 0, 7, 3, 0, 2, 0, 0, 0, 0, 8 }, new List<int> { }, new List<int> { }));
             else if (sName == "Trevor")
-                Uniform = new ClothBank("Valay", false, false, true, new ClothX("TrevValay", new List<int> { 0, 0, 0, 26, 21, 0, 0, 0, 0, 0, 0, 0 }, new List<int> { 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0 }, new List<int> { }, new List<int> { }));
+                Uniform = new ClothBank("Valay", false, false, true, new ClothX("TrevValay", new List<int> { 0, 0, -10, 26, 21, 0, 0, 0, 0, 0, 0, 0 }, new List<int> { 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0 }, new List<int> { }, new List<int> { }));
             else if (sName == "FreeFemale")
-                Uniform = new ClothBank("Valay", false, true, false, new ClothX("FreeFemaleValay", new List<int> { 0, 0, 0, 9, 133, 0, 101, 0, 193, 0, 0, 303 }, new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new List<int> { }, new List<int> { }));
+                Uniform = new ClothBank("Valay", false, true, false, new ClothX("FreeFemaleValay", new List<int> { 0, 0, -10, 9, 133, 0, 101, 0, 193, 0, 0, 303 }, new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new List<int> { }, new List<int> { }));
             else if (sName == "FreeMale")
-                Uniform = new ClothBank("Valay", false, true, true, new ClothX("FreeMaleValay", new List<int> { 0, 0, 0, 11, 126, 0, 97, 0, 157, 0, 0, 290 }, new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new List<int> { }, new List<int> { }));
+                Uniform = new ClothBank("Valay", false, true, true, new ClothX("FreeMaleValay", new List<int> { 0, 0, -10, 11, 126, 0, 97, 0, 157, 0, 0, 290 }, new List<int> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, new List<int> { }, new List<int> { }));
             else
                 Uniform = null;
 

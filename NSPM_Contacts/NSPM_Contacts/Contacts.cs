@@ -2,16 +2,24 @@
 using New_Street_Phone_Missions.Classes;
 using New_Street_Phone_Missions;
 using NativeUI;
-using iFruitAddon2;
 using GTA;
 using GTA.Native;
 using GTA.Math;
-using System;
+using System.IO;
 
 namespace NSPM_Contacts
 {
     public class Contacts
     {
+        private static string FruitDir = "" + Directory.GetCurrentDirectory() + "/MobileNetwork";
+        private static string FruitReturn01 = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Return01.ini";
+        private static string FruitReturn02 = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Return02.ini";
+        private static string FruitReturn03 = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Return03.ini";
+        private static string FruitReturn04 = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Return04.ini";
+        private static string FruitReturn05 = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Return05.ini";
+        private static string FruitReturn06 = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Return06.ini";
+        private static string FruitReturn07 = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Return07.ini";
+        private static string FruitReturn08 = "" + Directory.GetCurrentDirectory() + "/Scripts/NSPM/Return08.ini";
         private static bool bStopDriving = false;
         private static bool bMenuOpen = false;
         private static bool bImports = false;
@@ -23,9 +31,7 @@ namespace NSPM_Contacts
         private static bool bFooWayPot = false;
         private static bool bIFrutiyAdd = false;
         private static bool bFuToMishTarg = false;
-        private static bool bFunctionTime = false;
 
-        private static int iFunctionTime = 0;
         private static int iFubCarzz = 0;
         private static int iFubard = 0;
         private static int iJustBribed = 0;
@@ -43,25 +49,62 @@ namespace NSPM_Contacts
 
         private static List<bool> BeeEnabled = new List<bool> { false, false, false, false, false };
 
-        private static CustomiFruit iFruit = new CustomiFruit();
+        //private static CustomiFruit iFruit = new CustomiFruit();
 
         private static TimerBarPool VTBTimerPool = new TimerBarPool();
         private static TextTimerBar FuBar = new TextTimerBar("", "");
 
-        private static MenuPool YtmenuPool = new MenuPool();
+        private static MenuPool menuPoolX = new MenuPool();
 
+        public static void CheckPhone()
+        {
+            if (File.Exists(FruitReturn01))
+            {
+                File.Delete(FruitReturn01);
+                ShutThatPhone(1);
+            }
+            else if (File.Exists(FruitReturn02))
+            {
+                File.Delete(FruitReturn02);
+                ShutThatPhone(2);
+            }
+            else if (File.Exists(FruitReturn03))
+            {
+                File.Delete(FruitReturn03);
+                ShutThatPhone(3);
+            }
+            else if (File.Exists(FruitReturn04))
+            {
+                File.Delete(FruitReturn04);
+                ShutThatPhone(4);
+            }
+            else if (File.Exists(FruitReturn05))
+            {
+                File.Delete(FruitReturn05);
+                ShutThatPhone(5);
+            }
+            else if (File.Exists(FruitReturn06))
+            {
+                File.Delete(FruitReturn06);
+                ShutThatPhone(6);
+            }
+            else if (File.Exists(FruitReturn07))
+            {
+                File.Delete(FruitReturn07);
+                ShutThatPhone(7);
+            }
+            else if (File.Exists(FruitReturn08))
+            {
+                File.Delete(FruitReturn08);
+                ShutThatPhone(8);
+            }
+        }
         public static void Contacting()
         {
-            if (bFunctionTime)
+            if (bMenuOpen)
             {
-                bFunctionTime = false;
-                ShutThatPhone(iFunctionTime);
-                iFunctionTime = 0;
-            }
-            else if (bMenuOpen)
-            {
-                if (YtmenuPool.IsAnyMenuOpen())
-                    YtmenuPool.ProcessMenus();
+                if (menuPoolX.IsAnyMenuOpen())
+                    menuPoolX.ProcessMenus();
                 else
                 {
                     if (bWepMenuX)
@@ -74,8 +117,6 @@ namespace NSPM_Contacts
             }
             else if (bIFrutiyAdd)
             {
-                iFruit.Update();
-
                 if (Function.Call<bool>(Hash.IS_PLAYER_DEAD) || Function.Call<bool>(Hash.IS_PLAYER_BEING_ARRESTED))
                 {
                     if (bFubarRide || bWeaponMan || bMeeddicc || bImports)
@@ -434,7 +475,7 @@ namespace NSPM_Contacts
                 }
             }
             else
-                iFruit.Update();
+                CheckPhone();
         }
         private static void ShutThatPhone(int iFunct)
         {
@@ -442,14 +483,14 @@ namespace NSPM_Contacts
 
             if (DataStore.BankTransfer)
                 DataStore.BankTransfer = false;
-
+            /*
             iFruit.Close();
             while (Function.Call<bool>(Hash.IS_PED_RUNNING_MOBILE_PHONE_TASK, Game.Player.Character.Handle))
                 Script.Wait(1);
 
             
             Script.Wait(1000);
-
+            */
             if (DataStore.SharedVeh != null)
                 Fubar_Clean();
 
@@ -465,10 +506,13 @@ namespace NSPM_Contacts
                 {
                     iService = 1;
                     sLastVeh = "Dilettante";
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 53, false, "Fubar", false, true, 132, 132, 0, ReturnStuff.FunPlates()), true, true);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 53, false, "Fubar", false, true, 132, 132, 0, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position ,Vmod, true, true);
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[0]);
+                bIFrutiyAdd = true;
             }                           // Fubar
             else if (iFunct == 3)
             {
@@ -480,40 +524,27 @@ namespace NSPM_Contacts
             }                           // Imports
             else if (iFunct == 4)
             {
-                SearchFor.ExtCarz = null;
-                if (!Game.Player.Character.IsInVehicle() && Game.Player.Character.Position.DistanceTo(World.GetNextPositionOnStreet(Game.Player.Character.Position)) < 150f)
-                {
-                    if (DataStore.MyDatSet.iNSPMBank > 500)
-                    {
-                        NSBanking.YourCoinPopUp(-500, 1, DataStore.MyLang.ContactLang[42]);
-                        iService = 2;
-                        sLastVeh = "ambulance";
-                        SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 54, false, "Medic"), true);
-                    }
-                    else
-                        UI.Notify(DataStore.MyLang.ContactLang[41]);
-                }
-                else
-                    UI.Notify(DataStore.MyLang.ContactLang[3]);
-            }                           // Ambulance
-            else if (iFunct == 5)
-            {
                 var mainMenu = new UIMenu(DataStore.MyLang.ContactLang[43], DataStore.MyLang.ContactLang[44]);
-                YtmenuPool.Add(mainMenu);
+                menuPoolX.Add(mainMenu);
                 MkWepsOpt(mainMenu);
-                YtmenuPool.RefreshIndex();
+                menuPoolX.RefreshIndex();
                 bMenuOpen = true;
                 mainMenu.Visible = !mainMenu.Visible;
             }                           // Mk2Weaps
-            else if (iFunct == 6)
+            else if (iFunct == 5)
             {
                 SearchFor.ExtCarz = null;
                 if (!Game.Player.Character.IsInVehicle())
+                {
+                    // EntityBuild.PlaySoundDirect("MPCT", "MPCT_AMAA_01", "");
                     PeggsMenu();
+                }
                 else
+                {
                     UI.Notify(DataStore.MyLang.ContactLang[1]);
+                }
             }                           // Peggass
-            else if (iFunct == 7)
+            else if (iFunct == 6)
             {
                 if (iJustBribed < Game.GameTime)
                 {
@@ -537,15 +568,37 @@ namespace NSPM_Contacts
                     UI.Notify(DataStore.MyLang.ContactLang[60] + ReturnStuff.ShowComs(iTime, false, false));
                 }
             }                           // PoliceBribes
+            else if (iFunct == 7)
+            {
+
+
+                SearchFor.ExtCarz = null;
+                if (!Game.Player.Character.IsInVehicle() && Game.Player.Character.Position.DistanceTo(World.GetNextPositionOnStreet(Game.Player.Character.Position)) < 150f)
+                {
+                    if (DataStore.MyDatSet.iNSPMBank > 500)
+                    {
+                        NSBanking.YourCoinPopUp(-500, 1, DataStore.MyLang.ContactLang[42]);
+                        iService = 2;
+                        sLastVeh = "ambulance";
+                        VehMods Vmod = new VehMods(sLastVeh, 2, 54, false, "Medic");
+                        Vmod.VehTag = "Fubs=";
+                        SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, true);
+                    }
+                    else
+                        UI.Notify(DataStore.MyLang.ContactLang[41]);
+                }
+                else
+                    UI.Notify(DataStore.MyLang.ContactLang[3]);
+                bIFrutiyAdd = true;
+            }                           // Ambulance 
             else if (iFunct == 8)
             {
                 if (DataStore.OnTheJob)
                     UI.Notify(DataStore.MyLang.ContactLang[94]);
                 else
-                    TheMenus.SettingsMenu();
+                    TheMenusLoc.SettingsMenu();
             }                           // Settings
 
-            bIFrutiyAdd = true;
             AddMissingCont();
         }
         private static void AddMissingCont()
@@ -645,8 +698,9 @@ namespace NSPM_Contacts
         private static void AddNPC(string sModel, Vector3 vPos, float fHeads, Vehicle vHick, int iService)
         {
             Main.LogThis("AddNPC, sModel == " + sModel + ", iService == " + iService);
-
-            FUbarDrv = EntityBuild.NPCSpawn(new PedFeat(sModel, false, 140, 0, 1, vHick, 0, false, 0, ""), vPos, fHeads);
+            PedFeat YoPed = new PedFeat(sModel, false, 140, 0, 1, vHick, 0, false, 0, "");
+            YoPed.PedTag = "Fped=";
+            FUbarDrv = EntityBuild.NPCSpawn(YoPed, vPos, fHeads);
 
             if (FUbarDrv.Exists())
             {
@@ -794,100 +848,253 @@ namespace NSPM_Contacts
         private static void Fruits(int iAdd)
         {
             Main.LogThis("Fruits, iAdd == " + iAdd);
+            if (Directory.Exists(FruitDir))
+            {
+                if (iAdd == 0)
+                {
+                    List<string> AddSetts = new List<string>
+                    {
+                        "[Phone]",
+                        "ContactName=" + DataStore.MyLang.ContactLang[16],
+                        "ContactAddress=" + FruitReturn01,
+                        "Icon=CHAR_BANK_MAZE",
+                        "[Phone/End]"
+                    };
+                    EntityLog.CreateIni(FruitDir + "/NSPMPhone01.ini", AddSetts);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[16]);
+                    /*
+                    iFruit.CenterButtonColor = System.Drawing.Color.Orange;
+                    iFruit.LeftButtonColor = System.Drawing.Color.LimeGreen;
+                    iFruit.RightButtonColor = System.Drawing.Color.Purple;
+                    iFruit.CenterButtonIcon = SoftKeyIcon.Fire;
+                    iFruit.LeftButtonIcon = SoftKeyIcon.Police;
+                    iFruit.RightButtonIcon = SoftKeyIcon.Call;
 
-            if (iAdd == 0)
-            {
-                iFruit.CenterButtonColor = System.Drawing.Color.Orange;
-                iFruit.LeftButtonColor = System.Drawing.Color.LimeGreen;
-                iFruit.RightButtonColor = System.Drawing.Color.Purple;
-                iFruit.CenterButtonIcon = SoftKeyIcon.Fire;
-                iFruit.LeftButtonIcon = SoftKeyIcon.Police;
-                iFruit.RightButtonIcon = SoftKeyIcon.Call;
-
-                iFruitContact NSPMCoins = new iFruitContact(DataStore.MyLang.ContactLang[16]);
-                NSPMCoins.Answered += NSPMCoinAnswered;             // Linking the Answered event with our function
-                NSPMCoins.DialTimeout = 4000;                       // Delay before answering
-                NSPMCoins.Active = true;                            // true = the contact is available and will answer the phone
-                NSPMCoins.Icon = ContactIcon.MazeBank;              // Contact's icon
-                iFruit.Contacts.Add(NSPMCoins);                     // Add the contact to the phone
-                UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[16]);
-            }
-            else if (iAdd == 1)
-            {
-                iFruitContact FubarCarz = new iFruitContact(DataStore.MyLang.ContactLang[18]);
-                FubarCarz.Answered += FubarsAnswered;
-                FubarCarz.DialTimeout = 4000;
-                FubarCarz.Active = true;
-                FubarCarz.Icon = ContactIcon.Property_TaxiLot;
-                iFruit.Contacts.Add(FubarCarz);
-                UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[18]);
-            }
-            else if (iAdd == 2)
-            {
-                iFruitContact ImportantCarz = new iFruitContact(DataStore.MyLang.ContactLang[19]);
-                ImportantCarz.Answered += ImportsAnswered;
-                ImportantCarz.DialTimeout = 4000;
-                ImportantCarz.Active = true;
-                ImportantCarz.Icon = ContactIcon.LegendaryMotorsport;
-                iFruit.Contacts.Add(ImportantCarz);
-                UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[19]);
-            }
-            else if (iAdd == 3)
-            {
-                iFruitContact GunDelivery = new iFruitContact(DataStore.MyLang.ContactLang[20]);
-                GunDelivery.Answered += WeapsAnswered;
-                GunDelivery.DialTimeout = 4000;
-                GunDelivery.Active = true;
-                GunDelivery.Icon = ContactIcon.Ammunation;
-                iFruit.Contacts.Add(GunDelivery);
-                UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[20]);
-            }
-            else if (iAdd == 4)
-            {
-                iFruitContact Peggasis = new iFruitContact(DataStore.MyLang.ContactLang[21]);
-                Peggasis.Answered += PeggsAnswered;
-                Peggasis.DialTimeout = 4000;
-                Peggasis.Active = true;
-                Peggasis.Icon = ContactIcon.Pegasus;
-                iFruit.Contacts.Add(Peggasis);
-                UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[21]);
-            }
-            else if (iAdd == 5)
-            {
-                iFruitContact Bribes = new iFruitContact(DataStore.MyLang.ContactLang[22]);
-                Bribes.Answered += BribesAnswered;
-                Bribes.DialTimeout = 4000;
-                Bribes.Active = true;
-                Bribes.Icon = ContactIcon.MP_FibContact;
-                iFruit.Contacts.Add(Bribes);
-                UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[22]);
-            }
-            else if (iAdd == 6)
-            {
-                iFruitContact Medic = new iFruitContact(DataStore.MyLang.ContactLang[23]);
-                Medic.Answered += MedicAnswered;
-                Medic.DialTimeout = 4000;
-                Medic.Active = true;
-                Medic.Icon = ContactIcon.Emergency;
-                iFruit.Contacts.Add(Medic);
-                UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[23]);
-            }
-            else if (iAdd == 7)
-            {
-                iFruitContact MySets = new iFruitContact(DataStore.MyLang.Othertext[67]);
-                MySets.Answered += SettingsAnswered;
-                MySets.DialTimeout = 4000;
-                MySets.Active = true;
-                MySets.Icon = ContactIcon.Skull;
-                iFruit.Contacts.Add(MySets);
+                    iFruitContact NSPMCoins = new iFruitContact(DataStore.MyLang.ContactLang[16]);
+                    NSPMCoins.Answered += NSPMCoinAnswered;             // Linking the Answered event with our function
+                    NSPMCoins.DialTimeout = 4000;                       // Delay before answering
+                    NSPMCoins.Active = true;                            // true = the contact is available and will answer the phone
+                    NSPMCoins.Icon = ContactIcon.MazeBank;              // Contact's icon
+                    iFruit.Contacts.Add(NSPMCoins);                     // Add the contact to the phone
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[16]);
+                    */
+                }
+                else if (iAdd == 1)
+                {
+                    List<string> AddSetts = new List<string>
+                    {
+                        "[Phone]",
+                        "ContactName=" + DataStore.MyLang.ContactLang[18],
+                        "ContactAddress=" + FruitReturn02,
+                        "Icon=CHAR_PROPERTY_TAXI_LOT",
+                        "[Phone/End]"
+                    };
+                    EntityLog.CreateIni(FruitDir + "/NSPMPhone02.ini", AddSetts);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[18]);
+                    /*
+                    iFruitContact FubarCarz = new iFruitContact(DataStore.MyLang.ContactLang[18]);
+                    FubarCarz.Answered += FubarsAnswered;
+                    FubarCarz.DialTimeout = 4000;
+                    FubarCarz.Active = true;
+                    FubarCarz.Icon = ContactIcon.Property_TaxiLot;
+                    iFruit.Contacts.Add(FubarCarz);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[18]);
+                    */
+                }
+                else if (iAdd == 2)
+                {
+                    List<string> AddSetts = new List<string>
+                    {
+                        "[Phone]",
+                        "ContactName=" + DataStore.MyLang.ContactLang[19],
+                        "ContactAddress=" + FruitReturn03,
+                        "Icon=CHAR_CARSITE",
+                        "[Phone/End]"
+                    };
+                    EntityLog.CreateIni(FruitDir + "/NSPMPhone03.ini", AddSetts);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[19]);
+                    /*
+                    iFruitContact ImportantCarz = new iFruitContact(DataStore.MyLang.ContactLang[19]);
+                    ImportantCarz.Answered += ImportsAnswered;
+                    ImportantCarz.DialTimeout = 4000;
+                    ImportantCarz.Active = true;
+                    ImportantCarz.Icon = ContactIcon.LegendaryMotorsport;
+                    iFruit.Contacts.Add(ImportantCarz);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[19]);
+                    */
+                }
+                else if (iAdd == 3)
+                {
+                    List<string> AddSetts = new List<string>
+                    {
+                        "[Phone]",
+                        "ContactName=" + DataStore.MyLang.ContactLang[20],
+                        "ContactAddress=" + FruitReturn04,
+                        "Icon=CHAR_AMMUNATION",
+                        "[Phone/End]"
+                    };
+                    EntityLog.CreateIni(FruitDir + "/NSPMPhone04.ini", AddSetts);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[20]);
+                    /*
+                    iFruitContact GunDelivery = new iFruitContact(DataStore.MyLang.ContactLang[20]);
+                    GunDelivery.Answered += WeapsAnswered;
+                    GunDelivery.DialTimeout = 4000;
+                    GunDelivery.Active = true;
+                    GunDelivery.Icon = ContactIcon.Ammunation;
+                    iFruit.Contacts.Add(GunDelivery);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[20]);
+                    */
+                }
+                else if (iAdd == 4)
+                {
+                    List<string> AddSetts = new List<string>
+                    {
+                        "[Phone]",
+                        "ContactName=" + DataStore.MyLang.ContactLang[21],
+                        "ContactAddress=" + FruitReturn05,
+                        "Icon=CHAR_PEGASUS_DELIVERY",
+                        "[Phone/End]"
+                    };
+                    EntityLog.CreateIni(FruitDir + "/NSPMPhone05.ini", AddSetts);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[21]);
+                    /*
+                    iFruitContact Peggasis = new iFruitContact(DataStore.MyLang.ContactLang[21]);
+                    Peggasis.Answered += PeggsAnswered;
+                    Peggasis.DialTimeout = 4000;
+                    Peggasis.Active = true;
+                    Peggasis.Icon = ContactIcon.Pegasus;
+                    iFruit.Contacts.Add(Peggasis);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[21]);
+                    */
+                }
+                else if (iAdd == 5)
+                {
+                    List<string> AddSetts = new List<string>
+                    {
+                        "[Phone]",
+                        "ContactName=" + DataStore.MyLang.ContactLang[22],
+                        "ContactAddress=" + FruitReturn06,
+                        "Icon=CHAR_MP_FIB_CONTACT",
+                        "[Phone/End]"
+                    };
+                    EntityLog.CreateIni(FruitDir + "/NSPMPhone06.ini", AddSetts);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[22]);
+                    /*
+                    iFruitContact Bribes = new iFruitContact(DataStore.MyLang.ContactLang[22]);
+                    Bribes.Answered += BribesAnswered;
+                    Bribes.DialTimeout = 4000;
+                    Bribes.Active = true;
+                    Bribes.Icon = ContactIcon.MP_FibContact;
+                    iFruit.Contacts.Add(Bribes);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[22]);
+                    */
+                }
+                else if (iAdd == 6)
+                {
+                    List<string> AddSetts = new List<string>
+                    {
+                        "[Phone]",
+                        "ContactName=" + DataStore.MyLang.ContactLang[23],
+                        "ContactAddress=" + FruitReturn07,
+                        "Icon=CHAR_CALL911",
+                        "[Phone/End]"
+                    };
+                    EntityLog.CreateIni(FruitDir + "/NSPMPhone07.ini", AddSetts);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[23]);
+                    /*
+                    iFruitContact Medic = new iFruitContact(DataStore.MyLang.ContactLang[23]);
+                    Medic.Answered += MedicAnswered;
+                    Medic.DialTimeout = 4000;
+                    Medic.Active = true;
+                    Medic.Icon = ContactIcon.Emergency;
+                    iFruit.Contacts.Add(Medic);
+                    UI.Notify(DataStore.MyLang.ContactLang[17] + "~b~" + DataStore.MyLang.ContactLang[23]);
+                    */
+                }
+                else if (iAdd == 7)
+                {
+                    List<string> AddSetts = new List<string>
+                    {
+                        "[Phone]",
+                        "ContactName=" + DataStore.MyLang.Othertext[67],
+                        "ContactAddress=" + FruitReturn08,
+                        "Icon=CHAR_LESTER_DEATHWISH",
+                        "[Phone/End]"
+                    };
+                    EntityLog.CreateIni(FruitDir + "/NSPMPhone08.ini", AddSetts);
+                    /*
+                    iFruitContact MySets = new iFruitContact(DataStore.MyLang.Othertext[67]);
+                    MySets.Answered += SettingsAnswered;
+                    MySets.DialTimeout = 4000;
+                    MySets.Active = true;
+                    MySets.Icon = ContactIcon.Skull;
+                    iFruit.Contacts.Add(MySets);
+                    */
+                }
             }
         }
+        
+        /*
+         *  //iFruit.Update();
+            if (bFunctionTime)
+            {
+                bFunctionTime = false;
+                ShutThatPhone(iFunctionTime);
+                iFunctionTime = 0;
+            }
+            else
+
+
         private static void NSPMCoinAnswered(iFruitContact contact)
         {
             Main.LogThis("NSPMCoinAnswered");
             bFunctionTime = true;
             iFunctionTime = 1;
         }
+        private static void FubarsAnswered(iFruitContact contact)
+        {
+            Main.LogThis("FubarsAnswered");
+            bFunctionTime = true;
+            iFunctionTime = 2;
+        }
+        private static void ImportsAnswered(iFruitContact contact)
+        {
+            Main.LogThis("ImportsAnswered");
+            bFunctionTime = true;
+            iFunctionTime = 3;
+        }
+        private static void MedicAnswered(iFruitContact contact)
+        {
+            Main.LogThis("MedicAnswered");
+            bFunctionTime = true;
+            iFunctionTime = 4;
+        }
+        private static void WeapsAnswered(iFruitContact contact)
+        {
+            Main.LogThis("WeapsAnswered");
+            bFunctionTime = true;
+            iFunctionTime = 5;
+        }
+        private static void SettingsAnswered(iFruitContact contact)
+        {
+            Main.LogThis("SettingsAnswered");
+            bFunctionTime = true;
+            iFunctionTime = 8;
+        }
+        private static void BribesAnswered(iFruitContact contact)
+        {
+            Main.LogThis("BribesAnswered");
+            bFunctionTime = true;
+            iFunctionTime = 7;
+        }
+        private static void PeggsAnswered(iFruitContact contact)
+        {
+            Main.LogThis("PeggsAnswered");
+            bFunctionTime = true;
+            iFunctionTime = 6;
+        }
+        */
+ 
         private static void NSPMCoinAccount()
         {
             Main.LogThis("NSPMCoinAccount");
@@ -895,11 +1102,11 @@ namespace NSPM_Contacts
             if (!DataStore.MenuOpen && !DataStore.OnTheJob)
             {
                 var mainMenu = new UIMenu(DataStore.MyLang.ContactLang[15], DataStore.MyLang.ContactLang[15] + DataStore.MyLang.ContactLang[24]);
-                YtmenuPool.Add(mainMenu);
+                menuPoolX.Add(mainMenu);
                 NSPMCurrentAcc(mainMenu);
                 NSPMLowRiskAcc(mainMenu);
                 NSPMHighRiskAcc(mainMenu);
-                YtmenuPool.RefreshIndex();
+                menuPoolX.RefreshIndex();
                 bMenuOpen = true;
                 mainMenu.Visible = !mainMenu.Visible;
             }
@@ -909,7 +1116,7 @@ namespace NSPM_Contacts
         private static void NSPMCurrentAcc(UIMenu XMen)
         {
             Main.LogThis("NSPMCurrentAcc");
-            var CurrentAccmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[25] + DataStore.MyLang.ContactLang[24]);
+            var CurrentAccmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[25] + DataStore.MyLang.ContactLang[24]);
 
             var item_01 = new UIMenuItem(DataStore.MyLang.ContactLang[26], "");
             CurrentAccmenu.AddItem(item_01);
@@ -925,22 +1132,22 @@ namespace NSPM_Contacts
                 if (item == item_01)
                 {
                     UI.Notify(DataStore.MyLang.ContactLang[29] + ReturnStuff.ShowComs(DataStore.MyDatSet.iNSPMBank, true, true));
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
                 else if (item == item_02)
                 {
                     DataStore.BankTransfer = true;
                     DataStore.iCoinBats = 1;
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
                 else
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
             };
         }
         private static void NSPMLowRiskAcc(UIMenu XMen)
         {
             Main.LogThis("NSPMLowRiskAcc");
-            var LowAccmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[70]);
+            var LowAccmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[70]);
 
             var item_01 = new UIMenuItem(DataStore.MyLang.ContactLang[26], "");
             LowAccmenu.AddItem(item_01);
@@ -956,22 +1163,22 @@ namespace NSPM_Contacts
                 if (item == item_01)
                 {
                     UI.Notify(DataStore.MyLang.ContactLang[29] + ReturnStuff.ShowComs(DataStore.MyDatSet.iNSPMCLowRisk, true, true));
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
                 else if (item == item_02)
                 {
                     DataStore.BankTransfer = true;
                     DataStore.iCoinBats = 2;
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
                 else
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
             };
         }
         private static void NSPMHighRiskAcc(UIMenu XMen)
         {
             Main.LogThis("NSPMHighRiskAcc");
-            var HighAccmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[71]);
+            var HighAccmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[71]);
 
             var item_01 = new UIMenuItem(DataStore.MyLang.ContactLang[26], "");
             HighAccmenu.AddItem(item_01);
@@ -987,54 +1194,42 @@ namespace NSPM_Contacts
                 if (item == item_01)
                 {
                     UI.Notify(DataStore.MyLang.ContactLang[29] + ReturnStuff.ShowComs(DataStore.MyDatSet.iNSPMCHighRisk, true, true));
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
                 else if (item == item_02)
                 {
                     DataStore.BankTransfer = true;
                     DataStore.iCoinBats = 3;
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
                 else
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
             };
-        }
-        private static void FubarsAnswered(iFruitContact contact)
-        {
-            Main.LogThis("FubarsAnswered");
-            bFunctionTime = true;
-            iFunctionTime = 2;
-        }
-        private static void ImportsAnswered(iFruitContact contact)
-        {
-            Main.LogThis("ImportsAnswered");
-            bFunctionTime = true;
-            iFunctionTime = 3;
         }
         private static void ImportsMenu()
         {
             Main.LogThis("ImportsMenu");
 
             var mainMenu = new UIMenu(DataStore.MyLang.ContactLang[19], DataStore.MyLang.ContactLang[30]);
-            YtmenuPool.Add(mainMenu);
+            menuPoolX.Add(mainMenu);
             ImportExList(mainMenu);
-            YtmenuPool.RefreshIndex();
+            menuPoolX.RefreshIndex();
             bMenuOpen = true;
             mainMenu.Visible = !mainMenu.Visible;
         }
         private static void ImportExList(UIMenu XMen)
         {
-            var Submenu_01 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[31]);
-            var Submenu_02 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[32]);
-            var Submenu_03 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[36]);
-            var Submenu_04 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[34]);
-            var Submenu_05 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[33]);
-            var Submenu_06 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[39]);
-            var Submenu_07 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[37]);
-            var Submenu_08 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[39]);
-            var Submenu_09 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[35]);
-            var Submenu_10 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[76]);
-            var Submenu_11 = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[77]);
+            var Submenu_01 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[31]);
+            var Submenu_02 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[32]);
+            var Submenu_03 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[36]);
+            var Submenu_04 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[34]);
+            var Submenu_05 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[33]);
+            var Submenu_06 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[39]);
+            var Submenu_07 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[37]);
+            var Submenu_08 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[39]);
+            var Submenu_09 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[35]);
+            var Submenu_10 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[76]);
+            var Submenu_11 = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[77]);
 
             List<string> sub_01 = new List<string>();
             List<string> sub_02 = new List<string>();
@@ -1125,12 +1320,15 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_01[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_02.OnItemSelect += (sender, item, index) =>
             {
@@ -1138,12 +1336,15 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_02[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_03.OnItemSelect += (sender, item, index) =>
             {
@@ -1151,12 +1352,15 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_03[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_04.OnItemSelect += (sender, item, index) =>
             {
@@ -1164,12 +1368,15 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_04[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_05.OnItemSelect += (sender, item, index) =>
             {
@@ -1177,12 +1384,15 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_05[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_06.OnItemSelect += (sender, item, index) =>
             {
@@ -1190,12 +1400,15 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_06[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_07.OnItemSelect += (sender, item, index) =>
             {
@@ -1203,12 +1416,15 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_07[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_08.OnItemSelect += (sender, item, index) =>
             {
@@ -1216,12 +1432,15 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_08[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_09.OnItemSelect += (sender, item, index) =>
             {
@@ -1229,12 +1448,15 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_09[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_10.OnItemSelect += (sender, item, index) =>
             {
@@ -1242,38 +1464,32 @@ namespace NSPM_Contacts
                 {
                     iService = 4;
                     sLastVeh = sub_10[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
             Submenu_11.OnItemSelect += (sender, item, index) =>
             {
                 if (DataStore.MyDatSet.iNSPMBank > 200)
                 {
                     iService = 4;
-                    sLastVeh = sub_11[index];
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates()), false);
+                    sLastVeh = sub_11[index]; 
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Import", false, true, ReturnStuff.FunPlates());
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
-        }
-        private static void MedicAnswered(iFruitContact contact)
-        {
-            Main.LogThis("MedicAnswered");
-            bFunctionTime = true;
-            iFunctionTime = 4;
-        }
-        private static void WeapsAnswered(iFruitContact contact)
-        {
-            Main.LogThis("WeapsAnswered");
-            bFunctionTime = true;
-            iFunctionTime = 5;
         }
         private static void MkWepsOpt(UIMenu XMen)
         {
@@ -1293,30 +1509,27 @@ namespace NSPM_Contacts
                     iFubCarzz = 0;
                     iService = 3;
                     sLastVeh = "BOXVILLE5";
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Mk2 Weapons"), true);
-                    YtmenuPool.CloseAllMenus();
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Mk2 Weapons");
+                    Vmod.VehTag = "Fubs=";
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, true);
+                    menuPoolX.CloseAllMenus();
+                    bIFrutiyAdd = true;
                 }
                 else if (item == Rand_02)
                 {
                     AddMissWeaps(DataStore.MyContacts.MyMk2Weaps, bWeapSwap);
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
             };
-        }
-        private static void SettingsAnswered(iFruitContact contact)
-        {
-            Main.LogThis("SettingsAnswered");
-            bFunctionTime = true;
-            iFunctionTime = 8;
         }
         private static void WeaponsMenu()
         {
             Main.LogThis("WeaponsMenu");
 
             var mainMenu = new UIMenu(DataStore.MyLang.ContactLang[43], DataStore.MyLang.ContactLang[44]);
-            YtmenuPool.Add(mainMenu);
+            menuPoolX.Add(mainMenu);
             Mk2WeapsList(mainMenu);
-            YtmenuPool.RefreshIndex();
+            menuPoolX.RefreshIndex();
             bMenuOpen = true;
             bWepMenuX = true;
             mainMenu.Visible = !mainMenu.Visible;
@@ -1355,7 +1568,7 @@ namespace NSPM_Contacts
                 else
                 {
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
             };
         }
@@ -1363,7 +1576,7 @@ namespace NSPM_Contacts
         {
             Main.LogThis("AmmoAtachLiveList, iWeap == " + iWeap + ", sWeapName == " + sWeapName + ", sWeapHash == " + sWeapHash + ", iPrice == " + iPrice);
 
-            var Midmenu = YtmenuPool.AddSubMenu(XMen, sWeapName, DataStore.MyLang.ContactLang[15] + iPrice);
+            var Midmenu = menuPoolX.AddSubMenu(XMen, sWeapName, DataStore.MyLang.ContactLang[15] + iPrice);
 
             Mk2CompListAmmo(Midmenu, iWeap, sWeapName, sWeapHash);
             Mk2CompListAttach(Midmenu, iWeap, sWeapName, sWeapHash);
@@ -1484,7 +1697,7 @@ namespace NSPM_Contacts
                 sAdd01.Add("Explosive Rounds"); sAdd02.Add("COMPONENT_HEAVYSNIPER_MK2_CLIP_EXPLOSIVE"); iCost.Add(1450);
             }       //Heavy Sniper Mk2
 
-            var Lastmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[72]);
+            var Lastmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[72]);
 
             for (int i = 0; i < sAdd01.Count; i++)
             {
@@ -1515,7 +1728,7 @@ namespace NSPM_Contacts
                 else
                 {
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
             };
         }
@@ -1692,7 +1905,7 @@ namespace NSPM_Contacts
                 sAdd01.Add("Heavy Barrel"); sAdd02.Add("COMPONENT_AT_SR_BARREL_02"); iCost.Add(69825);
             }       //Heavy Sniper Mk2
 
-            var Lastmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[73]);
+            var Lastmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[73]);
 
             for (int i = 0; i < sAdd01.Count; i++)
             {
@@ -1724,7 +1937,7 @@ namespace NSPM_Contacts
                 else
                 {
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
             };
         }
@@ -1926,7 +2139,7 @@ namespace NSPM_Contacts
                 sAdd01.Add("Patriotic"); sAdd02.Add("COMPONENT_HEAVYSNIPER_MK2_CAMO_IND_01"); iCost.Add(100000);
             }       //Heavy Sniper Mk2
 
-            var Lastmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[74]);
+            var Lastmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[74]);
 
             for (int i = 0; i < sAdd01.Count; i++)
             {
@@ -1958,7 +2171,7 @@ namespace NSPM_Contacts
                 else
                 {
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
             };
         }
@@ -2000,7 +2213,7 @@ namespace NSPM_Contacts
         {
             Main.LogThis("Mk2AddAmmo");
 
-            var Ammosmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[47]);
+            var Ammosmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[47]);
 
             int iAmmo = ReturnStuff.MaxAmmo(sWeap, Game.Player.Character);
 
@@ -2020,7 +2233,7 @@ namespace NSPM_Contacts
                 else
                 {
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                    YtmenuPool.CloseAllMenus();
+                    menuPoolX.CloseAllMenus();
                 }
             };
         }
@@ -2100,20 +2313,14 @@ namespace NSPM_Contacts
                 iAm = 3;
             return iAm;
         }
-        private static void PeggsAnswered(iFruitContact contact)
-        {
-            Main.LogThis("PeggsAnswered");
-            bFunctionTime = true;
-            iFunctionTime = 6;
-        }
         private static void PeggsMenu()
         {
             Main.LogThis("PeggsMenu");
 
             var mainMenu = new UIMenu(DataStore.MyLang.ContactLang[48], DataStore.MyLang.ContactLang[49]);
-            YtmenuPool.Add(mainMenu);
+            menuPoolX.Add(mainMenu);
             PeggesTopMenu(mainMenu);
-            YtmenuPool.RefreshIndex();
+            menuPoolX.RefreshIndex();
             bMenuOpen = true;
             mainMenu.Visible = !mainMenu.Visible;
         }
@@ -2136,7 +2343,7 @@ namespace NSPM_Contacts
         }
         private static void PeggsSafeHeliList(UIMenu XMen)
         {
-            var SafeHelimenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[50]);
+            var SafeHelimenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[50]);
 
             List<string> sPegggisis = new List<string>
             {
@@ -2166,12 +2373,12 @@ namespace NSPM_Contacts
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
         }
         private static void PeggsArmdHeliList(UIMenu XMen)
         {
-            var ArmHelimenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[51]);
+            var ArmHelimenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[51]);
 
             List<string> sPegggisis = new List<string>
             {
@@ -2201,12 +2408,12 @@ namespace NSPM_Contacts
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
         }
         private static void PeggsSafeAirCraftList(UIMenu XMen)
         {
-            var SafePlanemenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[52]);
+            var SafePlanemenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[52]);
 
             List<string> sPegggisis = new List<string>
             {
@@ -2248,12 +2455,12 @@ namespace NSPM_Contacts
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
         }
         private static void PeggsArmAirCraftList(UIMenu XMen)
         {
-            var ArmPlanemenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[53]);
+            var ArmPlanemenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[53]);
 
             List<string> sPegggisis = new List<string>
             {
@@ -2289,12 +2496,12 @@ namespace NSPM_Contacts
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
         }
         private static void PeggsBoatsList(UIMenu XMen)
         {
-            var Boatsmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[54]);
+            var Boatsmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[54]);
 
             List<string> sPegggisis = new List<string>
             {
@@ -2332,12 +2539,12 @@ namespace NSPM_Contacts
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
         }
         private static void PeggsImpExpList(UIMenu XMen)
         {
-            var ImpExmenu = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[55]);
+            var ImpExmenu = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[55]);
 
             List<string> sPegggisis = new List<string>
             {
@@ -2366,7 +2573,7 @@ namespace NSPM_Contacts
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             };
         }
         private static void PeggsCustomList(UIMenu XMen)
@@ -2456,7 +2663,7 @@ namespace NSPM_Contacts
                 else if (DataStore.MyCustomVeh.CustomCars[i].VehList == 29)
                     Submarine = true;
             }
-            var SubHeadder = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[40]);
+            var SubHeadder = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[40]);
             if (Super)
                 SuperCus(SubHeadder);
             if (Sports)
@@ -2514,7 +2721,7 @@ namespace NSPM_Contacts
         }
         private static void SuperCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[31]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[31]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2529,7 +2736,7 @@ namespace NSPM_Contacts
         }
         private static void SportsCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[32]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[32]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2544,7 +2751,7 @@ namespace NSPM_Contacts
         }
         private static void CoupeCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[36]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[36]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2559,7 +2766,7 @@ namespace NSPM_Contacts
         }
         private static void MuscleCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[34]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[34]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2574,7 +2781,7 @@ namespace NSPM_Contacts
         }
         private static void SClassicCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[33]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[33]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2589,7 +2796,7 @@ namespace NSPM_Contacts
         }
         private static void SedanCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[39]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[39]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2604,7 +2811,7 @@ namespace NSPM_Contacts
         }
         private static void SuvCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[37]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[37]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2619,7 +2826,7 @@ namespace NSPM_Contacts
         }
         private static void CompCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[38]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[38]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2634,7 +2841,7 @@ namespace NSPM_Contacts
         }
         private static void OffRCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[35]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[35]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2649,7 +2856,7 @@ namespace NSPM_Contacts
         }
         private static void MCRCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[77]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[77]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2664,7 +2871,7 @@ namespace NSPM_Contacts
         }
         private static void BusCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[78]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[78]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2679,7 +2886,7 @@ namespace NSPM_Contacts
         }
         private static void IndusCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[79]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[79]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2694,7 +2901,7 @@ namespace NSPM_Contacts
         }
         private static void TrucksCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[80]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[80]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2709,7 +2916,7 @@ namespace NSPM_Contacts
         }
         private static void ComerCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[81]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[81]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2724,7 +2931,7 @@ namespace NSPM_Contacts
         }
         private static void ArmCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[82]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[82]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2739,7 +2946,7 @@ namespace NSPM_Contacts
         }
         private static void WeaponiseCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[83]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[83]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2754,7 +2961,7 @@ namespace NSPM_Contacts
         }
         private static void F1Cus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[85]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[85]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2769,7 +2976,7 @@ namespace NSPM_Contacts
         }
         private static void CartCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[86]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[86]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2784,7 +2991,7 @@ namespace NSPM_Contacts
         }
         private static void CycleCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[87]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[87]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2799,7 +3006,7 @@ namespace NSPM_Contacts
         }
         private static void BoatsCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[95]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[95]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2814,7 +3021,7 @@ namespace NSPM_Contacts
         }
         private static void JetSCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[92]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[92]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2829,7 +3036,7 @@ namespace NSPM_Contacts
         }
         private static void CivHelliCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[50]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[50]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2844,7 +3051,7 @@ namespace NSPM_Contacts
         }
         private static void MillHelliCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[51]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[51]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2859,7 +3066,7 @@ namespace NSPM_Contacts
         }
         private static void CivPlaneCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[52]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[52]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2874,7 +3081,7 @@ namespace NSPM_Contacts
         }
         private static void MillPlaneCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[53]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[53]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2889,7 +3096,7 @@ namespace NSPM_Contacts
         }
         private static void TowVehCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[90]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[90]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2904,7 +3111,7 @@ namespace NSPM_Contacts
         }
         private static void SubmarCus(UIMenu XMen)
         {
-            var SubVehic = YtmenuPool.AddSubMenu(XMen, DataStore.MyLang.ContactLang[91]);
+            var SubVehic = menuPoolX.AddSubMenu(XMen, DataStore.MyLang.ContactLang[91]);
 
             for (int i = 0; i < DataStore.MyCustomVeh.CustomCars.Count; i++)
             {
@@ -2924,8 +3131,9 @@ namespace NSPM_Contacts
                 if (DataStore.MyDatSet.iNSPMBank > 200)
                 {
                     iService = 4;
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(Veh, 2, 28, false, "Pegisus", false, true, ReturnStuff.FunPlates()), false, true);
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, new VehMods(Veh, 2, 28, false, "Pegisus", false, true, ReturnStuff.FunPlates()), false, true);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[19]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
@@ -2942,6 +3150,7 @@ namespace NSPM_Contacts
                         iService = 5;
                         EntityBuild.VehicleSpawn(new VehMods(Veh, 2, 28, false, "Pegisus", false, true, ReturnStuff.FunPlates()), vAirstrip, fPlaneHead);
                         NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[48]);
+                        bIFrutiyAdd = true;
                     }
                     else
                     {
@@ -2950,15 +3159,16 @@ namespace NSPM_Contacts
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
-                YtmenuPool.CloseAllMenus();
+                menuPoolX.CloseAllMenus();
             }
             else if (iType == 3)
             {
                 if (DataStore.MyDatSet.iNSPMBank > 200)
                 {
                     iService = 4;
-                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(Veh, 2, 28, false, "Pegisus", false, true, ReturnStuff.FunPlates()), false, true);
+                    SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, new VehMods(Veh, 2, 28, false, "Pegisus", false, true, ReturnStuff.FunPlates()), false, true);
                     NSBanking.YourCoinPopUp(-200, 1, DataStore.MyLang.ContactLang[48]);
+                    bIFrutiyAdd = true;
                 }
                 else
                     UI.Notify(DataStore.MyLang.ContactLang[41]);
@@ -2967,7 +3177,7 @@ namespace NSPM_Contacts
             {
                 PeggAirports(Veh);
             }
-            YtmenuPool.CloseAllMenus();
+            menuPoolX.CloseAllMenus();
         }
         private static void PeggDrop(int iList, int iDrop)
         {
@@ -2988,7 +3198,10 @@ namespace NSPM_Contacts
                 sVehicles.Add("VOLATUS"); //
                 iService = 4;
                 sLastVeh = sVehicles[iDrop];
-                SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Pegisus", false, true, ReturnStuff.FunPlates()), false, true);
+                VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Pegisus", false, true, ReturnStuff.FunPlates());
+                Vmod.VehTag = "Fubs=";
+                SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false, true);
+                bIFrutiyAdd = true;
             }
             else if (iList == 2)
             {
@@ -3003,7 +3216,10 @@ namespace NSPM_Contacts
                 sVehicles.Add("VALKYRIE"); //
                 iService = 4;
                 sLastVeh = sVehicles[iDrop];
-                SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sLastVeh, 2, 5, false, "Pegisus", false, true, ReturnStuff.FunPlates()), false, true);
+                VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Pegisus", false, true, ReturnStuff.FunPlates());
+                Vmod.VehTag = "Fubs=";
+                SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false, true);
+                bIFrutiyAdd = true;
             }
             else if (iList == 3)
             {
@@ -3076,7 +3292,10 @@ namespace NSPM_Contacts
                     float fPlaneHead = Game.Player.Character.Heading;
                     iService = 5;
                     sLastVeh = sVehicles[iDrop];
-                    EntityBuild.VehicleSpawn(new VehMods(sLastVeh, 2, 5, false, "Pegisus"),vAirstrip, fPlaneHead);
+                    VehMods Vmod = new VehMods(sLastVeh, 2, 5, false, "Pegisus");
+                    Vmod.VehTag = "Fubs=";
+                    EntityBuild.VehicleSpawn(Vmod, vAirstrip, fPlaneHead);
+                    bIFrutiyAdd = true;
                 }
                 else
                 {
@@ -3095,7 +3314,10 @@ namespace NSPM_Contacts
                 sVehicles.Add("BLAZER5");    //
 
                 iService = 4;
-                SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, new VehMods(sVehicles[iDrop], 2, 5, false, "Pegisus", false, true, ReturnStuff.FunPlates()), false, true);
+                VehMods Vmod = new VehMods(sVehicles[iDrop], 2, 5, false, "Pegisus", false, true, ReturnStuff.FunPlates());
+                Vmod.VehTag = "Fubs=";
+                SearchFor.ExtCarz = new FindVeh(0.01f, 120.00f, Game.Player.Character.Position, Vmod, false, true);
+                bIFrutiyAdd = true;
             }          
         }
         private static void PeggAirports(string sAircraft)
@@ -3157,14 +3379,11 @@ namespace NSPM_Contacts
             bIFrutiyAdd = true;
             iService = 4;
             sLastVeh = sAircraft;
-            Vehicle MeEnter = EntityBuild.VehicleSpawn(new VehMods(sAircraft, 2, 5, false, "Pegisus", false, true, ReturnStuff.FunPlates()), vAirStips[iAir], fAir[iAir]);
+            VehMods YourCraft = new VehMods(sAircraft, 2, 5, false, "Pegisus", false, true, ReturnStuff.FunPlates());
+            YourCraft.VehTag = "Fubs=";
+            Vehicle MeEnter = EntityBuild.VehicleSpawn(YourCraft, vAirStips[iAir], fAir[iAir]);
             EntityBuild.WarptoAnyVeh(MeEnter, Game.Player.Character, 1);
-        }
-        private static void BribesAnswered(iFruitContact contact)
-        {
-            Main.LogThis("BribesAnswered");
-            bFunctionTime = true;
-            iFunctionTime = 7;
+            bIFrutiyAdd = true;
         }
         public static void ContactLoadUp()
         {

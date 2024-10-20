@@ -3,6 +3,7 @@ using GTA.Math;
 using GTA.Native;
 using New_Street_Phone_Missions.Classes;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,12 +12,16 @@ namespace New_Street_Phone_Missions
     public class SearchFor : Script
     {
         private static int SeatRotata = 0;
-        public static bool bFindCCarz = false;
-        public static bool bFindCarz = false;
-        public static bool bFindPedz = false;
-        public static bool bFindPropz = false;
 
         private static PositionDirect FindMe = null;
+
+        private static readonly string FindVehFile = "" + Directory.GetCurrentDirectory() + "/FindVeh.txt";
+        private static readonly string FindPedFile = "" + Directory.GetCurrentDirectory() + "/FindPed.txt";
+        private static readonly string FindPropFile = "" + Directory.GetCurrentDirectory() + "/FindProp.txt";
+
+        private static readonly string YourVehFile = "" + Directory.GetCurrentDirectory() + "/VehList.ini";
+        private static readonly string YourPedFile = "" + Directory.GetCurrentDirectory() + "/PedList.ini";
+        private static readonly string YourPropFile = "" + Directory.GetCurrentDirectory() + "/PropList.ini";
 
         public static FindVeh ExtCarz { get; set; }
         public static List<FindVeh> MakeCarz { get; set; }
@@ -156,21 +161,41 @@ namespace New_Street_Phone_Missions
             StreetFrenz = new List<FindPed>();
             BackSeat = new List<FindSeat>();
 
+            if (File.Exists(YourVehFile))
+                File.Delete(YourVehFile);
+            if (File.Exists(YourPedFile))
+                File.Delete(YourPedFile);
+            if (File.Exists(YourPropFile))
+                File.Delete(YourPropFile);
+
             Tick += OnTick;
-            Interval = 1000;
+            Interval = 3000;
+        }
+        public static int StoI(string s)
+        {
+            int intOut;
+            if (int.TryParse(s, out intOut))
+            {
+                // Conversion succeeded, 'number' contains the integer value
+            }
+            else
+            {
+                intOut = 0;
+            }
+            return intOut;
         }
         private void OnTick(object sender, EventArgs e)
         {
             if (ExtCarz != null)
                 GoGetCars(ExtCarz, true);
 
-            if (MakeCarz.Count > 0 && !bFindCarz)
+            if (MakeCarz.Count > 0)
                 GoGetCars(MakeCarz[0], false);
             
-            if (MakeFrenz.Count > 0 && !bFindPedz)
+            if (MakeFrenz.Count > 0)
                 GoGetFrenz(MakeFrenz[0]);
 
-            if (StreetFrenz.Count > 0 && !bFindPedz)
+            if (StreetFrenz.Count > 0)
                 GetStreetFrenz(StreetFrenz[0]);
 
             if (BackSeat.Count > 0)
@@ -192,7 +217,7 @@ namespace New_Street_Phone_Missions
         {
             if (FindMe == null)
             {
-                FindMe = GetVehPos(ThisFind);
+                FindMe = GetVehPos(ThisFind, DataStore.OnCayoLand);
             }
             else
             {
@@ -300,64 +325,122 @@ namespace New_Street_Phone_Missions
                     SeatRotata = 0;
             }
         }
-        private static PositionDirect GetVehPos(FindVeh myFind)
+        private static PositionDirect GetVehPos(FindVeh myFind, bool bCayo)
         {
-            Vector3 vArea = Game.Player.Character.Position;
             PositionDirect MyPosDir = null;
-            List<Vehicle> CarSpot = GetLocalVeh(vArea, myFind.MaxRadi);
-
-            if (myFind.Near)
-                CarSpot = ReturnStuff.FarToNear(CarSpot, Game.Player.Character.Position);
-
-            for (int i = 0; i < CarSpot.Count; i++)
+            /*
+            float fDist = 100000.0f;
+            int iFound = 0;
+            for (int i = 0; i < MissionData.VhPoint.Count; i++)
             {
-                try
+                if (MissionData.VhPoint[i].V3.DistanceTo(myFind.Area) < fDist)
                 {
-                    Vehicle Veh = CarSpot[i];
-                    if (Veh.Exists())
-                    {
-                        if (myFind.Driver)
-                        {
-                            if (Veh.IsPersistent == false && Veh.Position.DistanceTo(vArea) > myFind.MinRadi && Veh.ClassType != VehicleClass.Boats && Veh.ClassType != VehicleClass.Cycles && Veh.ClassType != VehicleClass.Helicopters && Veh.ClassType != VehicleClass.Planes && Veh.ClassType != VehicleClass.Trains && Veh != Game.Player.Character.CurrentVehicle && !Veh.IsOnScreen && Veh.EngineRunning)
-                            {
-                                MyPosDir = new PositionDirect
-                                {
-                                    Pos = Veh.Position,
-                                    Dir = Veh.Heading
-                                };
-                                Veh.Delete();
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            if (Veh.IsPersistent == false && Veh.Position.DistanceTo(vArea) > myFind.MinRadi && Veh.ClassType != VehicleClass.Boats && Veh.ClassType != VehicleClass.Cycles && Veh.ClassType != VehicleClass.Helicopters && Veh.ClassType != VehicleClass.Planes && Veh.ClassType != VehicleClass.Trains && Veh != Game.Player.Character.CurrentVehicle && !Veh.IsOnScreen && !Veh.EngineRunning)
-                            {
-                                MyPosDir = new PositionDirect
-                                {
-                                    Pos = Veh.Position,
-                                    Dir = Veh.Heading
-                                };
-                                Veh.Delete();
-                                break;
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                    LoggerLight.LogThis("GetVehPos, LostVeh");
+                    fDist = MissionData.VhPoint[i].V3.DistanceTo(myFind.Area);
+                    iFound = i;
                 }
             }
 
+            MyPosDir = new PositionDirect
+            {
+                Pos = MissionData.VhPoint[iFound].V3,
+                Dir = MissionData.VhPoint[iFound].R
+            };
+            */
+
+            if (bCayo)
+            {
+                float fDist = 100000.0f;
+                int iFound = 0;
+                for (int i = 0; i < MissionData.CayoVhPoint.Count; i++)
+                {
+                    if (MissionData.CayoVhPoint[i].V3.DistanceTo(myFind.Area) < fDist)
+                    {
+                        fDist = MissionData.CayoVhPoint[i].V3.DistanceTo(myFind.Area);
+                        iFound = i;
+                    }
+                }
+
+                MyPosDir = new PositionDirect
+                {
+                    Pos = MissionData.CayoVhPoint[iFound].V3,
+                    Dir = MissionData.CayoVhPoint[iFound].R
+                };
+            }
+            else
+            {
+                List<Vehicle> CarSpot = GetLocalVeh(myFind.Area, myFind.MaxRadi);
+
+                if (myFind.Near)
+                    CarSpot = ReturnStuff.FarToNear(CarSpot, myFind.Area);
+
+                for (int i = 0; i < CarSpot.Count; i++)
+                {
+                    try
+                    {
+                        Vehicle Veh = CarSpot[i];
+                        if (Veh.Exists())
+                        {
+                            if (myFind.Driver)
+                            {
+                                if (Veh.IsPersistent == false && Veh.Position.DistanceTo(myFind.Area) > myFind.MinRadi && Veh.ClassType != VehicleClass.Boats && Veh.ClassType != VehicleClass.Cycles && Veh.ClassType != VehicleClass.Helicopters && Veh.ClassType != VehicleClass.Planes && Veh.ClassType != VehicleClass.Trains && Veh != Game.Player.Character.CurrentVehicle && !Veh.IsOnScreen && Veh.EngineRunning)
+                                {
+                                    MyPosDir = new PositionDirect
+                                    {
+                                        Pos = Veh.Position,
+                                        Dir = Veh.Heading
+                                    };
+                                    Veh.Delete();
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                if (Veh.IsPersistent == false && Veh.Position.DistanceTo(myFind.Area) > myFind.MinRadi && Veh.ClassType != VehicleClass.Boats && Veh.ClassType != VehicleClass.Cycles && Veh.ClassType != VehicleClass.Helicopters && Veh.ClassType != VehicleClass.Planes && Veh.ClassType != VehicleClass.Trains && Veh != Game.Player.Character.CurrentVehicle && !Veh.IsOnScreen && !Veh.EngineRunning)
+                                {
+                                    MyPosDir = new PositionDirect
+                                    {
+                                        Pos = Veh.Position,
+                                        Dir = Veh.Heading
+                                    };
+                                    Veh.Delete();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        LoggerLight.LogThis("GetVehPos, LostVeh");
+                    }
+                }
+            }
             return MyPosDir;
         }
         private static PositionDirect GetPedPos(float fMinRadi, float fMaxRadi)
         {
+            /*
+
+            PositionDirect MyPosDir = null;
+            float fDist = 100000.0f;
+            int iFound = 0;
+            for (int i = 0; i < MissionData.SpPoint.Count; i++)
+            {
+                if (MissionData.SpPoint[i].V3.DistanceTo(vArea) < fDist && MissionData.SpPoint[i].V3.DistanceTo(vArea) > fMinRadi)
+                {
+                    fDist = MissionData.SpPoint[i].V3.DistanceTo(vArea);
+                    iFound = i; 
+                }
+            }
+
+            MyPosDir = new PositionDirect
+            {
+                Pos = MissionData.SpPoint[iFound].V3,
+                Dir = MissionData.SpPoint[iFound].R
+            };
+            */
             Vector3 vArea = Game.Player.Character.Position;
             PositionDirect MyPosDir = null;
             List<Ped> MadPeds = GetLocalPeds(vArea, fMaxRadi);
-
             for (int i = 0; i < MadPeds.Count; i++)
             {
                 try
@@ -383,43 +466,88 @@ namespace New_Street_Phone_Missions
                     LoggerLight.LogThis("GetVehPos, LostVeh");
                 }
             }
-
+            
             return MyPosDir;
         }
         public static List<Prop> GetLocalProps(Vector3 Vpos, float fDist, List<string> sObjets)
         {
-            List<Prop> propList = new List<Prop>();
-            Prop[] StreetPhone = World.GetNearbyProps(Vpos, fDist);
-            for (int i = 0; i < StreetPhone.Count(); i++)
+            //Prop[] StreetPhone = World.GetNearbyProps(Vpos, fDist);
+
+            List<Prop> propList = GetAllProps(Vpos, fDist);
+            List<Prop> propListout = new List<Prop>();
+
+            for (int i = 0; i < propList.Count; i++)
             {
-                for (int ii = 0; ii < sObjets.Count; ii++)
+                if (propList[i].Exists())
                 {
-                    if (StreetPhone[i].Model == Function.Call<int>(Hash.GET_HASH_KEY, sObjets[ii]))
-                        propList.Add(new Prop(StreetPhone[i].Handle));
+                    for (int j = 0; j < sObjets.Count; j++)
+                    {
+                        if (propList[i].Model == Function.Call<int>(Hash.GET_HASH_KEY, sObjets[j]))
+                            propListout.Add(propList[i]);
+                    }
                 }
             }
 
-            return propList;
+            return propListout;
         }
         public static List<Prop> GetAllProps(Vector3 Vpos, float fDist)
         {
+            Vpos = Game.Player.Character.Position;
             List<Prop> propList = new List<Prop>();
-            Prop[] StreetPhone = World.GetNearbyProps(Vpos, fDist);
-            for (int i = 0; i < StreetPhone.Count(); i++)
+            EntityLog.CreateIni(FindPropFile, new List<string> { "blank" });
+            int fiveSec = Game.GameTime + 5000;
+            while (!File.Exists(YourPropFile))
             {
-                propList.Add(new Prop(StreetPhone[i].Handle));
+                if (fiveSec < Game.GameTime)
+                    break;
+                Script.Wait(500);
             }
+            if (File.Exists(YourPropFile))
+            {
+                List<string> output = EntityLog.FileOutPut(YourPropFile);
+                for (int i = 0; i < output.Count; i++)
+                {
+                    Prop obj = new Prop(StoI(output[i]));
+                    if (obj.Exists())
+                    {
+                        if (obj.Position.DistanceTo(Vpos) < fDist)
+                            propList.Add(obj);
+                    }
+                }
+                File.Delete(YourPropFile);
+            }
+            LoggerLight.LogThis("propList.size() == "  + propList.Count);
 
             return propList;
         }
         public static List<Ped> GetLocalPeds(Vector3 Vpos, float fDist)
         {
+            Vpos = Game.Player.Character.Position;
             List<Ped> pedList = new List<Ped>();
-            Ped[] pedFind = World.GetNearbyPeds(Vpos, fDist);
-            for (int i = 0; i < pedFind.Count(); i++)
+            EntityLog.CreateIni(FindPedFile, new List<string> { "blank" });
+            int fiveSec = Game.GameTime + 5000;
+            while (!File.Exists(YourPedFile))
             {
-                pedList.Add(new Ped(pedFind[i].Handle));
+                if (fiveSec < Game.GameTime)
+                    break;
+                Script.Wait(500);
             }
+            if (File.Exists(YourPedFile))
+            {
+                List<string> output = EntityLog.FileOutPut(YourPedFile);
+                for (int i = 0; i < output.Count; i++)
+                {
+                    Ped obj = new Ped(StoI(output[i]));
+                    if (obj.Exists())
+                    {
+                        if (obj.Position.DistanceTo(Vpos) < fDist)
+                            pedList.Add(obj);
+                    }
+                }
+
+                File.Delete(YourPedFile);
+            }
+            LoggerLight.LogThis("pedList.size() == " + pedList.Count);
 
             return pedList;
         }
@@ -434,12 +562,32 @@ namespace New_Street_Phone_Missions
         }
         public static List<Vehicle> GetLocalVeh(Vector3 Vpos, float fDist)
         {
+            Vpos = Game.Player.Character.Position;
             List<Vehicle> vehList = new List<Vehicle>();
-            Vehicle[] vehFind = World.GetNearbyVehicles(Vpos, fDist);
-            for (int i = 0; i < vehFind.Count(); i++)
+            EntityLog.CreateIni(FindVehFile, new List<string> { "blank" });
+            int fiveSec = Game.GameTime + 5000;
+            while (!File.Exists(YourVehFile))
             {
-                vehList.Add(new Vehicle(vehFind[i].Handle));
+                if (fiveSec < Game.GameTime)
+                    break;
+                Script.Wait(500);
             }
+            if (File.Exists(YourVehFile))
+            {
+                List<string> output = EntityLog.FileOutPut(YourVehFile);
+                for (int i = 0; i < output.Count; i++)
+                {
+                    Vehicle obj = new Vehicle(StoI(output[i]));
+                    if (obj.Exists())
+                    {
+                        if (obj.Position.DistanceTo(Vpos) < fDist)
+                            vehList.Add(obj);
+                    }
+                }
+
+                File.Delete(YourVehFile);
+            }
+            LoggerLight.LogThis("vehList.size() == " + vehList.Count);
 
             return vehList;
         }
@@ -521,7 +669,7 @@ namespace New_Street_Phone_Missions
                             thisDoor.Delete();
                         else
                         {
-                            thisDoor.FreezePosition = false;
+                            Function.Call(Hash.FREEZE_ENTITY_POSITION, thisDoor, false);                          
                             Function.Call(Hash.SET_STATE_OF_CLOSEST_DOOR_OF_TYPE, thisDoor.Model.Hash, thisDoor.Position.X, thisDoor.Position.Y, thisDoor.Position.Z, false, 0, 1);
                         }
                     }
@@ -550,7 +698,7 @@ namespace New_Street_Phone_Missions
                 {
                     Prop thisDoor = openD[i];
                     if (thisDoor.Exists())
-                        thisDoor.FreezePosition = true;
+                        Function.Call(Hash.FREEZE_ENTITY_POSITION, thisDoor, true);
                 }
                 catch
                 {
@@ -583,15 +731,13 @@ namespace New_Street_Phone_Missions
             LoggerLight.LogThis("SlowFastTravel");
 
             Game.Player.Character.IsInvincible = true;
-            if (fHedd == 0f)
-                fHedd = RandomX.RandInt(0, 360);
             Game.FadeScreenOut(500);
             Script.Wait(500);
-            Game.Player.Character.FreezePosition = true;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, Game.Player.Character, true);
             Game.Player.Character.Position = VDest;
             Game.Player.Character.Heading = fHedd;
             Script.Wait(1000);
-            Game.Player.Character.FreezePosition = false;
+            Function.Call(Hash.FREEZE_ENTITY_POSITION, Game.Player.Character, false);
             Game.FadeScreenIn(1000);
             Script.Wait(2000);
             Game.Player.Character.IsInvincible = false;
